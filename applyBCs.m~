@@ -1,0 +1,8 @@
+function [ output_args ] = applyBCs( input_args )
+%APPLYBCS apply Dirichlet BCs
+%   left Dirichlet BC
+%   right Dirichlet BC
+
+
+end
+
