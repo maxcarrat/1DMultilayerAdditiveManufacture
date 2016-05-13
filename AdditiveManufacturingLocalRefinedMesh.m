@@ -1,4 +1,4 @@
-%% 1D Multi-layer Additive Manufacturing
+%% 1D Multi-layer Additive Manufacturing with locally refined Mesh
 % evaluate a 1D poisson transient problem using h-FEM
 
 clear all;
@@ -27,15 +27,20 @@ dirichletRightBC = @(t) T0 + 200.0;
 rhs = @(x, t) 0.0;
 
 timeSteps = 20;
-numberOfElementsInX = 20;
+numberOfElementsInX = 25;
+refinementDepth = 5;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
+x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
 
 [X, T] = meshgrid(x, t);
+[X_ref, T_ref] = meshgrid(x_ref, t);
+
 
 %% Analysis and plot
-[temperatureSolution, heatFlux, internalEnergy] = backwardEulerMultilayers(x, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t);
+
+[temperatureSolution, heatFlux, temperatureSolutionRefined, heatFluxRefined] = backwardEulerRefined(x, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
 
 figure(2)
 surf(X, T, temperatureSolution')
@@ -44,13 +49,19 @@ figure(3)
 surf(X, T, heatFlux')
 
 figure(4)
-F(size(t,2)) = struct('cdata',[],'colormap',[]);
+surf(X_ref, T_ref, temperatureSolutionRefined')
 
-for i=1:size(t,2)
-    plot(x',temperatureSolution(:,i))
-    drawnow
-    F(i) = getframe;
-    writeVideo(writerObj, getframe(gcf, [ 0 0 560 420 ]));
-end
+figure(5)
+surf(X_ref, T_ref, heatFluxRefined')
+
+% figure(4)
+% F(size(t,2)) = struct('cdata',[],'colormap',[]);
+% 
+% for i=1:size(t,2)
+%     plot(x',temperatureSolution(:,i))
+%     drawnow
+%     F(i) = getframe;
+%     writeVideo(writerObj, getframe(gcf, [ 0 0 560 420 ]));
+% end
 
 close(writerObj);

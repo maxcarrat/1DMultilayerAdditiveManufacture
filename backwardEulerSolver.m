@@ -33,7 +33,7 @@ fprintf(formatSpec)
   % update temperature
   
     temperatureSolutions(:, t) = temperatureSolutions(:,t-1) + temperatureIncrement;
-    heatFluxes(:, t) = evaluateHeatFlux( poissonTransientProblem, temperatureSolutions );
+    heatFluxes(:, t) = -evaluateHeatFlux( poissonTransientProblem, temperatureSolutions, t );
     
   end
   

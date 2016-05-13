@@ -1,5 +1,5 @@
-function [temperatureSolutions, heatFluxes, internalEnergy]= backwardEulerMultilayers(coords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector)
-% BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem. 
+function [temperatureSolutions, heatFluxes, refinedTemperatureSolutions, refinedHeatFluxes]= backwardEulerRefined(coords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector, refineDepth)
+% BACKWARDEULERREFINED computes the 1D h-FEM numerical solution of a boundary value problem. 
 % Moreover, the numerical solution for each element is also computed
 %   coords = coordinates of the mesh points
 %   problem = struct that defines the boundary value problem
@@ -7,9 +7,12 @@ function [temperatureSolutions, heatFluxes, internalEnergy]= backwardEulerMultil
 
 timeSteps=size(timeVector,2);
 timeStepSize=max(timeVector)/( timeSteps );
+
 temperatureSolutions = zeros(size(coords, 2), timeSteps);
+refinedTemperatureSolutions = zeros(2^refineDepth+1, timeSteps);
+
 heatFluxes = zeros(size(coords, 2), timeSteps);
-internalEnergy = zeros(timeSteps, 1);
+refinedHeatFluxes = zeros(2^refineDepth+1, timeSteps);
 
 
 formatSpec = 'Begin Time Integration Scheme \n' ;
@@ -36,11 +39,25 @@ fprintf(formatSpec)
     
     temperatureIncrement = LHS\RHS;
     
-    % update temperature and post-process
+    %Update temperature and post-process
     mergedTemperature = mergeActiveSolutionInGlobalDomain( activeTemperatureSolution + temperatureIncrement, size(temperatureSolutions,1));
     temperatureSolutions(:, t) = mergedTemperature;
-    mergedHeatFluxes = mergeActiveSolutionInGlobalDomain( -evaluateHeatFlux( poissonTransientProblem, temperatureSolutions, t), size(heatFluxes,1));
+    mergedHeatFluxes = mergeActiveSolutionInGlobalDomain( -evaluateHeatFlux( poissonTransientProblem, temperatureSolutions, t ), size(heatFluxes,1));
     heatFluxes(:, t) = mergedHeatFluxes;
+    
+    %Generate the local problem
+    poissonTransientProblemRefined = poissonProblemTransientRefined(poissonTransientProblem, (activeTemperatureSolution + temperatureIncrement), refineDepth);
+    [M_ref, K_ref, f_ref] = assemblyAndApplyStrongBCs(poissonTransientProblemRefined);
+    
+    %Backward Euler Scheme
+    RHS = timeStepSize * (f_ref - K_ref * refinedTemperatureSolutions(:,t-1));
+    LHS = M_ref + timeStepSize * K_ref;
+    
+    temperatureIncrement_ref = LHS\RHS;
+    
+    %Update temperature and post-process
+    refinedTemperatureSolutions(:, t) = refinedTemperatureSolutions(:, t-1) + temperatureIncrement_ref;
+    refinedHeatFluxes(:, t) = -evaluateHeatFlux( poissonTransientProblemRefined, refinedTemperatureSolutions, t );
     
   end
   

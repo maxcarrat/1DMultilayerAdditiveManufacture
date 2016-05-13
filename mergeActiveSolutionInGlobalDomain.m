@@ -4,7 +4,7 @@ function [ globalSolutionUpdated ] = mergeActiveSolutionInGlobalDomain( activeSo
 
 globalSolutionUpdated = zeros(globalSolutionSize, 1);
 
-for i=1:size(activeSolution,1)
+for i=1:size(activeSolution, 1)
     
     globalSolutionUpdated(i) = activeSolution(i);
     

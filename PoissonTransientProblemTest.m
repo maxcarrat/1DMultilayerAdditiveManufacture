@@ -34,7 +34,7 @@ x = linspace(0.0, xEnd, numberOfElementsInX + 1);                       % spatia
 
 [X, T] = meshgrid(x, t);
 
-%% H-FEM
+%% Analysis and plot
 [temperatureSolution, heatFlux, internalEnergy] = backwardEulerSolver(x, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t);
 
 figure(4)
