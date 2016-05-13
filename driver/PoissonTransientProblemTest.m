@@ -13,11 +13,11 @@ open(writerObj);
 % Define the problem parameter, the boundary conditions
 % and the discretization.
 
-rho = 7200.0 ;                                        % density [kg/m^3]
-c = 440.5;                                         % specific heat [J/(kg°C)]
+rho = 7200.0 ;                                      % density [kg/m^3]
+c = 440.5;                                          % specific heat [J/(kg°C)]
 k = 35.0;                                           % thermal conductivity [W/(m°C)]
-T0 = 0.0;                                          %Initial temperature [°C]
-heatCapacity= rho*c;                               % heat capacity [kJ / kg °C]
+T0 = 0.0;                                           %Initial temperature [°C]
+heatCapacity= rho*c;                                % heat capacity [kJ / kg °C]
 
 tEnd = 32.0;
 xEnd = 0.1;
@@ -30,7 +30,7 @@ timeSteps = 32;
 numberOfElementsInX = 10;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
-x = linspace(0.0, xEnd, numberOfElementsInX + 1);                       % spatial discretization X
+x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 
 [X, T] = meshgrid(x, t);
 

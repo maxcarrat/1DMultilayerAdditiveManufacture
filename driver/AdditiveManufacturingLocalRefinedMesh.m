@@ -27,7 +27,7 @@ dirichletRightBC = @(t) T0 + 200.0;
 rhs = @(x, t) 0.0;
 
 timeSteps = 20;
-numberOfElementsInX = 25;
+numberOfElementsInX = 20;
 refinementDepth = 5;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
