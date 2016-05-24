@@ -1,43 +1,19 @@
-function [ reduceBasis, uNormalized ] = reducedBasis( T, dofs )
+function [ reducedBasisFuns ] = reducedBasis( X, i, iMode derivative, problem, reductionOperator, elementsCoords, refinementDepth )
 %% Reduce Order Basis
-% generate a reduce order basis functions, from J.G.Michopulous
-% "Performance of Reduced Order Models of Moving Heat Source Deposition
-% Problems for efficient inverse analysis", 2014
 
-Y = T(:,2:end)'*T(:,2:end);
-m = size(T,2)-1;
+funs = {@getReducedBasis, @getReducedBasisDerivatives};
+[x, elementID] = mapGlobalToLocalAndGetElementsID( X, elementsCoords, refinementDepth);
 
-% single value decomposition, return D and V are the matrices of the
-% eigenvectors and S is the diagonal matrix of the eigenvalues
+reducedBasisFuns= funs{derivative+1}(x, i, elementID, reductionOperator );
 
-[D, S, ~] = svd(Y);
-
-k= extractK
-u = zeros(dofs, m);                             % basis vectors matrix
-
-for i=1:m
-    for j=1:m
-         sum = D(j,i)*T(:,j);
-    end
-    u(:,i) = 1/sqrt(S(i,i)) * sum;
-end
-
-% normalization of the basis vector
-uNorm = norm(u);
-uNormalized = u/uNorm;
-
-% new vector of reduced order basis functions
-reduceBasis =@(x, i) problem.basis_fun(x, i, 0)*uNormalized;
+% % new vector of reduced order basis functions
+% reduceBasis =@(x, i) problem.basis_fun(x, i, 0)*uNormalized;
 
 end
 
 
-function [ k ] = extractK(S, toll)
-    k = [];
-    for i=1:size(S)
-        if(abs(S(i,i)/max(max(S))) >= toll)
-            k = [k i];
-        end
-    end
-end
+function y = getReducedBasis( x, i)
 
+    y =@(x, i) problem.basis_fun(x, i, 0)*uNormalized(;
+
+end

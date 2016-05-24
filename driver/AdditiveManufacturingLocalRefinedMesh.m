@@ -26,21 +26,24 @@ dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + 200.0;
 rhs = @(x, t) 0.0;
 
-timeSteps = 20;
-numberOfElementsInX = 20;
-refinementDepth = 5;
+timeSteps = 50;
+numberOfElementsInX = 50;
+refinementDepth = 3;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
+x_PostProcess = linspace(0.0, xEnd, 3*(numberOfElementsInX + 1));           % post-processing coordinates             
 
-[X, T] = meshgrid(x, t);
+
+[X, T] = meshgrid(x_PostProcess, t);
 [X_ref, T_ref] = meshgrid(x_ref, t);
 
 
 %% Analysis and plot
 
-[temperatureSolution, heatFlux, temperatureSolutionRefined, heatFluxRefined] = backwardEulerRefined(x, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
+[temperatureSolution, heatFlux, temperatureSolutionRefined, heatFluxRefined, internalEnergy]...
+    = backwardEulerRefined(x, x_PostProcess, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
 
 figure(2)
 surf(X, T, temperatureSolution')
@@ -49,19 +52,13 @@ figure(3)
 surf(X, T, heatFlux')
 
 figure(4)
-surf(X_ref, T_ref, temperatureSolutionRefined')
+F(size(t,2)) = struct('cdata',[],'colormap',[]);
 
-figure(5)
-surf(X_ref, T_ref, heatFluxRefined')
-
-% figure(4)
-% F(size(t,2)) = struct('cdata',[],'colormap',[]);
-% 
-% for i=1:size(t,2)
-%     plot(x',temperatureSolution(:,i))
-%     drawnow
-%     F(i) = getframe;
-%     writeVideo(writerObj, getframe(gcf, [ 0 0 560 420 ]));
-% end
+for i=1:size(t,2)
+    plot(x_PostProcess',temperatureSolution(:,i))
+    drawnow
+    F(i) = getframe;
+    writeVideo(writerObj, getframe(gcf, [ 0 0 560 420 ]));
+end
 
 close(writerObj);
