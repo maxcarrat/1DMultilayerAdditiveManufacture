@@ -18,20 +18,21 @@ c = 10.0;                                              % specific heat [J/(kg°C
 k = 10.0;                                              % thermal conductivity [W/(m°C)]
 T0 = 20.0;                                             % Initial temperature [°C]
 heatCapacity= rho*c;                                   % heat capacity [kJ / kg °C]
+Tsource = 2000.0;                                      % source temperature [°C]
 
 tEnd = 500.0;
 xEnd = 1.0;
 
 dirichletLeftBC = @(t) T0;
-dirichletRightBC = @(t) T0 + 200.0;
+dirichletRightBC = @(t) T0 + Tsource;
 rhs = @(x, t) 0.0;
 
-timeSteps = 50;
-numberOfElementsInX = 50;
+timeSteps = 200;
+numberOfElementsInX = 200;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
-x_postProcessing = linspace(0.0, xEnd, 2*numberOfElementsInX + 1);            % spatial discretization X for Post-Processing
+x_postProcessing = linspace(0.0, xEnd, 5*numberOfElementsInX + 1);          % spatial discretization X for Post-Processing
 
 [X, T] = meshgrid(x_postProcessing, t);
 

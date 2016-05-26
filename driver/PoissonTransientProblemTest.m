@@ -4,7 +4,7 @@
 clear all;
 clc;
 
-writerObj = VideoWriter('TravellingSource.avi');
+writerObj = VideoWriter('PoissonTest.avi');
 writerObj.Quality = 100;
 writerObj.FrameRate = 5;
 open(writerObj);

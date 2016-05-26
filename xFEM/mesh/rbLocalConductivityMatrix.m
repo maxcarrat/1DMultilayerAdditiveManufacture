@@ -3,7 +3,7 @@ function KE = rbLocalConductivityMatrix(problem, iMode, enrichedElementCoords)
 %   problem = definition of the boundary value problem
 %   enrichedElementCoords = coordinates of the refined element
 
-    ldof = problem.modes;
+    ldof = 2;
     
     KE = zeros(ldof, ldof);
     

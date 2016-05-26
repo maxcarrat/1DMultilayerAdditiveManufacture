@@ -3,7 +3,7 @@ function ME = rbLocalCapacityMatrix(problem, iMode, enrichedElementCoords)
 %   problem = definition of the boundary value problem
 %   enrichedElementCoords = coordinates of the refined element
 
-    ldof = problem.modes;
+    ldof = 2;
     
     ME = zeros(ldof, ldof);
     

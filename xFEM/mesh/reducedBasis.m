@@ -11,7 +11,7 @@ end
 function integratedFunction = getReducedBasis( x, i, iMode, problem, enrichedElementCoords )
 integratedFunction = zeros(1, size(x,2));
 
-for k=1:size(x)
+for k=1:size(x,2)
     for j=1:size(enrichedElementCoords,2)-1
         
         if(mapLocalToGlobal(x(k), enrichedElementCoords(1), enrichedElementCoords(end))< enrichedElementCoords(j+1)) &&...
@@ -29,13 +29,13 @@ function integratedFunction = getReducedBasisDerivatives( x, i, iMode, problem, 
 
 integratedFunction = zeros(1, size(x,2));
 
-for k=1:size(x)
+for k=1:size(x,2)
     for j=1:size(enrichedElementCoords,2)-1
         
         if(mapLocalToGlobal(x(k), enrichedElementCoords(1), enrichedElementCoords(end))< enrichedElementCoords(j+1)) &&...
                 (mapLocalToGlobal(x(k), enrichedElementCoords(1), enrichedElementCoords(end))>= enrichedElementCoords(j))
             
-            integratedFunction = problem.basis_fun(x, i, 0)*problem.reductionOperator(j, iMode);
+            integratedFunction = problem.basis_fun(x, i, 1)*problem.reductionOperator(j, iMode);
             
         end
     end

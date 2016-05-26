@@ -49,7 +49,7 @@ gdof = max(max(rbLM));
 cdof = max(max(LM));
 edof = max(max(rbLM));
 
-penalty = 1.0e+12;
+penalty = 1.0e+14;
 
 refinedLocalProblem = struct('LM', LM, 'basis_fun', basis_fun,'rbBasis_fun', rbBasis_fun, 'B', B, 'B_map', B_map, 'F', F,...
     'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc, 'refinementDepth', refinementDepth,...

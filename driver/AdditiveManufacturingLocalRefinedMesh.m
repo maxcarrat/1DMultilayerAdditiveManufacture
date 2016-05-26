@@ -4,7 +4,7 @@
 clear all;
 clc;
 
-writerObj = VideoWriter('TravellingSource.avi');
+writerObj = VideoWriter('AdditiveManufacturingRefined.avi');
 writerObj.Quality = 100;
 writerObj.FrameRate = 5;
 open(writerObj);
@@ -18,16 +18,18 @@ c = 10.0;                                              % specific heat [J/(kg°C
 k = 10.0;                                              % thermal conductivity [W/(m°C)]
 T0 = 20.0;                                             % Initial temperature [°C]
 heatCapacity= rho*c;                                   % heat capacity [kJ / kg °C]
+Tsource = 2000.0;                                      % source temperature [°C]
+
 
 tEnd = 500.0;
 xEnd = 1.0;
 
 dirichletLeftBC = @(t) T0;
-dirichletRightBC = @(t) T0 + 200.0;
+dirichletRightBC = @(t) T0 + Tsource;
 rhs = @(x, t) 0.0;
 
-timeSteps = 50;
-numberOfElementsInX = 50;
+timeSteps = 20;
+numberOfElementsInX = 20;
 refinementDepth = 3;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
@@ -45,13 +47,13 @@ x_PostProcess = linspace(0.0, xEnd, 3*(numberOfElementsInX + 1));           % po
 [temperatureSolution, heatFlux, temperatureSolutionRefined, heatFluxRefined, internalEnergy]...
     = backwardEulerRefined(x, x_PostProcess, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
 
-figure(2)
+figure(202)
 surf(X, T, temperatureSolution')
 
-figure(3)
+figure(303)
 surf(X, T, heatFlux')
 
-figure(4)
+figure(404)
 F(size(t,2)) = struct('cdata',[],'colormap',[]);
 
 for i=1:size(t,2)

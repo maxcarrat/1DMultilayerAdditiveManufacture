@@ -1,4 +1,4 @@
-function [ enrichmentCoefficients ] = solveLocalProblem( globalTemperatureCoefficents, enrichmentCoefficients, problem, timeStepSize )
+function [ globalTemperatureCoefficents ] = solveLocalProblem( globalTemperatureCoefficents, problem, timeStepSize, numberOfModesSupports )
 %SOLVEGLOBALPROBLEM returns the nodal temperature values of the
 %local/enriched problem.
 %   problemCoarse = problem struct on the coarse mesh
@@ -8,34 +8,32 @@ function [ enrichmentCoefficients ] = solveLocalProblem( globalTemperatureCoeffi
 %The enrichment solution of each mode is added to the final enrichment
 %vector
 
-numberOfModeSupports = 2;
+M = zeros(numberOfModesSupports+1, numberOfModesSupports+1);
+K = zeros(numberOfModesSupports+1, numberOfModesSupports+1);
+f = zeros(numberOfModesSupports+1, 1);
 
 for iMode=1:problem.modes
     
     %Assembly the local reduced basis
-    [M, K, f] = assemblyLocalProblem(problem, iMode);
+    [M_mode, K_mode, f_mode] = assemblyLocalProblem(problem, iMode, numberOfModesSupports);
     
-    %Apply the Dirichlet BCs at the nodes of the local enriched element
-    
-    K(1, 1) = K(1, 1) + problem.penalty;
-    f(1) =  f(1) + problem.penalty * globalTemperatureCoefficents(end-1);
-    
-    K(end, end) = K(end, end) + problem.penalty;
-    f(end) =  f(end) + problem.penalty * 0.0;
-    
-    %Solve
-    RHS = timeStepSize * (f - K * enrichmentCoefficients);
-    LHS = M + timeStepSize * K;
-%     RHS = f;
-%     LHS = K;
-    
-    enrichmentCoefficients = LHS\RHS;
-    
+    M = M + M_mode;
+    K = K + K_mode;
+    f = f + f_mode;
 end
 
-%% Constrine Coefficients 
-enrichmentCoefficients(1) = 0.0;
-enrichmentCoefficients(end) = 0.0;
+%Apply the Dirichlet BCs at the nodes of the local enriched element
+
+K(end, end) = K(end, end) + problem.penalty;
+f(end) =  f(end) + problem.penalty * problem.dirichlet_bc(2, 2);
+
+%Solve
+previousSolution = globalTemperatureCoefficents(end-numberOfModesSupports:end);
+RHS = timeStepSize * (f - K * previousSolution);
+LHS = M + timeStepSize * K;
+increment = LHS\RHS;
+
+globalTemperatureCoefficents(end-numberOfModesSupports:end) = globalTemperatureCoefficents(end-numberOfModesSupports:end) + increment;
 
 end
 

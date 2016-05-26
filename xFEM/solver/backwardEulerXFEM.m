@@ -1,4 +1,4 @@
-function [temperaturePostProcessing, heatFluxes, internalEnergy]= backwardEulerXFEM(coords, postProcessingCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector, refinementDepth, numberOfTrainingTimeSteps)
+function [temperaturePostProcessing, heatFluxes, internalEnergy, modes]= backwardEulerXFEM(coords, postProcessingCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector, refinementDepth, numberOfTrainingTimeSteps, maxIterations, tolerance)
 % BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem. 
 % Moreover, the numerical solution for each element is also computed
 %   coords = coordinates of the mesh points
@@ -15,11 +15,13 @@ timeSteps=size(timeVector,2);
 timeStepSize=max(timeVector)/( timeSteps );
 temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 
-refinedTemperatureSolutions = zeros(2^refinementDepth+1, timeSteps);
+refinedTemperatureSolutions = zeros(2^refinementDepth, 1);
 localRefinedTemperatureSolutions = zeros(2^refinementDepth, timeSteps);
 
 heatFluxes = zeros(size(postProcessingCoords, 2), timeSteps);
 internalEnergy = zeros(timeSteps, 1);
+
+previousMesh = coords;
 
 formatSpec = 'Begin Time Integration Scheme \n' ;
 fprintf(formatSpec)
@@ -34,37 +36,38 @@ fprintf(formatSpec)
     %Refinement
     refinedMesh = refineMesh(coords, refinementDepth, t, timeSteps);
     
-    %Project old solution onto the new mesh
-    refinedTemperatureSolutions = L2projection(refinedTemperatureSolutions, refinedMesh, coords);
-    
     %Generate the Poisson problem at timeStep t
     poissonTransientProblem = poissonProblemTransient(refinedMesh, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
-    [~, Kunconstrained, ~] = assembly(poissonTransientProblem);
-    [M, K, f] = assemblyAndApplyStrongBCs(poissonTransientProblem);
+    [M, K, f] = assembly(poissonTransientProblem);
+    
+    %Project old solution onto the new mesh
+    previousSolution = refinedTemperatureSolutions;
+    if (norm(refinedTemperatureSolutions))~=0.0
+        refinedTemperatureSolutions = L2projection(poissonTransientProblem, previousSolution, refinedMesh, previousMesh);
+    end
     
     %Backward Euler Scheme
-    RHS = timeStepSize * (f - K * refinedTemperatureSolutions);
-    LHS = M + timeStepSize * K;
-    
+    [LHS, RHS] = applyBCs(M, K, f, poissonTransientProblem, refinedTemperatureSolutions, timeStepSize);
     temperatureIncrement = LHS\RHS;
     
-    %Update temperature 
+    %Update and merge temperature into global domain
     refinedTemperatureSolutions = refinedTemperatureSolutions + temperatureIncrement;
     localRefinedTemperatureSolutions(:, t) = refinedTemperatureSolutions(t-1:end);    
+    previousMesh = refinedMesh;
 
     %Post-Processing
     temperaturePostProcessing(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, refinedTemperatureSolutions, 0) ;
     heatFluxes(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, refinedTemperatureSolutions, 1);
-    internalEnergy(t) = refinedTemperatureSolutions'*Kunconstrained*refinedTemperatureSolutions;
+    internalEnergy(t) = refinedTemperatureSolutions'*K*refinedTemperatureSolutions;
   end
   
  %% Generate the reduced basis
  
-  [solutionReductionOperator] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,2:numberOfTrainingTimeSteps));
+  [solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,2:numberOfTrainingTimeSteps));
   
  %% Enriched mesh using RB
 
-  enrichmentCoefficents = zeros(2+1, 1);
+ numberOfModesSupports=1;
 
   for t = (numberOfTrainingTimeSteps+1):timeSteps
     
@@ -75,57 +78,54 @@ fprintf(formatSpec)
     
     %Get active mesh
     activeMesh = getActiveCoordinates(coords, t, timeSteps);
-    modes = size(solutionReductionOperator, 2);
     
     %Project old solution onto the new mesh
-    temperatureSolutions = L2projectionEnriched(refinedTemperatureSolutions, activeMesh, refinedMesh, modes);
-    
-    %Solve Global/Coarse problem
-    poissonTransientProblem = poissonProblemTransient(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
-        rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
-   temperatureSolutions = solveGlobalProblem(temperatureSolutions, poissonTransientProblem, timeStepSize);
-    
-    %Solve Local problem
-
-    poissonTransientProblemEnriched = poissonProblemTransientEnriched(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
-        rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
-   temperatureSolutionsEnriched = solveLocalProblem(temperatureSolutions, enrichmentCoefficents, poissonTransientProblemEnriched, timeStepSize);
+    temperatureSolutionsProjected = L2projectionEnriched(refinedTemperatureSolutions, activeMesh, refinedMesh, modes);
+   
+   %Solve Local problem iteratively
+    for i=1:maxIterations
+        
+        %Solve Global/Coarse problem
+        poissonTransientProblem = poissonProblemTransient(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
+            rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
+        temperatureSolutionsGlobal = solveGlobalProblem(temperatureSolutionsProjected, poissonTransientProblem, timeStepSize);
+        
+        %Update solutions
+        temperatureSolutions = temperatureSolutionsGlobal;
+        
+        %Solve Local problem
+        poissonTransientProblemEnriched = poissonProblemTransientEnriched(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
+            rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
+        temperatureSolutionsLocal = solveLocalProblem(temperatureSolutionsProjected, poissonTransientProblemEnriched, timeStepSize, numberOfModesSupports);
       
-    
-    %Update and merge temperature into global domain
-    temperatureSolutions(end-2:end) = temperatureSolutions(end-2:end) + temperatureSolutionsEnriched;
-    refinedMesh = activeMesh;
-    refinedTemperatureSolutions = temperatureSolutions;
-    enrichmentCoefficents = enrichmentCoefficents + temperatureSolutionsEnriched;
+        %Update solutions
+        temperatureSolutions(end-numberOfModesSupports:end) = temperatureSolutionsLocal(end-numberOfModesSupports:end);
+        temperatureSolutionsProjected(1:end-numberOfModesSupports) = temperatureSolutions(1:end-numberOfModesSupports);
+        
+        %Check convergence
+        residualSolution = norm(temperatureSolutions(end-numberOfModesSupports:end)-temperatureSolutionsLocal(end-numberOfModesSupports:end));
+        if  residualSolution<= tolerance
+            break;
+        end
+        
+    end
 
-%     %Generate the refined Poisson problem at timeStep t and Assembly the
-%     %linear system
-%     poissonTransientProblemEnriched = poissonProblemTransientEnriched(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
-%         rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
-%     [~, Kunconstrained, ~] = assemblyEnrichedProblem(poissonTransientProblemEnriched);
-%     [M, K, f] = applyBCs(poissonTransientProblemEnriched);
-%     
-%     %Backward Euler Scheme
-%     RHS = timeStepSize * (f - K * refinedTemperatureSolutions);
-%     LHS = M + timeStepSize * K;
-%     
-%     temperatureIncrement = LHS\RHS;
+%    temperatureSolutionsEnriched = reducedBasisCoefficients;
 %     
 %     %Update and merge temperature into global domain
-%     refinedTemperatureSolutions = refinedTemperatureSolutions + temperatureIncrement;
-%     refinedMesh = activeMesh;
-    
-    %Post-Processing
-%     temperaturePostProcessing(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh(end-1:end),...
-%         poissonTransientProblemEnriched, temperatureSolutions, 0) ;
-%     heatFluxes(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh(end-1:end), poissonTransientProblemEnriched,...
-%         temperatureSolutions, 1);
+% %     temperatureSolutions(end-numberOfModesSupports:end) = temperatureSolutions(end-numberOfModesSupports:end) + temperatureSolutionsEnriched;
+%     temperatureSolutions(end-numberOfModesSupports:end) = temperatureSolutionsEnriched;
 
-    temperaturePostProcessing(:, t) = evaluateNumericalResults(postProcessingCoords,...
+    refinedMesh = activeMesh;
+    refinedTemperatureSolutions = temperatureSolutions;
+
+    temperaturePostProcessing(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh,...
         poissonTransientProblemEnriched, temperatureSolutions, 0) ;
-    heatFluxes(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblemEnriched,...
+    heatFluxes(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh, poissonTransientProblemEnriched,...
         temperatureSolutions, 1);
-%     internalEnergy(t) = temperatureSolutions'*Kunconstrained*temperatureSolutions;
+    
+    [~, K, ~] = assembly(poissonTransientProblem);
+    internalEnergy(t) = temperatureSolutions'*K*temperatureSolutions;
     
   end
   

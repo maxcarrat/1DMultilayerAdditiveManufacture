@@ -8,7 +8,6 @@ function [temperatureSolutionsPostProcessed, heatFluxesPostProcessed, internalEn
 timeSteps=size(timeVector,2);
 timeStepSize=max(timeVector)/( timeSteps );
 temperatureSolutions = zeros(size(coords, 2), timeSteps);
-heatFluxes = zeros(size(coords, 2), timeSteps);
 internalEnergy = zeros(timeSteps, 1);
 
 temperatureSolutionsPostProcessed = zeros(size(postProcessingCoords, 2), timeSteps);
@@ -30,19 +29,21 @@ fprintf(formatSpec)
     
     %Generate the Poisson problem at timeStep t
     poissonTransientProblem = poissonProblemTransient(activeCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
-    [M, K, f] = assemblyAndApplyStrongBCs(poissonTransientProblem);
+    [M, K, f] = assembly(poissonTransientProblem);
     
     %Backward Euler Scheme
-    RHS = timeStepSize * (f - K * activeTemperatureSolution);
-    LHS = M + timeStepSize * K;
+    [LHS, RHS] = applyBCs(M, K, f, poissonTransientProblem, activeTemperatureSolution, timeStepSize);
     
     temperatureIncrement = LHS\RHS;
-    
+        
     % update temperature and post-process
-    mergedTemperature = mergeActiveSolutionInGlobalDomain( activeTemperatureSolution + temperatureIncrement, size(temperatureSolutions,1));
+    activeTemperatureSolution = activeTemperatureSolution + temperatureIncrement;
+    mergedTemperature = mergeActiveSolutionInGlobalDomain( activeTemperatureSolution, size(temperatureSolutions,1));
     temperatureSolutionsPostProcessed(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 0) ;
     heatFluxesPostProcessed(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 1);
-    
+    internalEnergy(t) = activeTemperatureSolution'*K*activeTemperatureSolution;
+
+    temperatureSolutions(:, t) = mergedTemperature;
   end
   
 end

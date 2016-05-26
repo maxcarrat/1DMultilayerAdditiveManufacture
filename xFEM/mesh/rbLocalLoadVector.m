@@ -7,7 +7,7 @@ function FE = rbLocalLoadVector(problem, iMode, enrichedElementCoords, e)
     X1 = problem.coords(e);
     X2 = problem.coords(e+1);
     
-    ldof = problem.modes;
+    ldof = 2;
     FE = zeros(ldof, 1);
     
     for i=1:ldof
