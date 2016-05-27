@@ -22,9 +22,9 @@ for modesSupport=1:numberOfModesSupports
     X1 = problem.coords(problem.N-2);
     X2 = problem.coords(problem.N-1);
     
-    fel = rbLocalLoadVector(problem, iMode, enrichedElementCoords, problem.N);
+    fe = rbLocalLoadVector(problem, iMode, enrichedElementCoords, problem.N);
         
-    f(problem.rbLM(modesSupport,1:ldof)) = f(problem.rbLM(modesSupport,1:ldof)) + problem.F_map(X1,X2) * fel;
+    f(problem.rbLM(modesSupport,1:ldof)) = f(problem.rbLM(modesSupport,1:ldof)) + problem.F_map(X1,X2) * fe;
     M(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof)) = M(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof))...
         + problem.F_map(X1,X2) * ME(1:ldof, 1:ldof);
     K(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof)) = K(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof))...

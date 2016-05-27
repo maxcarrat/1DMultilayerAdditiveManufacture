@@ -7,14 +7,14 @@ function [ uNormalized, numberOfModes ] = properOrthogonalDecomposition( T )
 
 Y = T(:,:)'*T(:,:);
 
-% % eigendecomposition, return D as matrix of the
-% % eigenvectors and S as diagonal matrix of the eigenvalues.
-% 
-% [D, S, ~] = svd(Y);
-% 
-% k = extractK(S, 10e-2);                          % number of highly energetic eigenvalues
-% u = zeros(size(T,1), size(k,2));                  % basis vectors matrix
-% 
+% eigendecomposition, return D as matrix of the
+% eigenvectors and S as diagonal matrix of the eigenvalues.
+
+[D, S, ~] = svd(Y);
+
+k = extractK(S, 10e-2);                          % number of highly energetic eigenvalues
+u = zeros(size(T,1), size(k,2));                  % basis vectors matrix
+
 % for i=1:size(k,2)
 %     for j=1:size(k,2)
 %          sum = D(j,i)*T(:,j);
@@ -53,7 +53,7 @@ I = I(nL:-1:1);
 S = sqrt(diag(D));
 S = S(I);
 V = V(:,I);
-m = max(extractK(S, 10e-2));
+m = max(extractK(S, 10e-8));
 a = diag(S(1:m))*(V(:,1:m)');
 uNormalized = T*V(:,1:m)*diag(1./S(1:m));
 

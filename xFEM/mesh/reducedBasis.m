@@ -22,7 +22,6 @@ for k=1:size(x,2)
         end
     end
 end
-
 end
 
 function integratedFunction = getReducedBasisDerivatives( x, i, iMode, problem, enrichedElementCoords )

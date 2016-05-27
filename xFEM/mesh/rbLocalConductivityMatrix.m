@@ -1,5 +1,5 @@
 function KE = rbLocalConductivityMatrix(problem, iMode, enrichedElementCoords)
-%   KE = RBLOCALCONDUCTIVITYMATRIX(problem, refinementDepth) computes the conductivity local to one element
+%   KE = RBLOCALCONDUCTIVITYMATRIX(problem, enrichedElementCoords) computes the conductivity local to one element
 %   problem = definition of the boundary value problem
 %   enrichedElementCoords = coordinates of the refined element
 

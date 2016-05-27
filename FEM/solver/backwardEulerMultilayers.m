@@ -36,7 +36,7 @@ fprintf(formatSpec)
     
     temperatureIncrement = LHS\RHS;
         
-    % update temperature and post-process
+    %Update temperature and post-process
     activeTemperatureSolution = activeTemperatureSolution + temperatureIncrement;
     mergedTemperature = mergeActiveSolutionInGlobalDomain( activeTemperatureSolution, size(temperatureSolutions,1));
     temperatureSolutionsPostProcessed(:, t) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 0) ;
