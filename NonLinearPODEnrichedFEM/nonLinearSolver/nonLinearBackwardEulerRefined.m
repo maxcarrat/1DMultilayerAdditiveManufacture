@@ -1,4 +1,4 @@
-function [ temperaturePostProcessing, heatFluxes ] = nonLinearBackwardEulerRefined(coords, postProcessingCoords, rhs, leftDirichletBoundaryConditionValue,...
+function [ temperaturePostProcessing, heatFluxes ] = nonLinearBackwardEulerRefined(coords, postProcessingCoords, rhs, initialTemperature, leftDirichletBoundaryConditionValue,...
     rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector, refinementDepth, maxIterations, tolerance)
 %NONLINEARBACKWARDEULERREFINED computes the 1D h-FEM numerical solution of a boundary value problem. 
 % Moreover, the numerical solution for each element is also computed
@@ -11,7 +11,7 @@ timeStepSize=max(timeVector)/( timeSteps );
 
 temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 
-refinedTemperatureSolutions = zeros(2^refinementDepth, 1);
+refinedTemperatureSolutions = zeros(2^refinementDepth + 1, 1);
 
 heatFluxes = zeros(size(postProcessingCoords, 2), timeSteps);
 previousMesh = coords;
@@ -31,11 +31,13 @@ fprintf(formatSpec)
     refinedMesh = refineMesh(coords, refinementDepth, t, timeSteps);
     
     %Generate the Poisson problem at timeStep t
-    poissonTransientProblem = poissonNonLinearProblemTransient(refinedMesh, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
+    poissonTransientProblem = poissonNonLinearProblemTransient(refinedMesh, rhs,...
+        leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity,...
+        currentTime);
     
     %Project old solution onto the new mesh
     if (norm(refinedTemperatureSolutions))~=0.0
-        refinedTemperatureSolutions = L2projection(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh);
+        refinedTemperatureSolutions = L2projection(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh, initialTemperature);
     end
     
     %Solve the problem using Newton-Raphson scheme

@@ -21,14 +21,14 @@ heatCapacity= rho*c;                                   % heat capacity [kJ / kg 
 Tsource = 2000.0;                                      % source temperature [°C]
 
 tEnd = 500.0;
-xEnd = 1.0;
+xEnd = 0.10;
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + Tsource;
 rhs = @(x, t) 0.0;
 
-timeSteps = 200;
-numberOfElementsInX = 200;
+timeSteps = 100;
+numberOfElementsInX = 100;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
@@ -37,7 +37,8 @@ x_postProcessing = linspace(0.0, xEnd, 5*numberOfElementsInX + 1);          % sp
 [X, T] = meshgrid(x_postProcessing, t);
 
 %% Analysis and plot
-[temperatureSolution, heatFlux, internalEnergy] = backwardEulerMultilayers(x, x_postProcessing, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t);
+[temperatureSolution, heatFlux, internalEnergy] = backwardEulerMultilayers(x, x_postProcessing, rhs, T0, ...
+    dirichletLeftBC, dirichletRightBC, k, heatCapacity, t);
 
 figure(20)
 surf(X, T, temperatureSolution')

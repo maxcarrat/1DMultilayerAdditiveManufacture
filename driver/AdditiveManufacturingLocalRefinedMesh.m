@@ -22,7 +22,7 @@ Tsource = 2000.0;                                      % source temperature [°C
 
 
 tEnd = 500.0;
-xEnd = 1.0;
+xEnd = 0.10;
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + Tsource;
@@ -35,7 +35,7 @@ refinementDepth = 3;
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
-x_PostProcess = linspace(0.0, xEnd, 3*(numberOfElementsInX + 1));           % post-processing coordinates             
+x_PostProcess = linspace(0.0, xEnd, 5*(numberOfElementsInX + 1));           % post-processing coordinates             
 
 
 [X, T] = meshgrid(x_PostProcess, t);
@@ -45,7 +45,7 @@ x_PostProcess = linspace(0.0, xEnd, 3*(numberOfElementsInX + 1));           % po
 %% Analysis and plot
 
 [temperatureSolution, heatFlux, temperatureSolutionRefined, heatFluxRefined, internalEnergy]...
-    = backwardEulerRefined(x, x_PostProcess, rhs, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
+    = backwardEulerRefined(x, x_PostProcess, rhs, T0, dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth);
 
 figure(202)
 surf(X, T, temperatureSolution')

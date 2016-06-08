@@ -1,4 +1,4 @@
-function [ temperaturePostProcessing, heatFluxes, internalEnergy ] = nonLinearBackwardEuler( coords, postProcessingCoords, rhs,...
+function [ temperaturePostProcessing, heatFluxes, internalEnergy ] = nonLinearBackwardEuler( coords, postProcessingCoords, rhs, initialTemperature,...
     leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector, maxIterations, tolerance )
 % nonLinearBackwardEuler computes the 1D h-FEM numerical solution of a non-linear boundary value problem. 
 % Moreover, the numerical solution for each element is also computed
@@ -16,6 +16,8 @@ timeStepSize=max(timeVector)/( timeSteps );
 temperatureSolutions = zeros(size(coords, 2), timeSteps);
 temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 
+temperatureSolutions(:,:) = initialTemperature;
+
 heatFluxes = zeros(size(postProcessingCoords, 2), timeSteps);
 internalEnergy = zeros(timeSteps, 1);
 
@@ -31,7 +33,7 @@ fprintf(formatSpec)
     
     %Prepare the Analysis
     activeCoords = getActiveCoordinates(coords, t, timeSteps);
-    activeTemperatureSolution = getActiveTemperatureSolution(temperatureSolutions, t, timeSteps);
+    activeTemperatureSolution = getActiveTemperatureSolution(temperatureSolutions, initialTemperature, t, timeSteps);
     
     %Generate the Poisson problem at timeStep t
     poissonTransientProblem = poissonNonLinearProblemTransient(activeCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);

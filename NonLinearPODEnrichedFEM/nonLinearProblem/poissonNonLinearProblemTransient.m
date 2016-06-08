@@ -28,16 +28,19 @@ F_map = @(X1, X2) (X2-X1)/2;
 dirichlet_bc = [];
 
 %Dirichlet BCs 
-dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
-dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
-
+if size(leftDirichletBoundaryConditionValue(time))~=0
+    dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
+end
+if size(rightDirichletBoundaryConditionValue(time))~=0
+    dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
+end
 
 gdof = max(max(LM));
 
 penalty = 1.0e+12;
 
 nonLinearProblem = struct('LM', LM, 'basis_fun', basis_fun,'B', B, 'B_map', B_map, 'F', F,...
-    'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc,...
+    'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc, ...
     'N', N, 'gdof', gdof, 'rhs', rhs, 'penalty', penalty, 'coords', coords, 'k', k, 'heatCapacity',...
     heatCapacity, 'time', time);
 end

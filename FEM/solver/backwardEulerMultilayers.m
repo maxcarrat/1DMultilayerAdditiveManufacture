@@ -1,4 +1,5 @@
-function [temperatureSolutionsPostProcessed, heatFluxesPostProcessed, internalEnergy]= backwardEulerMultilayers(coords, postProcessingCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector)
+function [temperatureSolutionsPostProcessed, heatFluxesPostProcessed, internalEnergy]= backwardEulerMultilayers(coords, postProcessingCoords, rhs, initialTemperature,...
+    leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector)
 % BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem. 
 % Moreover, the numerical solution for each element is also computed
 %   coords = coordinates of the mesh points
@@ -25,7 +26,7 @@ fprintf(formatSpec)
     
     %Prepare the Analysis
     activeCoords = getActiveCoordinates(coords, t, timeSteps);
-    activeTemperatureSolution = getActiveTemperatureSolution(temperatureSolutions, t, timeSteps);
+    activeTemperatureSolution = getActiveTemperatureSolution(temperatureSolutions, initialTemperature, t, timeSteps);
     
     %Generate the Poisson problem at timeStep t
     poissonTransientProblem = poissonProblemTransient(activeCoords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);

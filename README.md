@@ -12,4 +12,4 @@ Two strategy are then employed to exchange the information from the local to the
 
 Tests:
 The code is tested using the NAFEM Benchmark where at x=0.08 the reference solution is 36.60°C after 32sec using 10 elements.
-The result with the present code is 35.64°C, returning a relative error of 0.026229508.
+The result with the present code is 36.44°C, returning a relative error of 0.026229508.
