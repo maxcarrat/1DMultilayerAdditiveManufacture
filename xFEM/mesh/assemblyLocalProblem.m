@@ -7,13 +7,15 @@ function [Menr, Kenr, fenr] = assemblyLocalProblem(problem)
 
 
 enrichedElementCoords = linspace(problem.coords(end-1), problem.coords(end),...
-    2^problem.refinementDepth);
+    2^problem.refinementDepth+1);
+
+detJenr = 2/(enrichedElementCoords(end) - enrichedElementCoords(end-1));
 
 %conductivity matrix of the locally enriched problem
-Kenr = rbLocalConductivityMatrix(problem, enrichedElementCoords)*problem.B_map(problem.coords(end-1), problem.coords(end));
+Kenr = rbLocalConductivityMatrix(problem, enrichedElementCoords)*problem.B_map(problem.coords(end-1), problem.coords(end))*detJenr;
 %capacity matrix of the locally enriched problem
-Menr = rbLocalCapacityMatrix(problem, enrichedElementCoords)*problem.F_map(problem.coords(end-1), problem.coords(end));
+Menr = rbLocalCapacityMatrix(problem, enrichedElementCoords)*problem.F_map(problem.coords(end-1), problem.coords(end))*1/detJenr;
 %load vector of the locally enriched problem
-fenr = rbLocalLoadVector(problem, enrichedElementCoords, problem.N)*problem.F_map(problem.coords(end-1), problem.coords(end));
+fenr = rbLocalLoadVector(problem, enrichedElementCoords, problem.N)*problem.F_map(problem.coords(end-1), problem.coords(end))*1/detJenr;
   
 end

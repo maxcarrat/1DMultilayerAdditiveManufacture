@@ -26,10 +26,10 @@ xEnd = 0.10;
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + Tsource;
-rhs = @(x, t) 0.0;
+rhs = @(x, t) x*1.0e+08;
 
 timeSteps = 20;
-numberOfElementsInX = 20;
+numberOfElementsInX = timeSteps;
 refinementDepth = 3;
 
 t = linspace(0, tEnd, timeSteps + 1);                                       % time discretization

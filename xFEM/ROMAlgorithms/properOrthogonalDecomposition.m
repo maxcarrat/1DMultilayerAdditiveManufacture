@@ -5,30 +5,61 @@ function [ uNormalized, numberOfModes ] = properOrthogonalDecomposition( T, numb
 % Problems for efficient inverse analysis", 2014
 %T = matrix of solution snapshots
 
-Y = T(:,:)'*T(:,:);
+N = size(T,2);
+Y = T(:,:)'*T(:,:)*1/N;
 
 % eigendecomposition, return D as matrix of the
 % eigenvectors and S as diagonal matrix of the eigenvalues.
 
-% [D, S, ~] = svd(Y);
+% % [D, S, ~] = svd(Y);
+% [D, S] = eig(Y);
+% 
+% [ S, D, numberOfModesFiltered ] = sortEigenvalues(S, D);
+% 
+% % if numberOfModes==0
+% %     k = extractK(S, 10e-6);                          % number of highly energetic eigenvalues
+% %     u = zeros(size(T,1), size(k,2));                  % basis vectors matrix
+% %     numberOfModes = size(k,2);
+% % end
 % 
 % if numberOfModes==0
-%     k = extractK(S, 10e-8);                          % number of highly energetic eigenvalues
-%     u = zeros(size(T,1), size(k,2));                  % basis vectors matrix
-%     numberOfModes = size(k,2);
+%     numberOfModes = numberOfModesFiltered;
 % end
 % 
-% 
+% u = zeros(size(T,1), numberOfModes);
+% uNormalized = zeros(size(T,1), numberOfModes);
 % for i=1:numberOfModes
-%     for j=1:numberOfModes
-%          sum = D(j,i)*T(:,j);
+%     for k=1:N
+%         u(:,i)=  D(k,i)*T(:,k) + u(:,i);
 %     end
-%     u(:,i) = 1/sqrt(S(i,i)) * sum;
+%     uNormalized(:,i) = 1/(N*S(i))*u(:,i);
 % end
 % 
-% % normalization of the basis vector
-% uNorm = norm(u);
-% uNormalized = u/uNorm;
+% 
+% 
+% % sum = zeros(size(T,1), 1);
+% % for i=1:numberOfModes
+% %     for j=1:numberOfModes
+% % %          sum = D(j,i)*T(:,j);
+% %         sum = sum + D(j,i)*T(:,j);
+% %     end
+% % %     u(:,i) = 1/sqrt(S(i,i)) * sum;
+% % u(:,i) = sum;
+% % end
+% % 
+% % % normalization of the basis vector
+% % % uNorm = norm(u);
+% % uNorm = 0.0;
+% % for j=1:numberOfModes
+% %     for i=1:size(u,1)
+% %         uNorm = uNorm + u(i,j)^2;
+% %     end
+% % end
+% % uNorm = sqrt(uNorm);
+% % 
+% % for i=1:numberOfModes
+% %     uNormalized(:,i) = u(:,i)/uNorm;
+% % end
 % 
 % %check if the results are orthogonal basis
 % checkOrtogonality(uNormalized);
@@ -57,6 +88,51 @@ a = diag(S(1:numberOfModes))*(V(:,1:numberOfModes)');
 uNormalized = T*V(:,1:numberOfModes)*diag(1./S(1:numberOfModes));
 
 checkOrtogonality(uNormalized);
+
+end
+
+
+function [ S, D, numberOfModes ] = sortEigenvalues(S, D)
+    k = extractK(S, 1.0e-08);
+    numberOfModes = numel(k);
+    
+    S = diag(S);
+    
+    % Bubble sort backward
+    n = numel(S);
+    
+    while (n > 0)
+        % Iterate through S
+        nnew = 0;
+        for i = 2:n
+            % Swap eigenvalues and eigenvectors in wrong order
+            if (S(i) > S(i - 1))
+                S = swapEigenvalues(S,i,i - 1);
+                D = swapEigenvectors(D,i,i-1);
+                nnew = i;
+            end
+        end
+        n = nnew;
+    end
+    
+end
+
+
+function S = swapEigenvalues(S,i,j)
+% Swap Eigenvalues
+
+val = S(i);
+S(i) = S(j);
+S(j) = val;
+
+end
+
+function D = swapEigenvectors(D,i,j)
+% Swap Eigenvalues
+
+val = D(:,i);
+D(:,i) = D(:,j);
+D(:,j) = val;
 
 end
 

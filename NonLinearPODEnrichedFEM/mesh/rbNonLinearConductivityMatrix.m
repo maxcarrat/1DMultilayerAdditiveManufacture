@@ -19,16 +19,16 @@ K_coupling = zeros(numberOfModes*ldof, ldof);
 
 for i=1:ldof
     for j=1:ldof
-        K_FEM(i,j) = problem.B(@(x)problem.basis_fun(x, i, 1.0),...
-            @(x)problem.basis_fun(x, j, 1.0), @(x, d)evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2);
+        K_FEM(i,j) = problem.B(@(x)problem.localBasis_fun(x, i, 1.0, problem, enrichedElementCoords),...
+                @(x)problem.localBasis_fun(x, j, 1.0, problem, enrichedElementCoords), @(x, d)evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2);
     end
 end
 
 for i=1:ldof
     for iMode = 1:numberOfModes
-        for j=1:ldof
+        for j= 1:ldof
             for jMode = 1:numberOfModes
-                K_enr((iMode-1)*ldof + i,(jMode-1)*ldof + j) = problem.rbB(@(x)problem.xFEMBasis_fun(x, i, iMode, 0.0, 1.0, problem, enrichedElementCoords ),...
+                K_enr((i-1)*numberOfModes + iMode,(j-1)*numberOfModes + jMode) = problem.rbB(@(x)problem.xFEMBasis_fun(x, i, iMode, 0.0, 1.0, problem, enrichedElementCoords ),...
                     @(x)problem.xFEMBasis_fun(x, j, jMode, 0.0, 1.0, problem, enrichedElementCoords), @(x, d) evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2) + ...
                     problem.rbB(@(x)problem.xFEMBasis_fun(x, i, iMode, 1.0, 0.0, problem, enrichedElementCoords ),...
                     @(x)problem.xFEMBasis_fun(x, j, jMode, 0.0, 1.0, problem, enrichedElementCoords), @(x, d) evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2) + ...
@@ -44,15 +44,15 @@ end
 for i=1:ldof
     for j=1:ldof
         for jMode = 1:numberOfModes
-            K_coupling((jMode-1)*ldof + j, i) = problem.rbB(@(x)problem.basis_fun(x, i, 1.0),...
+            K_coupling((j-1)*numberOfModes + jMode, i) = problem.rbB(@(x)problem.localBasis_fun(x, i, 1.0, problem, enrichedElementCoords),...
                 @(x)problem.xFEMBasis_fun(x, j, jMode, 0.0, 1.0, problem, enrichedElementCoords ), @(x, d) evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2) + ...
-                problem.rbB(@(x)problem.basis_fun(x, i, 1.0),...
+                problem.rbB(@(x)problem.localBasis_fun(x, i, 1.0, problem, enrichedElementCoords),...
                 @(x)problem.xFEMBasis_fun(x, j, jMode, 1.0, 0.0, problem, enrichedElementCoords ), @(x, d) evaluateLocalActualTemperature( x, problem, enrichedElementCoords, solution, d ), X1, X2);
         end
     end
 end
 
-K = [K_FEM, K_coupling'; K_coupling, K_enr];
+K = [K_FEM, (K_coupling)'; K_coupling, K_enr];
 
 
 end

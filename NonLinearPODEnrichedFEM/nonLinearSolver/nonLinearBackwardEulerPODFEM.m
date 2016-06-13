@@ -78,28 +78,29 @@ for t = (numberOfTrainingTimeSteps+1):timeSteps
     
     %Get active mesh
     activeMesh = getActiveCoordinates(coords, t, timeSteps);
+    activeMeshSize = numel(activeMesh);
     
     %Generate the Poisson problem at timeStep t on the coarse active mesh
     poissonTransientProblem = poissonNonLinearProblemTransient(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
         rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
     
     %Project old solution onto the new mesh
-    previousSolution = refinedTemperatureSolutions;
-    refinedTemperatureSolutions = L2projection(poissonTransientProblem, previousSolution, activeMesh, activeMesh, initialTemperature);
+    previousSolution = [refinedTemperatureSolutions(1:activeMeshSize-2);refinedTemperatureSolutions(end); 0.0];
     
     disp(' Solve Global Problem');
     
     %Solve the global problem using Newton-Raphson scheme on the coarse
     %mesh
-    temperatureSolutionsGlobal = newtonRaphsonGlobalProblem(refinedTemperatureSolutions, poissonTransientProblem, tolerance, maxIterations, timeStepSize);
+    temperatureSolutionsGlobal = newtonRaphsonGlobalProblem(previousSolution, poissonTransientProblem, tolerance, maxIterations, timeStepSize);
     
     %Generate the Poisson problem at timeStep t on the coarse active mesh
     poissonTransientProblemEnriched = poissonNonLinearProblemTransientPODEnrichment(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
         rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
     
     %Project old solution onto the new mesh
-    temperatureSolutionsProjected = L2projectionEnriched(poissonTransientProblemEnriched, refinedTemperatureSolutions,...
+    temperatureSolutionsProjected = L2projectionEnriched(poissonTransientProblemEnriched, previousSolution,...
         activeMesh, coords, modes, initialTemperature);
+    temperatureSolutionsProjected(1) = temperatureSolutionsGlobal(end);
     
     disp(' Solve Local Enriched Problem');
     
@@ -115,8 +116,7 @@ for t = (numberOfTrainingTimeSteps+1):timeSteps
     temperatureSolutions(1:end-modesOffset+2) = temperatureSolutionsGlobal(1:end);
     temperatureSolutions(end-modesOffset+2:end) = temperatureSolutionsEnriched(2:end);
         
-    refinedMesh = activeMesh;
-    refinedTemperatureSolutions = temperatureSolutions;
+    refinedTemperatureSolutions = temperatureSolutionsGlobal;
     
     %Post-Processing
     temperaturePostProcessing(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh,...

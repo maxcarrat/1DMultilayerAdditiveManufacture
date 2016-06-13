@@ -45,7 +45,9 @@ modes = size(reductionOperator, 2);
 
 % basis function and location map
 [rbBasis_fun, rbLM] = rbLocationMap(modes);
-xFEMBasis_fun = @xFEMBasis;
+
+xFEMBasis_fun = @PODEnrichedBasis;
+localBasis_fun = @localIntegrationBasis;
 
 %non-linear bilinear opertaor
 rbB = @(u, v, T, X1, X2)  integral( @(xi) k(T(mapLocalToGlobal(xi, X1, X2),0)) .* u(xi)...
@@ -67,12 +69,12 @@ gdof = max(max(rbLM));
 cdof = max(max(LM));
 edof = max(max(rbLM));
 
-penalty = 1.0e+12;
+penalty = 1.0e+15;
 
 %% Generate problem struct
 poissonTransientProblemEnriched = struct('LM', LM, 'basis_fun', basis_fun,'rbBasis_fun', rbBasis_fun, 'B', B, 'B_map', B_map, 'F', F,...
     'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc, 'refinementDepth', refinementDepth,...
-    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof, 'xFEMBasis_fun', xFEMBasis_fun, ...
+    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof, 'xFEMBasis_fun', xFEMBasis_fun, 'localBasis_fun', localBasis_fun,...
     'rhs', rhs, 'penalty', penalty, 'rbB', rbB, 'rbM', rbM, 'rbF', rbF, 'coords', coords, 'k', k, 'heatCapacity',...
     heatCapacity, 'time', time, 'modes', modes, 'rbLM', rbLM, 'reductionOperator', reductionOperator);
 end

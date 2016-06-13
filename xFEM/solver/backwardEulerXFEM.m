@@ -71,7 +71,7 @@ fprintf(formatSpec)
   
  %% Generate the reduced basis
  
-  [solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,4:numberOfTrainingTimeSteps), numberOfPODModes);
+  [solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,5:numberOfTrainingTimeSteps), numberOfPODModes);
   
  %% Enriched mesh using RB
 
@@ -83,25 +83,33 @@ fprintf(formatSpec)
     
     currentTime = timeStepSize * (t-1);
     
-    %Get active mesh
+      %Get active mesh
     activeMesh = getActiveCoordinates(coords, t, timeSteps);
+    activeMeshSize = numel(activeMesh);
+    
+    %Generate the Poisson problem at timeStep t on the coarse active mesh
+    poissonTransientProblem = poissonProblemTransient(activeMesh, rhs,...
+        leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+        k, heatCapacity, currentTime);
     
     %Project old solution onto the new mesh
-    previousSolution = refinedTemperatureSolutions;
-    refinedTemperatureSolutions = L2projection(poissonTransientProblem, previousSolution, activeMesh, refinedMesh, initialTemperature);
-
+    previousSolution = [refinedTemperatureSolutions(1:activeMeshSize-2);refinedTemperatureSolutions(end); 0.0];
+    
+    disp(' Solve Global Problem ');
+    
     %Solve Global/Coarse problem
-    poissonTransientProblem = poissonProblemTransient(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
-        rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime);
-    temperatureSolutionsGlobal = solveGlobalProblem(refinedTemperatureSolutions, poissonTransientProblem, timeStepSize);
+    temperatureSolutionsGlobal = solveGlobalProblem(previousSolution, poissonTransientProblem, timeStepSize);
     
     %Generate Local problem
     poissonTransientProblemEnriched = poissonProblemTransientEnriched(activeMesh, rhs, leftDirichletBoundaryConditionValue,...
         rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
-   
+    
     %Project global solution onto the enriched modal space
-    temperatureSolutionsProjected = L2projectionEnriched(poissonTransientProblemEnriched,refinedTemperatureSolutions,...
+    temperatureSolutionsProjected = L2projectionEnriched(poissonTransientProblemEnriched,previousSolution,...
         activeMesh, coords, modes, initialTemperature);
+    temperatureSolutionsProjected(1) = temperatureSolutionsGlobal(end-1);
+    
+    disp(' Solve Local Enriched Problem ');
     
     %Solve Local problem enriched
     temperatureSolutionsEnriched = solveLocalProblem(temperatureSolutionsProjected, poissonTransientProblemEnriched, timeStepSize, modes);
@@ -118,8 +126,7 @@ fprintf(formatSpec)
 % %     temperatureSolutions(end-numberOfModesSupports:end) = temperatureSolutions(end-numberOfModesSupports:end) + temperatureSolutionsEnriched;
 %     temperatureSolutions(end-numberOfModesSupports:end) = temperatureSolutionsEnriched;
 
-    refinedMesh = activeMesh;
-    refinedTemperatureSolutions = temperatureSolutions;
+    refinedTemperatureSolutions = temperatureSolutionsGlobal;
 
     temperaturePostProcessing(:, t) = evaluateNumericalResultsEnriched(postProcessingCoords, activeMesh,...
         poissonTransientProblemEnriched, temperatureSolutions, temperatureSolutionsGlobal, 0) ;

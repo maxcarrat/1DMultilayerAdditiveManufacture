@@ -67,16 +67,18 @@ X2 = coords(element+1);
 ldof = 2;
 
 enrichedElementCoords = linspace(X1, X2, 2^(problem.refinementDepth)+1);
+detJenr = 2/(enrichedElementCoords(end) - enrichedElementCoords(end-1));
+
 r = zeros(size(x));
 
 if derivative==0
     
     for i=1:ldof
-        r=r+coefficients(problem.LM(element,i)).* problem.basis_fun(mapGlobalToLocal(x, X1, X2), i, 0);
+        r=r+coefficients(problem.LM(element,i)).* problem.localBasis_fun(mapGlobalToLocal(x, X1, X2), i, 0.0, problem, enrichedElementCoords);
     end
-    for iMode=1:problem.modes
-        for i =1:ldof
-            r=r+coefficients(problem.N+1+(i-1)*problem.modes+iMode).*...
+    for i =1:ldof
+        for iMode=1:problem.modes
+            r=r+coefficients(problem.N+1+(iMode-1)*ldof+i).*...
                 problem.xFEMBasis_fun(mapGlobalToLocal(x, X1, X2), i, iMode, 0, 0,...
                 problem, enrichedElementCoords);
         end
@@ -97,7 +99,7 @@ else
     
 end
 
-% r = r .* (2/(X2-X1)) ^ derivative;
+ r = r .* (2/(X2-X1)) ^ derivative;% .* detJenr ^ derivative;
 
 end
 

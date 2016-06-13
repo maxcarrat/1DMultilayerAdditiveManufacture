@@ -15,7 +15,7 @@ open(writerObj);
 
 rho = 7580.0;                                                       % density [kg/m^3]
 c = 440.0;                                                          % specific heat [J/(kg°C)]
-k =@(T) 54.0 - 26.7 * tanh( ( T - 800.0 ) / 800.0 + 1.0 );          % thermal conductivity [W/(m°C)]
+k =@(T) 54.0 - 26.7 * tanh( ( T - 100.0 ) / 100.0 + 1.0 );          % thermal conductivity [W/(m°C)]
 T0 = 120.0;                                                         % Initial temperature [°C]
 heatCapacity= rho*c;                                                % heat capacity [kJ / kg °C]
 Tsource = 3000.0;                                                   % source temperature
@@ -33,8 +33,8 @@ refinementDepth = 2;
 
 tolerance = 1.0e-05;
 maxNumberOfIterations = 15;
-numberOfTrainingTimeSteps = 8;
-numberOfModes = 2;
+numberOfTrainingTimeSteps = 10;
+numberOfModes = 0;
 
 t = linspace(0, tEnd, timeSteps + 1);                                                         % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                                             % spatial discretization X
@@ -46,8 +46,10 @@ x_postProcessing = linspace(0.0, xEnd, 5*numberOfElementsInX*2^refinementDepth +
 [temperatureSolution, heatFlux] = nonLinearBackwardEulerPODFEM(x, x_postProcessing, rhs, T0, dirichletLeftBC,...
     dirichletRightBC, k, heatCapacity, t, refinementDepth, numberOfTrainingTimeSteps, maxNumberOfIterations, tolerance, numberOfModes);
 
+
 figure(2)
 surf(X, T, temperatureSolution')
+axis([-10 10 0 inf])
 
 figure(3)
 surf(X, T, heatFlux')
@@ -57,6 +59,7 @@ F(size(t,2)) = struct('cdata',[],'colormap',[]);
 
 for i=1:size(t,2)
     plot(x_postProcessing',temperatureSolution(:,i))
+    axis([0.0 0 0 inf])
     drawnow
     F(i) = getframe;
     writeVideo(writerObj, getframe(gcf, [ 0 0 560 420 ]));

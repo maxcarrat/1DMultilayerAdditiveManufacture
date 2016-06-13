@@ -1,6 +1,6 @@
-function refinedLocalProblem = poissonProblemTransientEnriched( coords, rhs, leftDirichletBoundaryConditionValue,...
-                                rightDirichletBoundaryConditionValue, k, heatCapacity, time, refinementDepth, reductionOperator )
-%POISSONPROBLEMTRANSIENTENRICHED The right boundary element of the global coarse problem
+function [ xFEMProblem ] = poissonProblemArmonicXFEM( coords, rhs, leftDirichletBoundaryConditionValue,...
+                                rightDirichletBoundaryConditionValue, k, heatCapacity, time, numberOfModes )
+%POISSONPROBLEMARMONICXFEM The right boundary element of the global coarse problem
 %is enriched using the POD modes from the training phase.
 
 % number of Elements
@@ -8,13 +8,10 @@ N = size(coords, 2) - 1;
 
 %number of Modes
 
-modes = size(reductionOperator, 2);
-
 [basis_fun, LM] = locationMap(N);
-[rbBasis_fun, rbLM] = rbLocationMap(modes);
+[rbBasis_fun, rbLM] = armonicLocationMap(N, numberOfModes);
 
-xFEMBasis_fun = @PODEnrichedBasis;
-localBasis_fun = @localIntegrationBasis;
+xFEMBasis_fun = @xFEMBasis;
 
 rbB = @(u, v)  integral( @(xi) k .* u(xi)...
                 .* v(xi), -1, 1);
@@ -47,21 +44,16 @@ if size(rightDirichletBoundaryConditionValue(time))~=0
     dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
 end
 
-%Dirichlet BCs on the enriched DOFs
-dirichlet_bc = [dirichlet_bc; 1 0.0];
-dirichlet_bc = [dirichlet_bc; rbLM(2,2) 0.0];
 
-
-gdof = max(max(rbLM));
+gdof = N + 1 + N * (2*numberOfModes);
 cdof = max(max(LM));
 edof = max(max(rbLM));
 
-penalty = 1.0e+12;
+penalty = 1.0e+10;
 
-refinedLocalProblem = struct('LM', LM, 'basis_fun', basis_fun,'rbBasis_fun', rbBasis_fun, 'B', B, 'B_map', B_map, 'F', F,...
-    'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc, 'refinementDepth', refinementDepth,...
-    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof, 'xFEMBasis_fun', xFEMBasis_fun, 'localBasis_fun', localBasis_fun,...
+xFEMProblem = struct('LM', LM, 'basis_fun', basis_fun,'rbBasis_fun', rbBasis_fun, 'B', B, 'B_map', B_map, 'F', F,...
+    'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc,...
+    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof, 'xFEMBasis_fun', xFEMBasis_fun,...
     'rhs', rhs, 'penalty', penalty, 'rbB', rbB, 'rbM', rbM, 'rbF', rbF, 'coords', coords, 'k', k, 'heatCapacity',...
-    heatCapacity, 'time', time, 'modes', modes, 'rbLM', rbLM, 'reductionOperator', reductionOperator);
+    heatCapacity, 'time', time, 'modes', numberOfModes, 'rbLM', rbLM);
 end
-

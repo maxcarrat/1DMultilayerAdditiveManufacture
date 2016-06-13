@@ -14,7 +14,7 @@ function [ solution ] = newtonRaphsonEnrichedProblem( oldSolution, problem, numb
 
 solution = oldSolution;
 solutionRB = zeros(numel(oldSolution), 1);
-lastConvergedSolution = zeros(numel(oldSolution), 1);
+lastConvergedSolution = oldSolution;
 
 for i=1:maxNumberOfIterations
     
@@ -26,7 +26,9 @@ for i=1:maxNumberOfIterations
     %Apply BCs
     constrainedTemperature = problem.dirichlet_bc(2, 2);
     constrainedNode = problem.coords(end);
-    [K, f] = applyWeakDirichletBCs(problem, constrainedNode, constrainedTemperature, K, f);
+%     [K, f] = applyWeakDirichletBCs(problem, constrainedNode, constrainedTemperature, K, f);
+    K(2,2) = K(2,2) + problem.penalty;
+    f(2) = f(2) + constrainedTemperature*problem.penalty;
 
     %% Solve
     %residuum
@@ -37,7 +39,7 @@ for i=1:maxNumberOfIterations
     J = K * timeStepSize + M;
     
     solutionIncrement = J\r;
-    resNorm = norm(solutionIncrement);
+    resNorm = sqrt(abs(r'*solutionIncrement));
     
     %% Check convergence
     if resNorm <= tolerance
@@ -52,11 +54,12 @@ for i=1:maxNumberOfIterations
     fprintf(formatSpec, resNorm);
     
     solutionRB = solutionRB + solutionIncrement;    
+    solution = solutionRB;
+
 end
 
 formatSpec = '\t\t Warning: Solution did not converge after %1.0f iterations!!!\n';
 fprintf(formatSpec, maxNumberOfIterations);
 
-solution = solutionRB;
 
 end
