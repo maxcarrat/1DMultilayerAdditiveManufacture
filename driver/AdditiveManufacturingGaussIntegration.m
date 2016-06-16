@@ -33,32 +33,34 @@ rhs = @(x, t) 0.0;%1.0e+08;
 % modes = zeros(maxTrainingTimeSteps-3,1);
 % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
 
-numberOfLayers = 20;
-trainingTimeSteps = 19;
+numberOfLayers = 10;
+trainingTimeSteps = 8;
 numberOfTimeStepsPerLayer = 10;
+
+integrationOrder = 5;
 
 % for trainingTimeSteps = 3:maxTrainingTimeSteps
 
-numberOfElementsInX = 20;
+numberOfElementsInX = numberOfLayers;
 timeSteps = 4;
-refinementDepth = 2;
-numberOfPODModes = 0;
+refinementDepth = 4;
+numberOfPODModes = 1;
 
 t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                 % layer spatial discretization X
 
 x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
-x_PostProcess = linspace(0.0, xEnd, 5*(numberOfElementsInX +1));            % post-processing coordinates
+x_PostProcess = linspace(0.0, xEnd, 200*(numberOfElementsInX +1));            % post-processing coordinates
 
 [X, T] = meshgrid(x_PostProcess, t);
 [X_ref, T_ref] = meshgrid(x_ref, t);
 
 
 %% Analysis
-[temperatureSolution, heatFlux, internalEnergy, modes(trainingTimeSteps-2)] = backwardEulerXFEM(x, x_PostProcess, rhs, T0,...
+[temperatureSolution, heatFlux, internalEnergy, modes(trainingTimeSteps-2)] = backwardEulerGaussIntegrationSolver(x, x_PostProcess, rhs, T0,...
     dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
-    numberOfLayers, numberOfPODModes);
+    numberOfLayers, numberOfPODModes, integrationOrder);
 
 %% Post-Process
 overkilledInternalEnergy = 4.221615373269894e+07;

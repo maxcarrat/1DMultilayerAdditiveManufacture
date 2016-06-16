@@ -11,7 +11,7 @@ Y = T(:,:)'*T(:,:)*1/N;
 % eigendecomposition, return D as matrix of the
 % eigenvectors and S as diagonal matrix of the eigenvalues.
 
-% % [D, S, ~] = svd(Y);
+% [D, S, ~] = svd(Y);
 % [D, S] = eig(Y);
 % 
 % [ S, D, numberOfModesFiltered ] = sortEigenvalues(S, D);
@@ -81,7 +81,7 @@ S = S(I);
 V = V(:,I);
 
 if numberOfModes==0
-    numberOfModes = numel(extractK(D, 10e-6));
+    numberOfModes = numel(extractK(D, 10e-8));
 end
 
 a = diag(S(1:numberOfModes))*(V(:,1:numberOfModes)');
