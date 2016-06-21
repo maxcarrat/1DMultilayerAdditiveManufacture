@@ -1,35 +1,21 @@
-function [M, K, f] = assemblyLocalProblem(problem, iMode, numberOfModesSupports)
-%   [M, K, f] = ASSEMBLYLOCALPROBLEM(problem) assembles the mass and the conductivity matrix and load vector 
+function [Menr, Kenr, fenr] = assemblyLocalProblem(problem)
+%   [Menr, Kenr, fenr] = ASSEMBLYLOCALPROBLEM(problem) assembles the mass and the conductivity matrix and load vector 
+%   of the enriched problem at the last active element of the mesh.
 %   problem = definition of the boundary value problem
 %   iMode = ith POD mode
+%   numberOfModes = number of POD basis 
 
 
-%conductivity matrix of the enriched problem
-K = zeros(numberOfModesSupports+1,numberOfModesSupports+1);
-%capacity matrix of the enriched problem
-M = zeros(numberOfModesSupports+1,numberOfModesSupports+1);
-%load vector of the enriched problem
-f = zeros(numberOfModesSupports+1, 1);
+enrichedElementCoords = linspace(problem.coords(end-1), problem.coords(end),...
+    2^problem.refinementDepth+1);
 
-enrichedElementCoords = linspace(problem.N-numberOfModesSupports, problem.N, 2^problem.refinementDepth);
+detJenr = 2/(enrichedElementCoords(end) - enrichedElementCoords(end-1));
 
-KE = rbLocalConductivityMatrix(problem, iMode, enrichedElementCoords);
-ME = rbLocalCapacityMatrix(problem, iMode, enrichedElementCoords);
-
-for modesSupport=1:numberOfModesSupports
-    
-    ldof = 2;
-    X1 = problem.coords(problem.N-2);
-    X2 = problem.coords(problem.N-1);
-    
-    fel = rbLocalLoadVector(problem, iMode, enrichedElementCoords, problem.N);
-        
-    f(problem.rbLM(modesSupport,1:ldof)) = f(problem.rbLM(modesSupport,1:ldof)) + problem.F_map(X1,X2) * fel;
-    M(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof)) = M(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof))...
-        + problem.F_map(X1,X2) * ME(1:ldof, 1:ldof);
-    K(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof)) = K(problem.rbLM(modesSupport, 1:ldof), problem.rbLM(modesSupport, 1:ldof))...
-        + problem.B_map(X1,X2) * KE(1:ldof, 1:ldof);
-    
-end
+%conductivity matrix of the locally enriched problem
+Kenr = rbLocalConductivityMatrix(problem, enrichedElementCoords)*problem.B_map(problem.coords(end-1), problem.coords(end))*detJenr;
+%capacity matrix of the locally enriched problem
+Menr = rbLocalCapacityMatrix(problem, enrichedElementCoords)*problem.F_map(problem.coords(end-1), problem.coords(end))*1/detJenr;
+%load vector of the locally enriched problem
+fenr = rbLocalLoadVector(problem, enrichedElementCoords, problem.N)*problem.F_map(problem.coords(end-1), problem.coords(end))*1/detJenr;
   
 end

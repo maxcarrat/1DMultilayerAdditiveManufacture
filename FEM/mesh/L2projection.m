@@ -1,24 +1,32 @@
-function [ projectedTemperature ] = L2projection(problem, previousTemperature, updatedMesh, previousMesh)
+function [ projectedTemperature ] = L2projection(problem, previousTemperature, updatedMesh, previousMesh, initialTemperature)
 %L2PROJECTION project the previous solution onto the updated mesh at the
 %new time step
 %   previousTemperature = temeprature distribution of the previous mesh
 %   updatedMesh = actual mesh configuration
 %   previousmesh = previous mesh configuration
+%   initialTemperature = initial temperature of the powder
 
 projectedTemperature = zeros(size(updatedMesh,2), 1);
 
 for j=1:size(updatedMesh,2)
     x = updatedMesh(j);
-    projectedTemperature(j) = globalProjection(x, previousMesh, previousTemperature, problem);
+    globalProjectedValue = globalProjection(x, previousMesh, previousTemperature, problem);
+    if globalProjectedValue ~= 0.0
+        projectedTemperature(j) = globalProjectedValue;
+    else
+        projectedTemperature(j) = initialTemperature;
+    end
 end
 
 end
 
 
 function [ numericalSolutions ] = globalProjection(x, previousMesh, coefficients, problem )
-% numericalSolutions = GLOBALPROJECTION(postProcessingCoords,, coefficients, derivative) evaluates the numerical solution
+% numericalSolutions = GLOBALPROJECTION(x, previousMesh, coefficients, problem) evaluates the numerical solution
 % x = coordinates to post process
+% previousMesh = mesh onto whom I project 
 % coefficients = coefficients of the basis function obtained by solving the mass matrix-load vector system of equations
+% problem = transient poisson problem struct
 
     coords = previousMesh;
     numericalSolutions=zeros(size(x));

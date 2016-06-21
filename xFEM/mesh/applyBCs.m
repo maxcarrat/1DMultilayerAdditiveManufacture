@@ -8,7 +8,6 @@ for i=1:size(problem.dirichlet_bc,1)
     f(problem.dirichlet_bc(i, 1)) =  f(problem.dirichlet_bc(i, 1)) + problem.penalty * problem.dirichlet_bc(i, 2);
 end
 
-RHS = timeStepSize * (f - K * previousSolution);
-LHS = M + timeStepSize * K;
-
+    RHS = timeStepSize*(f - K*previousSolution);
+    LHS = M + timeStepSize*K;
 end

@@ -11,7 +11,10 @@ N = size(coords, 2) - 1;
 modes = size(reductionOperator, 2);
 
 [basis_fun, LM] = locationMap(N);
-[rbBasis_fun, rbLM] = rbLocationMap(modes, 2);
+[rbBasis_fun, rbLM] = rbLocationMap(modes);
+
+xFEMBasis_fun = @PODEnrichedBasis;
+localBasis_fun = @localIntegrationBasis;
 
 rbB = @(u, v)  integral( @(xi) k .* u(xi)...
                 .* v(xi), -1, 1);
@@ -36,9 +39,13 @@ F_map = @(X1, X2) (X2-X1)/2;
 
 dirichlet_bc = [];
 
-%Dirichlet BCs on the standard DOFs
-dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
-dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
+%Dirichlet BCs of the strandard mesh
+if size(leftDirichletBoundaryConditionValue(time))~=0
+    dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
+end
+if size(rightDirichletBoundaryConditionValue(time))~=0
+    dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
+end
 
 %Dirichlet BCs on the enriched DOFs
 dirichlet_bc = [dirichlet_bc; 1 0.0];
@@ -49,11 +56,11 @@ gdof = max(max(rbLM));
 cdof = max(max(LM));
 edof = max(max(rbLM));
 
-penalty = 1.0e+14;
+penalty = 1.0e+12;
 
 refinedLocalProblem = struct('LM', LM, 'basis_fun', basis_fun,'rbBasis_fun', rbBasis_fun, 'B', B, 'B_map', B_map, 'F', F,...
     'F_map', F_map, 'M', M, 'dirichlet_bc', dirichlet_bc, 'refinementDepth', refinementDepth,...
-    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof,...
+    'N', N, 'gdof', gdof, 'cdof', cdof, 'edof', edof, 'xFEMBasis_fun', xFEMBasis_fun, 'localBasis_fun', localBasis_fun,...
     'rhs', rhs, 'penalty', penalty, 'rbB', rbB, 'rbM', rbM, 'rbF', rbF, 'coords', coords, 'k', k, 'heatCapacity',...
     heatCapacity, 'time', time, 'modes', modes, 'rbLM', rbLM, 'reductionOperator', reductionOperator);
 end

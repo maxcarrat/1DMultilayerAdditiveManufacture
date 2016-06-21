@@ -17,13 +17,17 @@ function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryCon
 
             B_map = @(X1, X2) 2/(X2-X1);
             F_map = @(X1, X2) (X2-X1)/2;
-
+            
+            %Dirichlet BCs
             dirichlet_bc = [];
-
-            dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
-            dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
-
-
+            
+            if size(leftDirichletBoundaryConditionValue(time))~=0
+                dirichlet_bc = [dirichlet_bc; 1 leftDirichletBoundaryConditionValue(time)];
+            end
+            if size(rightDirichletBoundaryConditionValue(time))~=0
+                dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
+            end
+            
             gdof = max(max(LM));
             
             penalty = 1.0e+12;
