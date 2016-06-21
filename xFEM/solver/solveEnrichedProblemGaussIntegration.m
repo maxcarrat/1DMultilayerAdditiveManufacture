@@ -1,12 +1,9 @@
 function [ localTemperatureCoefficients ] = solveEnrichedProblemGaussIntegration( localTemperatureCoefficients, problem, time,...
     timeStepSize, integrationOrder )
-%SOLVEGLOBALPROBLEMGaussIntegration returns the nodal temperature values of the
+%SOLVEGLOBALPROBLEMGAUSSINTEGRATION returns the nodal temperature values of the
 %local/enriched problem.
-%   problemCoarse = problem struct on the coarse mesh
+%   problem = problem struct on the coarse mesh
 
-%% Loop over POD modes 
-%The enrichment solution of each mode is added to the final enrichment
-%vector
 
 %Assembly the local reduced basis
 [M, K, f] = assemblyXFEMLinearSystem(problem, time, integrationOrder);

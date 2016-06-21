@@ -57,11 +57,12 @@ for e=1:problem.N
         
         %% Integrate FEM block
         %extrnal heat source
-        f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + problem.F_map(X1,X2) * N' * problem.rhs(mapLocalToGlobal(rGP(iGP), X1, X2), time) * wGP(iGP);
+        f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + N' * problem.rhs(mapLocalToGlobal(rGP(iGP), X1, X2),...
+            time) * wGP(iGP) * problem.F_map(X1,X2);
         
         %Capacity matrix
         M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-            problem.F_map(X1,X2) * problem.heatCapacity * (N' * N) * wGP(iGP);
+            problem.heatCapacity * (N' * N) * wGP(iGP) * problem.F_map(X1,X2);
         
         %Diffusion matrix
         K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
@@ -86,7 +87,7 @@ for e=1:problem.XN
     
     modalDofs = length(indexLocalEnrichedNodes)*modes;
 
-    for iMode=1:modalDofs
+    %for iMode=1:modalDofs
         
         % On active elements use the refined domain as integration domain
         integrationDomain = linspace(-1, 1, 2^problem.refinementDepth + 1);
@@ -107,6 +108,8 @@ for e=1:problem.XN
                 
                 [N, B] = shapeFunctionsAndDerivativesSubElements(rGP(iGP), integrationSubDomain,...
                     subDomainShapeFunctionCoefficients);
+%                 [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
+                
                 [F, G] = PODModesAndDerivatives(rGP(iGP), modes, PODCoefficients,...
                     subDomainShapeFunctionCoefficients, integrationSubDomain, indexLocalEnrichedNodes);
                 
@@ -114,28 +117,28 @@ for e=1:problem.XN
                 
                 %% Integrate Coupling block
                 %Capacity matrix
-                M_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, indexLocalEnrichedNodes)) = M_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, indexLocalEnrichedNodes)) +...
-                    problem.F_map(X1,X2) * mapIntegrationDomainForward * problem.heatCapacity * F' * N(indexLocalEnrichedNodes) * wGP(iGP);
+                M_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, :)) = M_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, :)) +...
+                    problem.heatCapacity * F' * N * wGP(iGP) *  problem.F_map(X1,X2) * mapIntegrationDomainForward; 
                 
                 %Diffusion matrix
-                K_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, indexLocalEnrichedNodes)) = K_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, indexLocalEnrichedNodes)) +...
-                    problem.B_map(X1,X2) * mapIntegrationDomainBackward * problem.k * G' * B(indexLocalEnrichedNodes) * wGP(iGP);
+                K_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, :)) = K_Coupling(((e-1)*modalDofs + 1):modalDofs, problem.LMC(e, :)) +...
+                    problem.B_map(X1,X2) * problem.k * G' * B * wGP(iGP) * mapIntegrationDomainBackward;
                 
                 %% Integrate XFEM block
                 %extrnal heat source
-                f_XFEM(problem.LME(e,1:modalDofs)) = f_XFEM(problem.LME(e,1:modalDofs)) + problem.F_map(X1,X2) * mapIntegrationDomainForward * F' *...
-                    problem.rhs(globalGP, time) * wGP(iGP);
+                f_XFEM(problem.LME(e,1:modalDofs)) = f_XFEM(problem.LME(e,1:modalDofs)) +  F' *...
+                    problem.rhs(globalGP, time) * wGP(iGP) * problem.F_map(X1,X2) * mapIntegrationDomainForward;
                 
                 %Capacity matrix
                 M_XFEM(problem.LME(e, 1:modalDofs), problem.LME(e, 1:modalDofs)) = M_XFEM(problem.LME(e, 1:modalDofs), problem.LME(e, 1:modalDofs)) +...
-                    problem.F_map(X1,X2) * mapIntegrationDomainForward * problem.heatCapacity * ( F' * F ) * wGP(iGP);
+                     problem.heatCapacity * ( F' * F ) * wGP(iGP) * problem.F_map(X1,X2) * mapIntegrationDomainForward;
                 
                 %Diffusion matrix
                 K_XFEM(problem.LME(e, 1:modalDofs), problem.LME(e, 1:modalDofs)) = K_XFEM(problem.LME(e, 1:modalDofs), problem.LME(e, 1:modalDofs)) +...
-                    problem.B_map(X1,X2) * mapIntegrationDomainBackward * problem.k * ( G' * G ) * wGP(iGP);
+                    problem.B_map(X1,X2) * problem.k * ( G' * G ) * wGP(iGP) * mapIntegrationDomainBackward;
                 
             end
-        end
+        %end
         
     end
     
