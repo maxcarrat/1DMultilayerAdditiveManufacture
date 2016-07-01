@@ -1,5 +1,6 @@
-function [temperaturePostProcessing, heatFluxes, internalEnergy, modes]= backwardEulerGaussIntegrationSolver(coords, postProcessingCoords, rhs, ...
-    initialTemperature, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector,...
+function [temperaturePostProcessing, heatFluxes, internalEnergy, computationalTime]= backwardEulerGaussIntegrationSolver(coords, postProcessingCoords, rhs, ...
+    initialTemperature, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+    neumannBoundaryconditionValue, k, heatCapacity, timeVector,...
     refinementDepth, numberOfTrainingLayers, numberOfLayersTimeSteps, numberOfLayers, numberOfPODModes, integrationOrder)
 % BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem.
 % Moreover, the numerical solution for each element is also computed
@@ -19,8 +20,7 @@ timeStepSize=max(timeVector)/( timeSteps );
 temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 
 refinedTemperatureSolutions = zeros(2^refinementDepth+1, 1);
-% refinedTemperatureSolutions(:) = initialTemperature;
-
+computationalTime = [];
 localRefinedTemperatureSolutions = zeros(2^refinementDepth+1, timeSteps);
 
 heatFluxes = zeros(size(postProcessingCoords, 2), timeSteps);
@@ -33,21 +33,25 @@ fprintf(formatSpec)
 
 %% Training phase
 for layer = 1:numberOfTrainingLayers
-    
+   
     %Refinement
     refinedMesh = refineLayer(coords, refinementDepth, layer, numberOfLayers);
     %     refinedMesh = refineMesh(coords, refinementDepth, layer, numberOfTrainingLayers);
     
     %Project old solution onto the new mesh
     if layer > 1
-        refinedTemperatureSolutions = L2projectionLinearDistribution(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh, initialTemperature, refinementDepth);
+%         refinedTemperatureSolutions = L2projection(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh, initialTemperature);
+          refinedTemperatureSolutions = L2projectionLinearDistribution(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh,...
+              previousMesh, initialTemperature, refinementDepth);
     else
         refinedTemperatureSolutions = zeros(size(refinedMesh, 2), 1);
         localRefinedTemperatureSolutions = zeros(size(refinedMesh, 2), timeSteps);
     end
-    
+
+    timeToGenerateAndSolveTheSystem = 0.0;
+
     for iTime = 1:numberOfLayersTimeSteps
-        
+        tic
         t = (layer - 1) * numberOfLayersTimeSteps + iTime;
         
         formatSpec = 'Backward Euler Time Step(Training Phase): %1.1f \n' ;
@@ -58,7 +62,7 @@ for layer = 1:numberOfTrainingLayers
         %Generate the Poisson problem at timeStep t
         poissonTransientProblem = poissonProblemTransient(refinedMesh, rhs,...
             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            k, heatCapacity, currentTime);
+            neumannBoundaryconditionValue, k, heatCapacity, currentTime);
         
         %Update and merge temperature into global domain
         refinedTemperatureSolutions = solveGlobalProblemGaussIntegration( refinedTemperatureSolutions, poissonTransientProblem,...
@@ -68,17 +72,21 @@ for layer = 1:numberOfTrainingLayers
         localRefinedTemperatureSolutions(:, t+1) = getLayerSolution(refinedTemperatureSolutions, layer, numberOfLayers, coords);
         previousMesh = refinedMesh;
         
+        timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
+
         %Post-Processing
         temperaturePostProcessing(:, t+1) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 0) ;
         heatFluxes(:, t+1) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 1);
         %         internalEnergy(t+1) = refinedTemperatureSolutions'*K*refinedTemperatureSolutions;
         
     end
+    
+    computationalTime = [computationalTime, timeToGenerateAndSolveTheSystem];
 end
 
 %% Generate the reduced basis
 
-[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,5:numberOfTrainingLayers), numberOfPODModes);
+[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,3:numberOfTrainingLayers), numberOfPODModes);
 
 %% Enriched mesh using RB
 
@@ -89,7 +97,7 @@ temperatureSolutions = [refinedTemperatureSolutions(1:end-refinedDOFs);...
 
 % %Generate Local problem
 % [activeMesh, numberOfActiveElementsLayer] = getLayerActiveCoords(coords, layer, numberOfLayers);
-% 
+%
 % poissonTransientProblemEnriched = poissonProblemXFEM(activeMesh,numberOfActiveElementsLayer, rhs, leftDirichletBoundaryConditionValue,...
 %     rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
 
@@ -99,12 +107,12 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
     [activeMesh, numberOfActiveElementsLayer] = getLayerActiveCoords(coords, layer, numberOfLayers);
     
     poissonTransientProblemEnriched = poissonProblemXFEM(activeMesh,numberOfActiveElementsLayer, rhs, leftDirichletBoundaryConditionValue,...
-        rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
+        rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
     
     %Project global solution onto the enriched modal space
     temperatureSolutions = eXtendedProjection(poissonTransientProblemEnriched,temperatureSolutions,...
         modes, initialTemperature);
-   
+    tic
     for iTime = 1:numberOfLayersTimeSteps
         
         t = (layer - 1) * numberOfLayersTimeSteps + iTime;
@@ -116,14 +124,15 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
         %Generate Local problem
         poissonTransientProblemEnriched = poissonProblemXFEM(activeMesh,numberOfActiveElementsLayer, rhs, leftDirichletBoundaryConditionValue,...
-            rightDirichletBoundaryConditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
+            rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
         
-
+        
         disp(' Solve Local Enriched Problem ');
         
         %Solve Local problem enriched
-        temperatureSolutions = solveEnrichedProblemGaussIntegration( temperatureSolutions, poissonTransientProblemEnriched, currentTime,...
+        temperatureSolutions = solveGaussIntegration( temperatureSolutions, poissonTransientProblemEnriched, currentTime,...
             timeStepSize, integrationOrder );
+        
         
         %Post-Processing
         temperaturePostProcessing(:, t) = postProcessingProjection(postProcessingCoords, poissonTransientProblemEnriched, temperatureSolutions,...
@@ -136,6 +145,7 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
     end
     
+    computationalTime = [computationalTime, toc];
 end
 
 end
@@ -150,72 +160,25 @@ function [ projectedCoefficients ] = eXtendedProjection(problem, previousTempera
 %   modes = number of enrichment modes
 %   initialTemperature = initial temperature of the powder
 
-[rGL, ~] = GaussLobatto(modes*3);
-numberOfProjectionPoints = length(rGL);
-projectedCoefficients = [];
+projectedCoefficients = zeros(problem.N + 1 +...
+    modes * (2*problem.XN - 1), 1);
 
 for e=1:problem.N
-    
-    X1 = problem.coords(e);
-    X2 = problem.coords(e+1);
-    
-    if e > problem.N - problem.XN  % element is active
-        
-        if e == problem.N - problem.XN +1
-            indexLocalEnrichedNodes = 2; %rhs node
-        else
-            indexLocalEnrichedNodes = [1, 2];
-        end
-        
-        % rhs node
-        projectedCoefficients = [projectedCoefficients; previousTemperature(e)];
+
+    if e == problem.N % last element
         % lhs node
-        projectedCoefficients = [projectedCoefficients; initialTemperature];
+        projectedCoefficients(e) = previousTemperature(e);
+        % rhs node
+        projectedCoefficients(e+1) = initialTemperature;
         
-        % On active elements use the refined domain as integration domain
-        integrationDomain = linspace(-1, 1, 2^problem.refinementDepth + 1);
-        subDomainShapeFunctionCoefficients = linspace(0, 1, 2^problem.refinementDepth + 1);
-        
-        projectionOperator = [];
-        projectionValues = [];
-        
-        for integrationSubDomainIndex=1:length(integrationDomain)-1
-            
-            Xi1 = integrationDomain(integrationSubDomainIndex);
-            Xi2 = integrationDomain(integrationSubDomainIndex + 1);
-            
-            % Gauss-Lobatto point to project
-            for iGL = 1:numberOfProjectionPoints
-                
-                if rGL(iGL) >= integrationDomain(integrationSubDomainIndex) && rGL(iGL) <= integrationDomain(integrationSubDomainIndex + 1)
-                
-                [N, ~] = shapeFunctionsAndDerivativesSubElements(rGL(iGL), integrationSubDomainIndex,...
-                    subDomainShapeFunctionCoefficients);
-                [F, ~] = PODModesAndDerivatives(rGL(iGL), modes, problem.reductionOperator, subDomainShapeFunctionCoefficients,...
-                    integrationSubDomainIndex,indexLocalEnrichedNodes);
-                
-                projectionOperator = [projectionOperator; N, F];
-                if iGL == 1
-                    projectionValues = [projectionValues; 0.0];
-                    
-                else
-                    projectionValues = [projectionValues; 0.0];
-                end
-                
-                end
-            end
-        end
-        
-        projectedCoefficientsEnriched = projectionOperator\projectionValues;
-        projectedCoefficients = [projectedCoefficients; projectedCoefficientsEnriched(3:end)];
-        
-    else     % Element not active
-        projectedCoefficients = [projectedCoefficients; previousTemperature(e)];
+    else     
+        projectedCoefficients(e) = previousTemperature(e);
     end
 end
 
 
 end
+
 
 function [ projectedCoefficients ] = postProcessingProjection(x, problem, solutionCoefficients,...
     modes, derivative)
@@ -272,7 +235,7 @@ if e > problem.N - problem.XN  % element is active
     
     % On active elements use the refined domain as integration domain
     integrationDomain = linspace(-1, +1, 2^problem.refinementDepth + 1);
-    subDomainShapeFunctionCoefficients = linspace(0, 1, 2^problem.refinementDepth + 1);
+    subDomainShapeFunctionCoefficients = linspace(-1, 1, 2^problem.refinementDepth + 1);
     
     Xi1 = integrationDomain(1);
     Xi2 = integrationDomain(2);
@@ -282,7 +245,7 @@ if e > problem.N - problem.XN  % element is active
     
     projectedCoefficients(localCoordinates>=Xi1 & localCoordinates<=Xi2) = postProcessingProjectionSubElements(1,...
         localCoordinates(localCoordinates>=Xi1 & localCoordinates<=Xi2), problem, integrationDomain,...
-        solutionCoefficients, modes, derivative, subDomainShapeFunctionCoefficients);
+        solutionCoefficients, modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes);
     
     for integrationSubDomainIndex=2:length(integrationDomain)-1
         
@@ -291,7 +254,7 @@ if e > problem.N - problem.XN  % element is active
         
         projectedCoefficients(localCoordinates>Xi1 & localCoordinates<=Xi2) = postProcessingProjectionSubElements(integrationSubDomainIndex,...
             localCoordinates(localCoordinates>Xi1 & localCoordinates<=Xi2), problem, integrationDomain,...
-            solutionCoefficients, modes, derivative, subDomainShapeFunctionCoefficients);
+            solutionCoefficients, modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes);
         
     end
     
@@ -327,7 +290,7 @@ end
 
 
 function [ projectedCoefficients ] = postProcessingProjectionSubElements(e, x, problem, integrationDomain, solutionCoefficients,...
-    modes, derivative, subDomainShapeFunctionCoefficients)
+    modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes)
 % POSTPROCESSINGPROJECTIONSUBELEMENTS project the previous solution onto the element.
 %   e = element index
 %   x = post-processing mesh in local coordinates of the integration domain
@@ -341,9 +304,10 @@ function [ projectedCoefficients ] = postProcessingProjectionSubElements(e, x, p
 numberOfProjectionPoints = length(x);
 projectionOperator = zeros(numberOfProjectionPoints, length(solutionCoefficients(problem.N:end)) );
 
-X1 = integrationDomain(e);
-X2 = integrationDomain(e+1);
-localCoords =  mapGlobalToLocal( x, X1, X2 );
+% X1 = integrationDomain(e);
+% X2 = integrationDomain(e+1);
+% localCoords =  mapGlobalToLocal( x, X1, X2 );
+localCoords = x;
 
 N = zeros(length(x), 2);
 B = zeros(length(x), 2);
@@ -352,10 +316,11 @@ F = zeros(length(x), modes);
 G = zeros(length(x), modes);
 
 for k=1:length(x)
-    [N(k,:), B(k,:)] = shapeFunctionsAndDerivativesSubElements(localCoords(k), e,...
-        subDomainShapeFunctionCoefficients);
-    [F(k,:), G(k,:)] = PODModesAndDerivatives(localCoords(k), modes, problem.reductionOperator,...
-        subDomainShapeFunctionCoefficients, e, 2);
+    
+    [N(k,:), B(k,:)] = shapeFunctionsAndDerivatives(localCoords(k));
+    
+    [F(k,:), G(k,:)] = PODModesAndDerivativesGaussIntegration(localCoords(k), modes, problem.reductionOperator,...
+        subDomainShapeFunctionCoefficients, e, indexLocalEnrichedNodes);
 end
 
 if derivative == 0

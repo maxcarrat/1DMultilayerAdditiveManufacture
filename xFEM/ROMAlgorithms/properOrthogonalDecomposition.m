@@ -93,7 +93,7 @@ end
 
 
 function [ S, D, numberOfModes ] = sortEigenvalues(S, D)
-    k = extractK(S, 1.0e-04);
+    k = extractK(S, 1.0e-08);
     numberOfModes = numel(k);
     
     S = diag(S);

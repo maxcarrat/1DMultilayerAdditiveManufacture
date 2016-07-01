@@ -1,5 +1,6 @@
 %% Poisson Problem 1D transient
-function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, time)
+function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryConditionValue,...
+    rightDirichletBoundaryConditionValue, neumannBoundaryConditionValue, k, heatCapacity, time)
 
             % number of Elements
             N = size(coords, 2) - 1;
@@ -18,7 +19,7 @@ function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryCon
             B_map = @(X1, X2) 2/(X2-X1);
             F_map = @(X1, X2) (X2-X1)/2;
             
-            %Dirichlet BCs
+            % Dirichlet BCs
             dirichlet_bc = [];
             
             if size(leftDirichletBoundaryConditionValue(time))~=0
@@ -28,13 +29,18 @@ function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryCon
                 dirichlet_bc = [dirichlet_bc; LM(N,2) rightDirichletBoundaryConditionValue(time)];
             end
             
+            % Neumann BCs
+            if numel(neumannBoundaryConditionValue) ~= 0
+                neumann_bc = [LM(N,2) neumannBoundaryConditionValue];
+            end
+            
             gdof = max(max(LM));
             
-            penalty = 1.0e+12;
+            penalty = 1.0e+20;
 
             problem = struct('LM', LM, 'basis_fun', basis_fun, 'B', B, 'B_map', B_map, 'F', F, 'F_map', F_map, 'M', M, ...
                 'dirichlet_bc', dirichlet_bc, 'N', N, 'gdof', gdof, 'rhs', rhs, 'coords', coords, 'penalty', penalty, ...
-                'k', k, 'heatCapacity', heatCapacity, 'time', time);
+                'k', k, 'heatCapacity', heatCapacity, 'time', time, 'neumann_bc', neumann_bc);
 end 
 
 

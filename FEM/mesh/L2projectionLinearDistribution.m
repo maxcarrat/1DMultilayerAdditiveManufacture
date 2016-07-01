@@ -54,14 +54,14 @@ function r = localProjection(x, coords, element, coefficients, problem)
 
     X1 = coords(element);
     X2 = coords(element+1);
-    ldof = 2;
+    
+    [N, ~] = shapeFunctionsAndDerivatives(mapGlobalToLocal(x, X1, X2));
 
     r = zeros(size(x));
-    for i=1:ldof
-        r=r+coefficients(problem.LM(element,i)).* problem.basis_fun(mapGlobalToLocal(x, X1, X2), i, 0);
-    end
-
     
+    if isempty(r) == 0
+        r = r + N * [coefficients(problem.LM(element,1)) coefficients(problem.LM(element,2))]';
+    end
 end
 
 

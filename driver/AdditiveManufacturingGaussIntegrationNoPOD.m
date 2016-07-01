@@ -1,4 +1,4 @@
-%% 1D Multi-layer Linear Additive Manufacturing 
+%% 1D Multi-layer Linear Additive Manufacturing
 % evaluate a 1D poisson transient linear problem using h-FEM
 
 clear all;
@@ -13,31 +13,32 @@ open(writerObj);
 % Define the problem parameter, the boundary conditions
 % and the discretization.
 
-rho = 1000.0;                                          % density [kg/m^3]
-c = 1.0;                                               % specific heat [J/(kg°C)]
-k = 1.0;                                               % thermal conductivity [W/(m°C)]
-T0 = 20.0;                                             % Initial temperature [°C]
-heatCapacity= rho*c;                                   % heat capacity [kJ / kg °C]
-Tsource = 2000.0;                                      % source temperature [°C]
+rho = 7500;                                               % density [kg/m^3]
+c = 600.0;                                                  % specific heat [J/(kg°C)]
+k = 56.0;                                                   % thermal conductivity [W/(m°C)]
+T0 = 20.0;                                                  % Initial temperature [°C]
+heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
+Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 10.0e-03;
-xEnd = 0.1;
+tEnd = 0.1;                                                % total time [sec]
+xEnd = 0.001;                                               % length of the bar 0.001 [m]
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + Tsource;
-rhs = @(x, t) 0.0;%1.0e+08;
+nuemannRightBC = 0.0e+08;
+bodySource = 0.0e+13;
 
-for depth = 6:6
+for depth = 1:4
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
     % modes = zeros(maxTrainingTimeSteps-3,1);
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
     numberOfLayers = 20;
-    trainingTimeSteps = 20;
-    numberOfTimeStepsPerLayer = 10;
+    trainingTimeSteps = numberOfLayers;
+    numberOfTimeStepsPerLayer = 5;
     
-    integrationOrder = 2;
+    integrationOrder = 1;
     
     % for trainingTimeSteps = 3:maxTrainingTimeSteps
     
@@ -45,6 +46,9 @@ for depth = 6:6
     timeSteps = 4;
     refinementDepth = depth;
     numberOfPODModes = 0;
+    
+    bodyLoad = @(x, t) externalSource(x, t, xEnd, numberOfLayers, tEnd,...
+    numberOfTimeStepsPerLayer, refinementDepth, bodySource);
     
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
@@ -58,17 +62,13 @@ for depth = 6:6
     
     
     %% Analysis
-    [temperatureSolution, heatFlux, internalEnergy, modes(trainingTimeSteps-2)] = backwardEulerGaussIntegrationSolver(x, x_PostProcess, rhs, T0,...
-        dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
+    [temperatureSolution, heatFlux, internalEnergy, CPUTime] = backwardEulerGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+        dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
         numberOfLayers, numberOfPODModes, integrationOrder);
     
     %% Post-Process
-    overkilledInternalEnergy = 4.221615373269894e+07;
-    
-    relErrorEnergyNorm(trainingTimeSteps-2) = sqrt((internalEnergy(end)-overkilledInternalEnergy)^2)/sqrt(overkilledInternalEnergy^2);
     
     figure(depth+6)
-    
     % Create axes
     axes1 = axes;
     
@@ -85,8 +85,8 @@ for depth = 6:6
         xlabel('\fontname{Latin Modern Math} length [m]');
         
         % Axis limit
-        xlim(axes1,[0 0.1]);
-        ylim(axes1,[-1000 5000]);
+        xlim(axes1,[0 0.001]);
+        ylim(axes1,[-100 3000]);
         
         box(axes1,'on');
         % Set the remaining axes properties
@@ -104,14 +104,23 @@ for depth = 6:6
     % Write results to a file
     formatSpec = 'myFEMResultsFile_%d.txt';
     filename = sprintf(formatSpec,depth);
-    
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
-%         for j=1:size(temperatureSolution, 2)
-            fprintf(resultFile, '%d;\n', temperatureSolution(i, end-1));
-%         end
-%         fprintf(resultFile, ';\n');
+        for j=1:numberOfTimeStepsPerLayer
+            fprintf(resultFile, '%d, %\t', temperatureSolution(i,end-(j-1)));
+        end
+        fprintf(resultFile, '\n');
     end
+    fclose(resultFile);
+    
+    % Write CPU time to a file
+    formatSpec = 'myFEMTimeFile_%d.txt';
+    filename = sprintf(formatSpec,depth);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:numel(CPUTime)
+        fprintf(resultFile, '%d, %\t', CPUTime(i));
+    end
+    
     fclose(resultFile);
     
     
@@ -137,8 +146,8 @@ for i=1:size(t,2)
     xlabel('\fontname{Latin Modern Math} length [m]');
     
     % Axis limit
-    xlim(axes1,[0 0.1]);
-    ylim(axes1,[-1000 5000]);
+    xlim(axes1,[0 0.001]);
+    ylim(axes1,[-100 3000]);
     
     box(axes1,'on');
     % Set the remaining axes properties

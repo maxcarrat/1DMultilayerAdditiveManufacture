@@ -1,4 +1,5 @@
-function [ projectedTemperature ] = L2projection(problem, previousTemperature, updatedMesh, previousMesh, initialTemperature)
+function [ projectedTemperature ] = L2projection(problem, previousTemperature, updatedMesh,...
+    previousMesh, initialTemperature)
 %L2PROJECTION project the previous solution onto the updated mesh at the
 %new time step
 %   previousTemperature = temeprature distribution of the previous mesh

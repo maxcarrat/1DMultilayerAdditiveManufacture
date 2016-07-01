@@ -4,7 +4,7 @@
 clear all;
 clc;
 
-writerObj = VideoWriter('AdditiveManufacturingPODBasis.avi');
+writerObj = VideoWriter('AdditiveManufacturingOverkilled.avi');
 writerObj.Quality = 100;
 writerObj.FrameRate = 5;
 open(writerObj);
@@ -13,20 +13,20 @@ open(writerObj);
 % Define the problem parameter, the boundary conditions
 % and the discretization.
 
-rho = 1000.0;                                          % density [kg/m^3]
-c = 1.0;                                               % specific heat [J/(kg°C)]
-k = 1.0;                                               % thermal conductivity [W/(m°C)]
-T0 = 20.0;                                             % Initial temperature [°C]
-heatCapacity= rho*c;                                   % heat capacity [kJ / kg °C]
-Tsource = 2000.0;                                      % source temperature [°C]
+rho = 7500.0;                                               % density [kg/m^3]
+c = 600.0;                                                  % specific heat [J/(kg°C)]
+k = 56.0;                                                   % thermal conductivity [W/(m°C)]
+T0 = 20.0;                                                  % Initial temperature [°C]
+heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
+Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 10.0e-02;
-xEnd = 0.1;
+tEnd = 0.1;                                                 % total time [sec]
+xEnd = 0.001;                                               % length of the bar 0.001 [m]
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBC = @(t) T0 + Tsource;
-rhs = @(x, t) 0.0;
-
+nuemannRightBC = 0.0e+08;
+bodySource = 0.0e+12;
 
 % maxTrainingTimeSteps = timeSteps*0.5;
 % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
@@ -34,40 +34,40 @@ rhs = @(x, t) 0.0;
 % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
 
 numberOfLayers = 20;
-trainingTimeSteps = 20;
-numberOfTimeStepsPerLayer = 10;
+trainingTimeSteps = numberOfLayers;
+numberOfTimeStepsPerLayer = 5;
 
-integrationOrder = 2;
+integrationOrder = 1;
 
 % for trainingTimeSteps = 3:maxTrainingTimeSteps
 
 numberOfElementsInX = numberOfLayers;
 timeSteps = 4;
-refinementDepth = 8;
+refinementDepth = 6;
 numberOfPODModes = 10;
+
+bodyLoad = @(x, t) externalSource(x, t, xEnd, numberOfLayers, tEnd,...
+    numberOfTimeStepsPerLayer, refinementDepth, bodySource);
+
 
 t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                 % layer spatial discretization X
 
 x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
-x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2.^refinementDepth * 2);          % post-processing coordinates
+x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2.^8);          % post-processing coordinates
 
 [X, T] = meshgrid(x_PostProcess, t);
 [X_ref, T_ref] = meshgrid(x_ref, t);
 
 
 %% Analysis
-[temperatureSolution, heatFlux, internalEnergy] = backwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, rhs, T0,...
-    dirichletLeftBC, dirichletRightBC, k, heatCapacity, t, refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
+[temperatureSolution, heatFlux, internalEnergy] = backwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+    dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
 
 %% Post-Process
-overkilledInternalEnergy = 4.221615373269894e+07;
 
-relErrorEnergyNorm(trainingTimeSteps-2) = sqrt((internalEnergy(end)-overkilledInternalEnergy)^2)/sqrt(overkilledInternalEnergy^2);
-
-figure(2)
-
+figure(0002)
 % Create axes
 axes1 = axes;
 
@@ -84,8 +84,8 @@ for i=1:size(temperatureSolution, 2)
     xlabel('\fontname{Latin Modern Math} length [m]');
     
     % Axis limit
-    xlim(axes1,[0 0.1]);
-    ylim(axes1,[-1000 5000]);
+    xlim(axes1,[0 0.001]);
+    ylim(axes1,[-100 3000]);
     
     box(axes1,'on');
     % Set the remaining axes properties
@@ -95,32 +95,20 @@ for i=1:size(temperatureSolution, 2)
     
 end
 
-% Create ylabel
-
-
 hold off
 
 % Write results to a file
-
-resultFile = fopen('myReferenceResultsFile.txt', 'wt'); % Open for writing
+filename = 'myReferenceResultsFile.txt';            % Name of the file
+resultFile = fopen(filename, 'wt');                 % Open for writing
 for i=1:size(temperatureSolution, 1)
-    %         for j=1:size(temperatureSolution, 2)
-    fprintf(resultFile, '%d;\n', temperatureSolution(i,end-1));
-    %         end
-    %         fprintf(resultFile, ';\n');
+    for j=1:numberOfTimeStepsPerLayer
+        fprintf(resultFile, '%d, %\t', temperatureSolution(i,end-(j-1)));
+    end
+    fprintf(resultFile, '\n');
 end
 fclose(resultFile);
 
-
-% figure(3)
-% surf(X, T, heatFlux')
-% 
-% % end
-
-
-
-figure(4)
-
+figure(0004)
 % Create axes
 axes1 = axes;
 
@@ -137,8 +125,8 @@ for i=1:size(t,2)
     xlabel('\fontname{Latin Modern Math} length [m]');
     
     % Axis limit
-    xlim(axes1,[0 0.1]);
-    ylim(axes1,[-1000 5000]);
+    xlim(axes1,[0 0.001]);
+    ylim(axes1,[-100 3000]);
     
     box(axes1,'on');
     % Set the remaining axes properties

@@ -1,5 +1,5 @@
 function refinedLocalProblem = poissonProblemXFEM( coords, activeMeshSize, rhs, leftDirichletBoundaryConditionValue,...
-                                rightDirichletBoundaryConditionValue, k, heatCapacity, time, refinementDepth, reductionOperator )
+    rightDirichletBoundaryConditionValue, nuemannRightBC, k, heatCapacity, time, refinementDepth, reductionOperator )
 %POISSONPROBLEMTRANSIENTENRICHED The right boundary element of the global coarse problem
 %is enriched using the POD modes from the training phase.
 
@@ -27,10 +27,11 @@ if size(rightDirichletBoundaryConditionValue(time))~=0
     dirichlet_bc = [dirichlet_bc; LM(numberOfElements,2) rightDirichletBoundaryConditionValue(time)];
 end
 
-%Dirichlet BCs on the enriched DOFs
-dirichlet_bc = [dirichlet_bc; 1 0.0];
-dirichlet_bc = [dirichlet_bc; LM(2,2) 0.0];
 
+%Neumann BCs
+if numel(nuemannRightBC) ~= 0
+    neumann_bc = [LM(numberOfElements, 2), nuemannRightBC];
+end
 
 gdof = max(max(LM));
 FEMdof = numberOfElements + 1;
@@ -39,7 +40,7 @@ XFEMdof = 2 * modes;
 penalty = 1.0e+20;
 
 refinedLocalProblem = struct('LM', LM, 'LMC', LMCoupling, 'LME', LMEnriched, 'B_map', B_map,...
-    'F_map', F_map, 'dirichlet_bc', dirichlet_bc, 'refinementDepth', refinementDepth,...
+    'F_map', F_map, 'dirichlet_bc', dirichlet_bc, 'neumann_bc', neumann_bc, 'refinementDepth', refinementDepth,...
     'N', numberOfElements, 'XN', numberOfEnrichedElements, 'gdof', gdof, 'FEMdof', FEMdof, 'XFEMdof', XFEMdof,...
     'rhs', rhs, 'penalty', penalty, 'coords', coords, 'k', k, 'heatCapacity',...
     heatCapacity, 'time', time, 'modes', modes,  'reductionOperator', reductionOperator);

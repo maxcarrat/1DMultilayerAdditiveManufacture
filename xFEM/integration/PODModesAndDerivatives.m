@@ -66,7 +66,7 @@ else
         
         Phi_Nodal = PODCoefficients(end, iMode);
         
-        Phi_LocalSupport = abs(Phi_iMode - Phi_Nodal);
+        Phi_LocalSupport = Phi_iMode - Phi_Nodal;
         
         %Phi modal basis
         Phi = [Phi, N * Phi_LocalSupport];
@@ -140,8 +140,9 @@ else
         Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode);
         Phi_coeff = [Phi1, Phi2];
         
-        Phi_iMode = N_subElement * Phi_coeff';
-        Phi_iModeDerivative = B_subElement * Phi_coeff';
+        Phi_Nodal = PODCoefficients(end, iMode);
+        Phi_iMode = N_subElement * ( Phi_coeff - Phi_Nodal)';
+        Phi_iModeDerivative = B_subElement * ( Phi_coeff - Phi_Nodal)';
    
         %PhiDerivative modal basis derivative
         PhiDerivative = [PhiDerivative, B * Phi_iMode + N * Phi_iModeDerivative];

@@ -1,4 +1,5 @@
-function [temperaturePostProcessing, heatFluxes, internalEnergy] = backwardEulerNoCoarseningGaussIntegrationSolver(coords, postProcessingCoords, rhs, initialTemperature, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue, k, heatCapacity, timeVector,...
+function [temperaturePostProcessing, heatFluxes, internalEnergy] = backwardEulerNoCoarseningGaussIntegrationSolver(coords, postProcessingCoords, rhs, initialTemperature, leftDirichletBoundaryConditionValue,...
+    rightDirichletBoundaryConditionValue, neumannBoundaryConditionValue, k, heatCapacity, timeVector,...
     refinementDepth, numberOfLayersTimeSteps, numberOfLayers, integrationOrder)
 % BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem.
 % Moreover, the numerical solution for each element is also computed
@@ -18,8 +19,6 @@ temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 
 refinedTemperatureSolutions = zeros(2^refinementDepth+1, 1);
 
-localRefinedTemperatureSolutions = zeros(2^refinementDepth+1, timeSteps);
-
 heatFluxes = zeros(size(postProcessingCoords, 2), timeSteps);
 internalEnergy = zeros(timeSteps, 1);
 
@@ -35,14 +34,14 @@ for layer = 1:numberOfLayers
     %generate refined mesh for the new active configuration
     [activeMesh, numberOfElementsPerLayer] = getLayerActiveCoords(coords, layer, numberOfLayers);
     refinedActiveElement = linspace(activeMesh(end-numberOfElementsPerLayer), activeMesh(end), numberOfElementsPerLayer*2^(refinementDepth) + 1);
-    refinedMesh = [coords(1:((layer-1) * numberOfElementsPerLayer)) refinedActiveElement];
     
     %Project old solution onto the new mesh
     if layer > 1
-        refinedTemperatureSolutions = L2projection(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh, initialTemperature);
+        refinedMesh = [refinedMesh(1:end-1) refinedActiveElement];
+        refinedTemperatureSolutions = L2projectionLinearDistribution(poissonTransientProblem, refinedTemperatureSolutions, refinedMesh, previousMesh, initialTemperature, refinementDepth);
     else
+        refinedMesh = refinedActiveElement;
         refinedTemperatureSolutions = zeros(size(refinedMesh, 2), 1);
-        localRefinedTemperatureSolutions = zeros(size(refinedMesh, 2), timeSteps);
     end
     
     for iTime = 1:numberOfLayersTimeSteps
@@ -57,14 +56,12 @@ for layer = 1:numberOfLayers
         %Generate the Poisson problem at timeStep t
         poissonTransientProblem = poissonProblemTransient(refinedMesh, rhs,...
             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            k, heatCapacity, currentTime);
+            neumannBoundaryConditionValue, k, heatCapacity, currentTime);
         
         %Update and merge temperature into global domain
         refinedTemperatureSolutions = solveGlobalProblemGaussIntegration( refinedTemperatureSolutions, poissonTransientProblem,...
             currentTime, timeStepSize, integrationOrder );
         mergedTemperature = mergeActiveSolutionInGlobalDomain(refinedTemperatureSolutions, size(coords, 2));
-        
-        localRefinedTemperatureSolutions(:, t+1) = getLayerSolution(refinedTemperatureSolutions, layer, numberOfLayers, coords);
         previousMesh = refinedMesh;
         
         %Post-Processing

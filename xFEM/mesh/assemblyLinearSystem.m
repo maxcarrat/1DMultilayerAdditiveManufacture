@@ -29,11 +29,11 @@ function [M, K, f] = assemblyLinearSystem(problem, time, integrationOrder)
             
             %Capacity matrix
             M(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-                                                    problem.F_map(X1,X2) * problem.heatCapacity * N' * N * wGP(iGP);
+                                                    problem.F_map(X1,X2) * problem.heatCapacity * (N' * N) * wGP(iGP);
             
             %Diffusion matrix
             K(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = K(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-                                                    problem.B_map(X1,X2) * problem.k * B' * B * wGP(iGP);
+                                                    problem.B_map(X1,X2) * problem.k * (B' * B) * wGP(iGP);
             
         end
     end
