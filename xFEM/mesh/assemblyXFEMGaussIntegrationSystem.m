@@ -1,4 +1,4 @@
-function [M, K, f] = assemblyXFEMGaussIntegrationSystem(problem, time, integrationOrder, solutionCoefficients)
+function [M, K, f] = assemblyXFEMGaussIntegrationSystem(problem, time, integrationOrder, integrationModalOrder, solutionCoefficients)
 %   [M, K, f] = ASSEMBLY(problem) assembles the mass and the conductivity matrix and load vector
 %   problem = definition of the boundary value problem
 %   time = current time
@@ -38,8 +38,10 @@ M_Coupling = zeros(problem.XFEMdof,problem.FEMdof);
 
 %gauss points
 [rGP, wGP] = gaussPoints( integrationOrder );
+[rGPXFEM, wGPXFEM] = gaussPoints( integrationModalOrder );
 
 numberOfIntegrationPoints = length(rGP);
+numberOfModalIntegrationPoints = length(rGPXFEM);
 
 modes = problem.modes;
 
@@ -56,31 +58,32 @@ for e=1:problem.N
     X1 = problem.coords(e);
     X2 = problem.coords(e+1);
     
-    % Gauss integration
-    for iGP = 1:numberOfIntegrationPoints
+    if e > (problem.N - problem.XN)
         
-        [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
-        
-        %% Integrate FEM block
-        %extrnal heat source
-        f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + N' * problem.rhs(mapLocalToGlobal(rGP(iGP), X1, X2),...
-            time) * wGP(iGP) * problem.F_map(X1,X2);
-        
-        %Capacity matrix
-        M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-            problem.heatCapacity * (N' * N) * wGP(iGP) * problem.F_map(X1,X2);
-        
-        %Diffusion matrix
-        K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-            problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGP(iGP), X1, X2),...
-            time, evaluateTemperature(e, rGP(iGP), problem, solutionCoefficients)) * (B' * B) * wGP(iGP);
-        
-        if e > (problem.N - problem.XN)
+        % Gauss integration
+        for iGP = 1:numberOfModalIntegrationPoints
+            
+            [N, B] = shapeFunctionsAndDerivatives(rGPXFEM(iGP));
+            
+            %% Integrate FEM block
+            %extrnal heat source
+            f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + N' * problem.rhs(mapLocalToGlobal(rGPXFEM(iGP), X1, X2),...
+                time) * wGPXFEM(iGP) * problem.F_map(X1,X2);
+            
+            %Capacity matrix
+            M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
+                problem.heatCapacity * (N' * N) * wGPXFEM(iGP) * problem.F_map(X1,X2);
+            
+            %Diffusion matrix
+            K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
+                problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGPXFEM(iGP), X1, X2),...
+                time, evaluateTemperature(e, rGPXFEM(iGP), problem, solutionCoefficients)) * (B' * B) * wGPXFEM(iGP);
+            
             
             elementEnrichedIndex = e - (problem.N - problem.XN);
             
             if elementEnrichedIndex == 1
-                indexLocalEnrichedNodes = 2; 
+                indexLocalEnrichedNodes = 2;
             else
                 indexLocalEnrichedNodes = [1, 2];
             end
@@ -88,8 +91,8 @@ for e=1:problem.N
             modalDofs = length(indexLocalEnrichedNodes)*modes;
             
             for integrationSubDomainIndex = 1:numel(integrationDomain) - 1
-                if rGP(iGP) <= integrationDomain(integrationSubDomainIndex + 1) &&...
-                        rGP(iGP) > integrationDomain(integrationSubDomainIndex)
+                if rGPXFEM(iGP) <= integrationDomain(integrationSubDomainIndex + 1) &&...
+                        rGPXFEM(iGP) > integrationDomain(integrationSubDomainIndex)
                     
                     Xi1 = integrationDomain(integrationSubDomainIndex);
                     Xi2 = integrationDomain(integrationSubDomainIndex + 1);
@@ -100,46 +103,46 @@ for e=1:problem.N
                     mapIntegrationDomainForward = (Xi2 - Xi1)/2;
                     mapIntegrationDomainBackward = 2/(Xi2 - Xi1);
                     
-%                     [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
-                    [N, B] = shapeFunctionsAndDerivativesSubElements(rGP(iGP), integrationSubDomainIndex,...
-                           subDomainShapeFunctionCoefficients);
+                    %                     [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
+                    [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
+                        subDomainShapeFunctionCoefficients);
                     
-                    [F, G] = PODModesAndDerivativesGaussIntegration( rGP(iGP), modes, PODCoefficients,...
+                    [F, G] = PODModesAndDerivativesGaussIntegration( rGPXFEM(iGP), modes, PODCoefficients,...
                         integrationCoefficients, integrationSubDomainIndex, indexLocalEnrichedNodes );
                     
-                    globalGP = mapLocalToGlobal(rGP(iGP), X1, X2);
+                    globalGP = mapLocalToGlobal(rGPXFEM(iGP), X1, X2);
                     
                     %% Integrate Coupling block
                     %Capacity matrix
                     M_Coupling(((elementEnrichedIndex-1)*modalDofs + 1):modalDofs, problem.LMC(elementEnrichedIndex, :)) =...
                         M_Coupling(((elementEnrichedIndex-1)*modalDofs + 1):modalDofs, problem.LMC(elementEnrichedIndex, :)) +...
-                        problem.heatCapacity * F' * N * wGP(iGP) *  problem.F_map(X1,X2);
+                        problem.heatCapacity * F' * N * wGPXFEM(iGP) *  problem.F_map(X1,X2);
                     
                     %Diffusion matrix
                     K_Coupling(((elementEnrichedIndex-1)*modalDofs + 1):modalDofs, problem.LMC(elementEnrichedIndex, :)) =...
                         K_Coupling(((elementEnrichedIndex-1)*modalDofs + 1):modalDofs, problem.LMC(elementEnrichedIndex, :)) +...
-                        problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGP(iGP), X1, X2),...
-                        time, evaluateTemperatureSubElements(elementEnrichedIndex, rGP(iGP), problem,...
+                        problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGPXFEM(iGP), X1, X2),...
+                        time, evaluateTemperatureSubElements(elementEnrichedIndex, rGPXFEM(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients, integrationCoefficients, indexLocalEnrichedNodes))...
-                        * G' * B * wGP(iGP);
+                        * G' * B * wGPXFEM(iGP);
                     
                     %% Integrate XFEM block
                     %extrnal heat source
                     f_XFEM(problem.LME(elementEnrichedIndex,1:modalDofs)) = f_XFEM(problem.LME(elementEnrichedIndex,1:modalDofs)) +  F' *...
-                        problem.rhs(globalGP, time) * wGP(iGP) * problem.F_map(X1,X2);
+                        problem.rhs(globalGP, time) * wGPXFEM(iGP) * problem.F_map(X1,X2);
                     
                     %Capacity matrix
                     M_XFEM(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LME(elementEnrichedIndex, 1:modalDofs)) =...
                         M_XFEM(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LME(elementEnrichedIndex, 1:modalDofs)) +...
-                        problem.heatCapacity * ( F' * F ) * wGP(iGP) * problem.F_map(X1,X2);
+                        problem.heatCapacity * ( F' * F ) * wGPXFEM(iGP) * problem.F_map(X1,X2);
                     
                     %Diffusion matrix
                     K_XFEM(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LME(elementEnrichedIndex, 1:modalDofs)) =...
                         K_XFEM(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LME(elementEnrichedIndex, 1:modalDofs)) +...
-                        problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGP(iGP), X1, X2),...
-                        time, evaluateTemperatureSubElements(elementEnrichedIndex, rGP(iGP), problem,...
+                        problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGPXFEM(iGP), X1, X2),...
+                        time, evaluateTemperatureSubElements(elementEnrichedIndex, rGPXFEM(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients, integrationCoefficients, indexLocalEnrichedNodes))...
-                        * ( G' * G ) * wGP(iGP);
+                        * ( G' * G ) * wGPXFEM(iGP);
                     
                 end
             end
@@ -147,6 +150,28 @@ for e=1:problem.N
             
         end
         
+    else
+        
+        % Gauss integration
+        for iGP = 1:numberOfIntegrationPoints
+            
+            [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
+            
+            %% Integrate FEM block
+            %extrnal heat source
+            f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + N' * problem.rhs(mapLocalToGlobal(rGP(iGP), X1, X2),...
+                time) * wGP(iGP) * problem.F_map(X1,X2);
+            
+            %Capacity matrix
+            M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
+                problem.heatCapacity * (N' * N) * wGP(iGP) * problem.F_map(X1,X2);
+            
+            %Diffusion matrix
+            K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = K_FEM(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
+                problem.B_map(X1,X2) * problem.k(mapLocalToGlobal(rGP(iGP), X1, X2),...
+                time, evaluateTemperature(e, rGP(iGP), problem, solutionCoefficients)) * (B' * B) * wGP(iGP);
+            
+        end
     end
     
 end

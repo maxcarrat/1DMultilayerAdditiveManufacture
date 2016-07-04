@@ -1,4 +1,5 @@
-function [ solution ] = solveNonLinearEnrichedProblem( problem, time, timeStepSize, integrationOrder, tolerance, maxNumberOfIterations, oldSolution )
+function [ solution ] = solveNonLinearEnrichedProblem( problem, time, timeStepSize, integrationOrder,...
+    integrationModalOrder, tolerance, maxNumberOfIterations, oldSolution )
 %SOLVENONLINEARPROBLEMGAUSSINTEGRATION returns the nodal temperature values of the
 %coarse/global problem using Backward Euler implictit scheme
 %   problemCoarse = problem struct on the coarse mesh
@@ -11,7 +12,7 @@ for i=1:maxNumberOfIterations
     
    %assembly and apply BCs
 %    [M, K, f] = assemblyNonLinearSystemXFEM(problem, time, integrationOrder, solution);
-   [M, K, f] = assemblyXFEMGaussIntegrationSystem(problem, time, integrationOrder, solution);
+   [M, K, f] = assemblyXFEMGaussIntegrationSystem(problem, time, integrationOrder, integrationModalOrder, solution);
    [M, K, f] = applyGlobalBCs(problem, M, K, f);
    
    %residuum

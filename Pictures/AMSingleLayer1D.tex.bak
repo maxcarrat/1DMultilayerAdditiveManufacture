@@ -1,0 +1,130 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\begin{document}
+\tdplotsetmaincoords{60}{30}
+
+
+
+\begin{tikzpicture}
+    [ tdplot_main_coords,
+      bar/.style={black,draw=black, fill=gray!50, fill opacity=0.25},
+      grid/.style={very thin,black},
+      axis/.style={black,->,>=latex, thin},
+      load/.style={black,fill=gray!70, fill opacity=0.4},
+      dim/.style={latex-latex}]
+      
+  \scriptsize%
+
+
+  %draw the axes
+  \draw[axis] (-1,-1,-1) -- ++(1,0,0) node[anchor=west]{$x$};
+  \draw[axis] (-1,-1,-1) -- ++(0,1,0) node[anchor=west]{$y$};
+  \draw[axis] (-1,-1,-1) -- ++(0,0,1) node[anchor=west]{$z$};
+
+  %draw the cube
+  \draw[bar]   (0,0,0) 
+            -- (+5,0,0) 
+            -- (+5,0,0.5) 
+            -- (0,0,0.5) 
+            -- cycle;
+            
+  \draw[bar]   (+5,0,0) 
+            -- (+5,5,0) 
+            -- (+5,5,0.5) 
+            -- (+5,0,0.5) 
+            -- cycle;
+  
+  \draw[bar]   (0,0,0.5) 
+            -- (+5,0,0.5) 
+            -- (+5,5,0.5) 
+            -- (0,5,0.5) 
+            -- cycle;  
+            
+
+
+  % Boundary conditions
+   \tikzset{xzplane/.style={canvas is xz plane at y=#1}}
+   \tikzset{yzplane/.style={canvas is yz plane at x=#1}}
+   \tikzset{xyplane/.style={canvas is xy plane at z=#1}}
+
+
+  % Draw base mesh
+
+
+%   \begin{scope}[xyplane=0.25]
+%
+%      \foreach \x in {0.0,0.1,...,2.5} 
+%      {
+%        \draw[grid] (\x,0.0,0.0) -- ++(0.0,1.0,0.0);
+%      }
+%
+%      \foreach \y in {0.0,0.1,...,1.0} 
+%      {
+%        \draw[grid] (0.0,\y,0.0) -- ++(2.5,0.0,0.0);
+%      }
+%
+%   \end{scope}
+%
+
+      \foreach \x in {0.5,2.5,...,4.5} 
+      {
+        \draw[->,>=latex] (\x,0.0,0.5) -- ++(0.0,5,0.0);
+      }
+
+      \foreach \x in {1.5,3.5,...,3.5} 
+      {
+        \draw[<-,>=latex] (\x,0.0,0.5) -- ++(0.0,5,0.0);
+      }
+
+
+  % draw the load surface
+  \coordinate (a) at (4.5,0.0,0.5);
+  \coordinate (b) at (4.5,5,0.5);
+  \coordinate (c) at (2,2,0.5);
+  \coordinate (d) at (3,3,0.5);
+  \coordinate (e) at (2.5,2.5,0.5);
+
+  \draw[load] (e) ellipse (0.5 and 0.5);
+
+  \draw[grid]  (a) -- (b) node[align=center, sloped, midway, above] {\small $laser \quad path$};
+  
+  \draw[black, thin] (2.5,2,0.5) -- ++(-0.55,0.0,0);
+  \draw[black, thin] (2.5,3,0.5) -- ++(-0.55,0.0,0) ;
+  \draw[dim] (1.5,2,0.5) -- ++(0,1,0.5)node[ align=center, midway, yshift=-0.0, xshift=0.0, right] {\small $0.05$} ;
+  
+   
+  % dimensions
+  
+  \draw[black, thin] (5,5,0) -- ++(0.55,0.0,0);
+  \draw[black, thin] (5,5,0.5) -- ++(0.55,0.0,0) ;
+  \draw[dim] (5.5,5,0.0) -- ++(0,0,0.5)node[ align=center, midway, yshift=-0.0, xshift=0.0, right] {\small $0.05$} ;
+  
+%  \draw (0,0,0.0) -- ++(0.0,-0.5,0);
+%  \draw (0.5,0,0.0) -- ++(0.0,-0.5,0);
+%  \draw[dim] (0,-0.45,0) -- ++(0.5,0,0.0) node[align=center, midway, below] {\small $0.5$};
+%  
+%  \draw (0.5,0.0,0.0) -- ++(0.5,0,0);
+%  \draw[dim] (1,0,0) -- ++(0.0,0.5,0.0) node[align=center, midway, right] {\small $0.5$};
+  
+%  
+%  \draw (2.5,0,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (+2.5,0,+0.6) -- ++(0,1,0) node[midway,above] {\small $1.03$};
+%  
+%  \draw (0,+1,0.25) -- ++(0,0,0.4);
+%  \draw (+2.5,+1,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
+%
+%  \draw (0.5,+1,+0.25) -- ++(0,0,0.4);
+%  \draw[dim] (0.5,+1,+0.6) -- ++(1.5,0,0) node[midway,above] {\small $1.5$};
+%
+%  \draw (2,+1,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (2.0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
+%  
+%  \draw[ very thin, opacity=1.0] (1.8,0.7,0.25) -- ++(0,0,0.0)node[black] {\small $\Omega_{fict}$} ;
+%  \draw[ very thin, opacity=1.0] (1.2,0.0,0.1) -- ++(0,0.0,0.0)node[black] {\small $\Omega_{phy}$} ;
+  
+\end{tikzpicture}
+\end{document}

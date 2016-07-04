@@ -14,7 +14,7 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 4.5;                                                 % total time [sec]
+tEnd = 45;                                                  % total time [sec]
 xEnd = 0.01;                                                % length of the bar [m]
 
 dirichletLeftBC = @(t) T0;
@@ -26,26 +26,20 @@ tolerance = 1.0e-03;
 maxIteration = 20;
 
 for modes = 1:5
+    
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
     % modes = zeros(maxTrainingTimeSteps-3,1);
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
-    myVideoSpec = 'AdditiveManufacturingNonLinearPODBasis_%d.avi';
-    myVideo = sprintf(myVideoSpec,modes);
-    writerObj = VideoWriter(myVideo);
-    writerObj.Quality = 100;
-    writerObj.FrameRate = 10;
-    open(writerObj);
-    
-    numberOfLayers = 20;
-    trainingTimeSteps = 10;
-    numberOfTimeStepsPerLayer = 10;
-    numberOfHeatingTimeSteps = 2;
+    numberOfLayers = 200;
+    trainingTimeSteps = 11;
+    numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
+    numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
     refinementDepth = 4;
     
     integrationOrder = 2;
-    integrationModesOrder = (modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes+1; %(modes - 1) ^ 2  + 1 + modes;
     
     numberOfRefinedElementsToBeKept = 1;
     
@@ -112,7 +106,7 @@ for modes = 1:5
     hold off
     
     % Write results to a file
-    formatSpec = 'myPODXFEMNonLinearResultsFile_%d.txt';
+    formatSpec = 'myPODXFEMNonLinearResultsFile_IntegrationM+1_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -124,7 +118,7 @@ for modes = 1:5
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myPODXFEMNonLinearTimeFile_%d.txt';
+    formatSpec = 'myPODXFEMNonLinearTimeFile_IntegrationM+1_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
@@ -133,40 +127,47 @@ for modes = 1:5
     
     fclose(resultFile);
     
-    figure(modes + 11111111)
-    % Create axes
-    axes1 = axes;
-    
-    F(size(t,2)) = struct('cdata',[],'colormap',[]);
-    
-    for i=1:size(t,2)
-        plot(x_PostProcess,temperatureSolution(:,i)')
-        
-        % Title
-        myTitleSpec = 'Temperature evolution of the bar using %d. modes';
-        myTitle = sprintf(myTitleSpec,modes);
-        title( myTitle, 'Interpreter','latex');
-        
-        % Create ylabel
-        ylabel('\fontname{Latin Modern Math} Temperature [°C]');
-        xlabel('\fontname{Latin Modern Math} length [m]');
-        
-        % Axis limit
-        xlim(axes1,[0 xEnd]);
-        ylim(axes1,[-100 2500]);
-        
-        box(axes1,'on');
-        % Set the remaining axes properties
-        set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
-        
-        grid on
-        drawnow
-        F(i) = getframe;
-        writeVideo(writerObj, getframe(gcf, [ 0 0 500 400 ]));
-    end
-    
-    close(writerObj);
-    
+%     myVideoSpec = 'AdditiveManufacturingNonLinearPODBasis_%d.avi';
+%     myVideo = sprintf(myVideoSpec,modes);
+%     writerObj = VideoWriter(myVideo);
+%     writerObj.Quality = 100;
+%     writerObj.FrameRate = 10;
+%     open(writerObj);
+%     
+%     figure(modes + 11111111)
+%     % Create axes
+%     axes1 = axes;
+%     
+%     F(size(t,2)) = struct('cdata',[],'colormap',[]);
+%     
+%     for i=1:size(t,2)
+%         plot(x_PostProcess,temperatureSolution(:,i)')
+%         
+%         % Title
+%         myTitleSpec = 'Temperature evolution of the bar using %d. modes';
+%         myTitle = sprintf(myTitleSpec,modes);
+%         title( myTitle, 'Interpreter','latex');
+%         
+%         % Create ylabel
+%         ylabel('\fontname{Latin Modern Math} Temperature [°C]');
+%         xlabel('\fontname{Latin Modern Math} length [m]');
+%         
+%         % Axis limit
+%         xlim(axes1,[0 xEnd]);
+%         ylim(axes1,[-100 2500]);
+%         
+%         box(axes1,'on');
+%         % Set the remaining axes properties
+%         set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
+%         
+%         grid on
+%         drawnow
+%         F(i) = getframe;
+%         writeVideo(writerObj, getframe(gcf, [ 0 0 500 400 ]));
+%     end
+%     
+%     close(writerObj);
+%     
     
     
 end % modes loop

@@ -151,7 +151,7 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
         %Solve Local problem enriched
         temperatureSolutions = solveNonLinearEnrichedProblem( poissonTransientProblemEnriched, currentTime,...
-            timeStepSize, integrationModesOrder, tolerance, maxIterations, temperatureSolutions );
+            timeStepSize,integrationOrder, integrationModesOrder, tolerance, maxIterations, temperatureSolutions );
         
         timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
 

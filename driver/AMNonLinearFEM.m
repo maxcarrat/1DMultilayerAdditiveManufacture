@@ -20,7 +20,7 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 4.5;                                                % total time [sec]
+tEnd = 45;                                                 % total time [sec]
 xEnd = 0.01;                                               % length of the bar 0.001 [m]
 
 dirichletLeftBC = @(t) T0;
@@ -31,16 +31,16 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-03;
 maxIteration = 20;
 
-for depth = 1:6
+for depth = 1:5
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
     % modes = zeros(maxTrainingTimeSteps-3,1);
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
-    numberOfLayers = 20;
+    numberOfLayers = 200;
     trainingTimeSteps = numberOfLayers;
-    numberOfTimeStepsPerLayer = 10;
-    numberOfHeatingTimeSteps = 2;
+    numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
+    numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
 
     integrationOrder = 2;
     
@@ -119,7 +119,7 @@ for depth = 1:6
     hold off
     
     % Write results to a file
-    formatSpec = 'myFEMNonLinearResultsFile_%d.txt';
+    formatSpec = 'myFEMNonLinearResultsFile_Coarsening_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -131,7 +131,7 @@ for depth = 1:6
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myFEMNonLinearTimeFile_%d.txt';
+    formatSpec = 'myFEMNonLinearTimeFile_Coarsening_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)

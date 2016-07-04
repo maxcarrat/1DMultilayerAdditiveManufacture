@@ -20,7 +20,7 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 4.5;                                                 % total time [sec]
+tEnd = 45;                                                 % total time [sec]
 xEnd = 0.01;                                                % length of the bar [m]
 
 dirichletLeftBC = @(t) T0;
@@ -36,7 +36,7 @@ maxIterations = 20;
 % modes = zeros(maxTrainingTimeSteps-3,1);
 % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
 
-numberOfLayers = 20;
+numberOfLayers = 200;
 trainingTimeSteps = numberOfLayers;
 numberOfTimeStepsPerLayer = 10;
 
@@ -46,7 +46,7 @@ numberOfElementsInX = numberOfLayers;
 timeSteps = 4;
 refinementDepth = 6;
 numberOfPODModes = 10;
-numberOfHeatingTimeSteps = 2;
+numberOfHeatingTimeSteps = 4;
 
 dirichletRightBC = @(t) heatingCoolingBoundary(t, numberOfLayers, tEnd,...
     numberOfTimeStepsPerLayer, numberOfHeatingTimeSteps, dirichletRightBCValue);
