@@ -22,6 +22,8 @@ temperaturePostProcessing = zeros(size(postProcessingCoords, 2), timeSteps);
 refinedTemperatureSolutions = linspace(0.0,...
     0.0, 2^refinementDepth);
 
+convergence = 0.0;
+
 computationalTime = [];
 localRefinedTemperatureSolutions = zeros(2^refinementDepth+1, timeSteps);
 
@@ -65,7 +67,7 @@ for layer = 1:numberOfTrainingLayers
             neumannBoundaryconditionValue, k, heatCapacity, currentTime);
         
         %Update and merge temperature into global domain
-        refinedTemperatureSolutions = solveNonLinearProblemGaussIntegration( poissonTransientProblem,...
+        [refinedTemperatureSolutions, convergenceFlag] = solveNonLinearProblemGaussIntegration( poissonTransientProblem,...
             currentTime, timeStepSize, integrationOrder, tolerance, maxIterations, refinedTemperatureSolutions );
         mergedTemperature = mergeActiveSolutionInGlobalDomain(refinedTemperatureSolutions, size(coords, 2));
         
@@ -75,6 +77,7 @@ for layer = 1:numberOfTrainingLayers
 
         previousMesh = refinedMesh;
         
+        convergence = convergence + convergenceFlag;
         timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
         
         %Post-Processing
@@ -150,9 +153,10 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         disp(' Solve Local Enriched Problem ');
         
         %Solve Local problem enriched
-        temperatureSolutions = solveNonLinearEnrichedProblem( poissonTransientProblemEnriched, currentTime,...
+        [temperatureSolutions, convergenceFlag] = solveNonLinearEnrichedProblem( poissonTransientProblemEnriched, currentTime,...
             timeStepSize,integrationOrder, integrationModesOrder, tolerance, maxIterations, temperatureSolutions );
         
+        convergence = convergence + convergenceFlag;
         timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
 
         %Post-Processing
@@ -171,6 +175,11 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
     computationalTime = [computationalTime, timeToGenerateAndSolveTheSystem];
 end
 
+    if convergence <= 1
+        disp('The analysis always converged')
+    else
+        disp('The analysis did not always converged !!!')
+    end
 end
 
 function [ projectedCoefficients ] = eXtendedProjection(problem, previousTemperature,...

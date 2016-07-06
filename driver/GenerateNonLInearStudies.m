@@ -9,7 +9,7 @@ axes1 = axes;
 referenceFile = fopen('myNonLinearReferenceResultsFile.txt','r');
 formatSpec = '%f;\n';
 % referenceTemperatureSolution = fscanf(referenceFile, formatSpec);
-referenceTemperatureSolution = dlmread('myNonLinearReferenceResultsFile.txt');
+referenceTemperatureSolution = dlmread('myFEMNonLinearResultsFile_6.txt');
 
 %% hFEM plot
 % plot the rlative error on the temperature L2 norm using diffrent level of
@@ -47,7 +47,7 @@ relErrorPOD = [];
 pointwiseRelError = [];
 
 
-for modes=1:5
+for modes=1:4
     formatSpec = 'myPODXFEMNonLinearResultsFile_%d.txt';
     XFEMFileID = sprintf(formatSpec,modes);
     XFEMFile = fopen(XFEMFileID, 'r');
@@ -71,7 +71,7 @@ for modes=1:5
 end
 
 % Create multiple lines using matrix input to plot
-loglog(dofsVectorPOD(1:5),relErrorPOD, '--bd');
+loglog(dofsVectorPOD(1:4),relErrorPOD, '--bd');
 hold on
 
 % Title

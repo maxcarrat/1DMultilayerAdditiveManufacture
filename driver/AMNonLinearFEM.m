@@ -4,7 +4,7 @@
 clear all;
 clc;
 
-writerObj = VideoWriter('AMNonLinearHFEM.avi');
+writerObj = VideoWriter('AMNonLinearHFEMNoCoarsening.avi');
 writerObj.Quality = 100;
 writerObj.FrameRate = 5;
 open(writerObj);
@@ -20,8 +20,8 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 45;                                                 % total time [sec]
-xEnd = 0.01;                                               % length of the bar 0.001 [m]
+tEnd = 4.5;                                                 % total time [sec]
+xEnd = 0.001;                                               % length of the bar 0.001 [m]
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue = T0 + Tsource;
@@ -31,13 +31,13 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-03;
 maxIteration = 20;
 
-for depth = 1:5
+for depth = 1:6
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
     % modes = zeros(maxTrainingTimeSteps-3,1);
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
-    numberOfLayers = 200;
+    numberOfLayers = 20;
     trainingTimeSteps = numberOfLayers;
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
@@ -75,13 +75,14 @@ for depth = 1:5
     
     
     %% Analysis
-        [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
-            dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration,numberOfRefinedElementsToBeKept,...
-            refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
-            numberOfLayers, numberOfPODModes, integrationOrder);
-%     [temperatureSolution, heatFlux, internalEnergy] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
-%         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration, ...
-%         refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
+%         [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+%             dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration,numberOfRefinedElementsToBeKept,...
+%             refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
+%             numberOfLayers, numberOfPODModes, integrationOrder);
+
+    [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+        dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration, ...
+        refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
     
     %% Post-Process
     
@@ -119,7 +120,7 @@ for depth = 1:5
     hold off
     
     % Write results to a file
-    formatSpec = 'myFEMNonLinearResultsFile_Coarsening_%d.txt';
+    formatSpec = 'myFEMNonLinearResultsFile_NoCoarsening_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -131,7 +132,7 @@ for depth = 1:5
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myFEMNonLinearTimeFile_Coarsening_%d.txt';
+    formatSpec = 'myFEMNonLinearTimeFile__NoCoarsening_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)

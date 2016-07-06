@@ -14,8 +14,8 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 45;                                                  % total time [sec]
-xEnd = 0.01;                                                % length of the bar [m]
+tEnd = 4.5;                                                  % total time [sec]
+xEnd = 0.001;                                                % length of the bar [m]
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue =  T0 + Tsource;
@@ -32,7 +32,7 @@ for modes = 1:5
     % modes = zeros(maxTrainingTimeSteps-3,1);
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
-    numberOfLayers = 200;
+    numberOfLayers = 20;
     trainingTimeSteps = 11;
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
@@ -106,7 +106,7 @@ for modes = 1:5
     hold off
     
     % Write results to a file
-    formatSpec = 'myPODXFEMNonLinearResultsFile_IntegrationM+1_%d.txt';
+    formatSpec = 'myXFEMNonLinearResultsFile_IntegrationM+1_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -118,7 +118,7 @@ for modes = 1:5
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myPODXFEMNonLinearTimeFile_IntegrationM+1_%d.txt';
+    formatSpec = 'myXFEMNonLinearTimeFile_IntegrationM+1_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)

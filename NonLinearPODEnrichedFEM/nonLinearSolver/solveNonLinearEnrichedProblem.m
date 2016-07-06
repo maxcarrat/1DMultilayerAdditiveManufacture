@@ -1,12 +1,14 @@
-function [ solution ] = solveNonLinearEnrichedProblem( problem, time, timeStepSize, integrationOrder,...
+function [ solution, convergenceFlag ] = solveNonLinearEnrichedProblem( problem, time, timeStepSize, integrationOrder,...
     integrationModalOrder, tolerance, maxNumberOfIterations, oldSolution )
 %SOLVENONLINEARPROBLEMGAUSSINTEGRATION returns the nodal temperature values of the
-%coarse/global problem using Backward Euler implictit scheme
+%coarse/global problem using Backward Euler implictit scheme, if it 
+%converges the flag value is set to 0, 1 otherwise.
 %   problemCoarse = problem struct on the coarse mesh
 %   activeMesh = active elements at teh current time step
 
 solution = oldSolution;
 lastConvergedSolution = oldSolution;
+convergenceFlag = 1;
 
 for i=1:maxNumberOfIterations
     
@@ -30,6 +32,7 @@ for i=1:maxNumberOfIterations
        formatSpec = '\t\t Solution converge after %1.0f iterations\n';
        fprintf(formatSpec, i);
        solution = solution + solutionIncrement;
+       convergenceFlag = 0;
        return
    end
    
@@ -42,6 +45,6 @@ end
 
 formatSpec = '\t\t Warning: Solution did not converge after %1.0f iterations!!!\n';
 fprintf(formatSpec, maxNumberOfIterations);
-   
+ 
 end
 
