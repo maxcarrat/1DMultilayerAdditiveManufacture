@@ -31,7 +31,7 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-03;
 maxIteration = 20;
 
-for depth = 1:6
+for depth = 1:8
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
     % modes = zeros(maxTrainingTimeSteps-3,1);
@@ -67,22 +67,20 @@ for depth = 1:6
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                 % layer spatial discretization X
     
-    x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
     x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2^8);          % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
-    [X_ref, T_ref] = meshgrid(x_ref, t);
     
     
     %% Analysis
-%         [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
-%             dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration,numberOfRefinedElementsToBeKept,...
-%             refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
-%             numberOfLayers, numberOfPODModes, integrationOrder);
+        [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+            dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration,numberOfRefinedElementsToBeKept,...
+            refinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
+            numberOfLayers, numberOfPODModes, integrationOrder);
 
-    [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
-        dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration, ...
-        refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
+%     [temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+%         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration, ...
+%         refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
     
     %% Post-Process
     
@@ -120,7 +118,7 @@ for depth = 1:6
     hold off
     
     % Write results to a file
-    formatSpec = 'myFEMNonLinearResultsFile_NoCoarsening_%d.txt';
+    formatSpec = 'myFEMNonLinearResultsFileShort_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -131,8 +129,20 @@ for depth = 1:6
     end
     fclose(resultFile);
     
+    % Write fluxes to a file
+    formatSpec = 'myFEMNonLinearFluxesFileShort_%d.txt';
+    filename = sprintf(formatSpec,depth);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(heatFlux, 1)
+        for j=1:numberOfTimeStepsPerLayer
+            fprintf(resultFile, '%d, %\t', heatFlux(i,end-(j-1)));
+        end
+        fprintf(resultFile, '\n');
+    end
+    fclose(resultFile);
+    
     % Write CPU time to a file
-    formatSpec = 'myFEMNonLinearTimeFile__NoCoarsening_%d.txt';
+    formatSpec = 'myFEMNonLinearTimeFileShort_%d.txt';
     filename = sprintf(formatSpec,depth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)

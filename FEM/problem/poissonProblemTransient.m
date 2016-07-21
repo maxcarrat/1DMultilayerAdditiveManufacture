@@ -36,7 +36,7 @@ function problem = poissonProblemTransient(coords, rhs, leftDirichletBoundaryCon
             
             gdof = max(max(LM));
             
-            penalty = 1.0e+20;
+            penalty = 1.0e+12;
 
             problem = struct('LM', LM, 'basis_fun', basis_fun, 'B', B, 'B_map', B_map, 'F', F, 'F_map', F_map, 'M', M, ...
                 'dirichlet_bc', dirichlet_bc, 'N', N, 'gdof', gdof, 'rhs', rhs, 'coords', coords, 'penalty', penalty, ...

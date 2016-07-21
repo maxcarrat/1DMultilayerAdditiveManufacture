@@ -5,14 +5,25 @@ function LM = locationMapEnriched(modes, numberOfXelements)
 %   modes = number of POD-modes
 %   numberOfXelements = number of enriched elements
 
-LM = zeros(numberOfXelements, 2*modes);
+LM = zeros(2 * modes, numberOfXelements);
 
 %% Construct the location map of the XFEM-block
 
-% Fill LM with locations of the modes 
-for i=1:numberOfXelements
-    for j=1:2*modes
-        LM(i, j) = (i-1)*2*modes + j;
+% Fill LM with locations of the modes
+
+for j=1:numberOfXelements
+    if j == 1
+        for i=1:2*modes
+            
+            LM(i, j) = (j-1) * modes + i;
+            
+        end
+    else
+        for i=1:2*modes
+            
+            LM(i, j) = (j-2) * modes + i;
+            
+        end
     end
 end
 

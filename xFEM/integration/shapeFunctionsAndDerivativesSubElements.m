@@ -18,9 +18,6 @@ N = [N_subElement * ( 1 - N_coeff)', N_subElement * N_coeff'];
 
 %% Matrix of shape functions derivatives
 
-% Define B
-B = [];
-
 B_subElement =  0.5 * [-1, 1];
 B1 = coefficients(integrationSubDomainIndex);
 B2 = coefficients(integrationSubDomainIndex+1);

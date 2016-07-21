@@ -92,7 +92,7 @@ end
 
 %% Generate the reduced basis
 
-[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,2:numberOfTrainingLayers), numberOfPODModes);
+[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,1:numberOfTrainingLayers*numberOfLayersTimeSteps), numberOfPODModes);
 
 %% Enriched mesh using RB
 if layer ~= numberOfLayers
@@ -160,10 +160,10 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
 
         %Post-Processing
-        temperaturePostProcessing(:, t) = postProcessingProjection(postProcessingCoords, poissonTransientProblemEnriched, temperatureSolutions,...
+        temperaturePostProcessing(:, t+1) = postProcessingProjection(postProcessingCoords, poissonTransientProblemEnriched, temperatureSolutions,...
             modes, 0.0);
-        heatFluxes(:, t) = postProcessingProjection(postProcessingCoords, poissonTransientProblemEnriched,temperatureSolutions,...
-            modes, 1.0);
+        heatFluxes(:, t+1) = postProcessingProjection(postProcessingCoords, poissonTransientProblemEnriched,temperatureSolutions,...
+            modes, 1);
         
         %     [~, K, ~] = assembly(poissonTransientProblem);
         %     internalEnergy(t) = temperatureSolutions'*K*temperatureSolutions;
@@ -319,8 +319,13 @@ if e > problem.N - problem.XN  % element is active
         projectedCoefficients(localCoordinates>Xi1 & localCoordinates<=Xi2) = postProcessingProjectionSubElements(integrationSubDomainIndex,...
             localCoordinates(localCoordinates>Xi1 & localCoordinates<=Xi2), problem, integrationDomain,...
             solutionCoefficients, modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes);
-        
+          
+  
     end
+    
+%     projectedCoefficients = projectedCoefficients .* (2/(Xi2-Xi1)) ^ derivative;
+    projectedCoefficients = projectedCoefficients .* (2/(X2-X1)) ^ derivative;
+    
     
 else     % Element not enriched
     
@@ -346,6 +351,8 @@ else     % Element not enriched
     end
     
     projectedCoefficients = projectionOperator * solutionCoefficients(problem.LM(e,:));
+    
+    projectedCoefficients = projectedCoefficients .* (2/(X2-X1)) ^ derivative;
     
 end
 
@@ -398,5 +405,5 @@ else
 end
 
 projectedCoefficients = projectionOperator * solutionCoefficients(problem.N:end);
-
+ 
 end

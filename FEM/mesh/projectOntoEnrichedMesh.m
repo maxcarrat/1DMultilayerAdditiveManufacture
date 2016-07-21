@@ -1,11 +1,10 @@
 function [ projectedTemperature ] = projectOntoEnrichedMesh( problem, temperatureCoefficients,...
-    modes, refinedMesh, previousMesh, initialTemperature )
+    modes, refinedMesh,  previousMesh, PODRefinementDepth, initialTemperature )
 %PROJECTONTOENRICHEDMESH Summary of this function goes here
 %   Detailed explanation goes here
 
-%% TODO
-% change "+ modes" to include non-boundary elements
-projectedTemperature = zeros(numel(refinedMesh) + modes, 1);
+
+projectedTemperature = zeros(numel(refinedMesh) + (2.^PODRefinementDepth)*modes, 1);
 
 for j=1:numel(refinedMesh)
     x = refinedMesh(j);
@@ -27,7 +26,7 @@ function [ numericalSolutions ] = globalProjection(x, previousMesh, coefficients
 % problem = transient poisson problem struct
 
     coords = previousMesh;
-    numericalSolutions=zeros(size(x));
+    numericalSolutions = zeros(size(x));
     X1 = coords(1);
     X2 = coords(2);
 

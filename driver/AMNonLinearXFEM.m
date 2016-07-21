@@ -25,7 +25,7 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-03;
 maxIteration = 20;
 
-for modes = 1:5
+for modes = 1:4
     
     % maxTrainingTimeSteps = timeSteps*0.5;
     % relErrorEnergyNorm = zeros(maxTrainingTimeSteps-3,1);
@@ -33,13 +33,13 @@ for modes = 1:5
     % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
     
     numberOfLayers = 20;
-    trainingTimeSteps = 11;
+    trainingTimeSteps = 10;
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
-    refinementDepth = 4;
+    refinementDepth = 6;
     
     integrationOrder = 2;
-    integrationModesOrder = modes+1; %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 20;%(modes - 1) ^ 2  + 1 + modes;
     
     numberOfRefinedElementsToBeKept = 1;
     
@@ -106,7 +106,7 @@ for modes = 1:5
     hold off
     
     % Write results to a file
-    formatSpec = 'myXFEMNonLinearResultsFile_IntegrationM+1_%d.txt';
+    formatSpec = 'myXFEMNonLinearResultsFileShort_IntegrationM+20_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -117,8 +117,20 @@ for modes = 1:5
     end
     fclose(resultFile);
     
+    % Write fluxes to a file
+    formatSpec = 'myXFEMNonLinearFluxesFileShort_IntegrationM+20_%d.txt';
+    filename = sprintf(formatSpec,modes);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(heatFlux, 1)
+        for j=1:numberOfTimeStepsPerLayer
+            fprintf(resultFile, '%d, %\t', heatFlux(i,end-(j-1)));
+        end
+        fprintf(resultFile, '\n');
+    end
+    fclose(resultFile);
+    
     % Write CPU time to a file
-    formatSpec = 'myXFEMNonLinearTimeFile_IntegrationM+1_%d.txt';
+    formatSpec = 'myXFEMNonLinearTimeFileShort_IntegrationM+20_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
@@ -126,7 +138,7 @@ for modes = 1:5
     end
     
     fclose(resultFile);
-    
+%     
 %     myVideoSpec = 'AdditiveManufacturingNonLinearPODBasis_%d.avi';
 %     myVideo = sprintf(myVideoSpec,modes);
 %     writerObj = VideoWriter(myVideo);
@@ -167,7 +179,7 @@ for modes = 1:5
 %     end
 %     
 %     close(writerObj);
-%     
+    
     
     
 end % modes loop

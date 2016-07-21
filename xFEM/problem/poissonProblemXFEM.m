@@ -1,5 +1,5 @@
 function refinedLocalProblem = poissonProblemXFEM( coords, activeMeshSize, rhs, leftDirichletBoundaryConditionValue,...
-    rightDirichletBoundaryConditionValue, nuemannRightBC, k, heatCapacity, time, refinementDepth, reductionOperator )
+    rightDirichletBoundaryConditionValue, nuemannRightBC, k, heatCapacity, time, refinementDepth, PODRefinementDepth, reductionOperator )
 %POISSONPROBLEMTRANSIENTENRICHED The right boundary element of the global coarse problem
 %is enriched using the POD modes from the training phase.
 
@@ -12,7 +12,7 @@ modes = size(reductionOperator, 2);
 
 [~, LM] = locationMap(numberOfElements);
 LMCoupling = locationMapCoupling(numberOfElements, numberOfEnrichedElements);
-LMEnriched = locationMapEnriched(modes, numberOfEnrichedElements);
+LMEnriched = locationMapEnriched(modes, numberOfEnrichedElements)';
 
 B_map = @(X1, X2) 2/(X2-X1);
 F_map = @(X1, X2) (X2-X1)/2;
@@ -35,7 +35,7 @@ end
 
 gdof = max(max(LM));
 FEMdof = numberOfElements + 1;
-XFEMdof = 2 * modes;
+XFEMdof = (2.^PODRefinementDepth) * modes;
 
 penalty = 1.0e+20;
 

@@ -98,14 +98,15 @@ for e=1:problem.N
                     Xi2 = integrationDomain(integrationSubDomainIndex + 1);
                     
                     PODCoefficients = problem.reductionOperator(...
-                        (elementEnrichedIndex-1)*(refinedNodes - 1) + 1: (elementEnrichedIndex-1)*(refinedNodes - 1) + refinedNodes, :);
+                        (elementEnrichedIndex-1)*(refinedNodes - 1) + 1:...
+                        (elementEnrichedIndex-1)*(refinedNodes - 1) + refinedNodes, :);
                     
                     mapIntegrationDomainForward = (Xi2 - Xi1)/2;
                     mapIntegrationDomainBackward = 2/(Xi2 - Xi1);
                     
-                    %                     [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
-                    [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
-                        subDomainShapeFunctionCoefficients);
+                   [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
+%                     [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
+%                         subDomainShapeFunctionCoefficients);
                     
                     [F, G] = PODModesAndDerivativesGaussIntegration( rGPXFEM(iGP), modes, PODCoefficients,...
                         integrationCoefficients, integrationSubDomainIndex, indexLocalEnrichedNodes );
