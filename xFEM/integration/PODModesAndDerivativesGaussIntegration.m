@@ -88,12 +88,12 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode)  - Phi_Nodal;
         Phi_coeff = [Phi1, Phi2];
         
-%         Phi1Der = PODCoefficients(integrationSubDomainIndex, iMode);
-%         Phi2Der = PODCoefficients(integrationSubDomainIndex+1, iMode);
-%         Phi_coeff_der = [Phi1Der, Phi2Der];    
+        Phi1Der = PODCoefficients(integrationSubDomainIndex, iMode);
+        Phi2Der = PODCoefficients(integrationSubDomainIndex+1, iMode);
+        Phi_coeff_der = [Phi1Der, Phi2Der];    
         
         Phi_iMode = mapIntegrationDomainForward * N_subElement * Phi_coeff';
-        Phi_iModeContinuousDer = mapIntegrationDomainBackward * B_subElement * Phi_coeff';
+        Phi_iModeContinuousDer = mapIntegrationDomainBackward * B_subElement * Phi_coeff_der';
         
         derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;
         derivative_2 =  B(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode;

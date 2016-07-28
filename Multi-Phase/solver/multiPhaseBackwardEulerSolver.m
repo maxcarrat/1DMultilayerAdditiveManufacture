@@ -294,7 +294,7 @@ if e > problem.N - problem.XN  % element is active
     elementEnrichedIndex = e - (problem.N - problem.XN);
 
     if elementEnrichedIndex == 1
-        indexLocalEnrichedNodes = 2; %lhs node
+        indexLocalEnrichedNodes = 2; %rhs node
     else
         indexLocalEnrichedNodes = [1, 2];
     end
@@ -424,7 +424,7 @@ if length(indexLocalEnrichedNodes) == 1 %lhs
 else
     coefficients = [solutionCoefficients((problem.N - problem.XN) + e : (problem.N - problem.XN) + e + 1); ...
         solutionCoefficients(problem.N  + (e - 2) * modes + 2 : problem.N...
-        + (e - 2) * modes + length(indexLocalEnrichedNodes)  * modes + 1 )];
+        + (e - 2) * modes + 2 + length(indexLocalEnrichedNodes)  * modes - 1 )];
 end
 
 projectedCoefficients = projectionOperator * coefficients ;
@@ -435,9 +435,9 @@ if derivative == 1
     end
     
     temperature = projectionOperator * coefficients ;
-    for i=1:numel(projectedCoefficients)
-        projectedCoefficients(i) = projectedCoefficients(i) * ...
-            problem.k(globalCoords, t, temperature(i));
+    for i=1:numel(x)
+        projectedCoefficients(i) = projectedCoefficients(i) .* ...
+            problem.k(globalCoords(i), t, temperature(i));
     end
 end
 

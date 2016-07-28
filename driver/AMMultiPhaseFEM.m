@@ -18,7 +18,7 @@ c = 600.0;                                                  % specific heat [J/(
 T0 = 20.0;                                                  % Initial temperature [°C]
 entalphyJump = 261e+03;                                     % entalphy [J/Kg]
 Tsource = 1500.0;                                           % source temperature [°C]
-Tmelt = 1450.0;                                             % melting temperature [°C]
+Tmelt = 1475.0;                                             % melting temperature [°C]
 
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar 0.001 [m]
@@ -72,15 +72,16 @@ for depth = 1:maxRefinementDepth
     k = @(x, t, T) steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, T);  % thermal conductivity [W/(m K)]
     
-    heatCapacity= @(x, t, T) capacityPhaseTransition(x, t,...
-        xEnd, numberOfLayers, tEnd, numberOfTimeStepsPerLayer, T, c, rho, entalphyJump, Tsource, Tmelt);                                        % heat capacity [kJ / kg °C]
+    heatCapacity= @(x, T, T_last) capacityPhaseTransition(x, ... 
+        T, T_last, c, rho,...
+        entalphyJump, Tsource, Tmelt);                                        % heat capacity [kJ / kg °C]
                                       % heat capacity [kJ / kg °C]
     
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                 % layer spatial discretization X
     
-    x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2^8);          % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2^6);          % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
     
@@ -148,7 +149,7 @@ for depth = 1:maxRefinementDepth
         
         % Axis limit
         xlim(axes2,[0 xEnd]);
-        ylim(axes2,[0.0e+01 4.0e+07]);
+        ylim(axes2,[-1.0e+07 4.0e+08]);
 
         box(axes2,'on');
         % Set the remaining axes properties
@@ -212,35 +213,35 @@ for depth = 1:maxRefinementDepth
 end % depth loop
 
 
-figure(10101)
-
-% Create axes
-axes1 = axes;
-
-F(size(t,2)) = struct('cdata',[],'colormap',[]);
-
-for i=1:size(t,2)
-    plot(x_PostProcess,temperatureSolution(:,i)')
-    
-    % Title
-    title('Temperature evolution of the bar', 'Interpreter','latex');
-    
-    % Create ylabel
-    ylabel('\fontname{Latin Modern Math} Temperature [°C]');
-    xlabel('\fontname{Latin Modern Math} length [m]');
-    
-    % Axis limit
-    xlim(axes1,[0 xEnd]);
-    ylim(axes1,[-100 3000]);
-    
-    box(axes1,'on');
-    % Set the remaining axes properties
-    set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
-    
-    grid on
-    drawnow
-    F(i) = getframe;
-    writeVideo(writerObj, getframe(gcf, [ 0 0 500 400 ]));
-end
-
-close(writerObj);
+% figure(10101)
+% 
+% % Create axes
+% axes1 = axes;
+% 
+% F(size(t,2)) = struct('cdata',[],'colormap',[]);
+% 
+% for i=1:size(t,2)
+%     plot(x_PostProcess,temperatureSolution(:,i)')
+%     
+%     % Title
+%     title('Temperature evolution of the bar', 'Interpreter','latex');
+%     
+%     % Create ylabel
+%     ylabel('\fontname{Latin Modern Math} Temperature [°C]');
+%     xlabel('\fontname{Latin Modern Math} length [m]');
+%     
+%     % Axis limit
+%     xlim(axes1,[0 xEnd]);
+%     ylim(axes1,[-100 3000]);
+%     
+%     box(axes1,'on');
+%     % Set the remaining axes properties
+%     set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
+%     
+%     grid on
+%     drawnow
+%     F(i) = getframe;
+%     writeVideo(writerObj, getframe(gcf, [ 0 0 500 400 ]));
+% end
+% 
+% close(writerObj);

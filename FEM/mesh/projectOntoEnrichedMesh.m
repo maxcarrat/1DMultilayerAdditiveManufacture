@@ -1,8 +1,6 @@
 function [ projectedTemperature ] = projectOntoEnrichedMesh( problem, temperatureCoefficients,...
     modes, refinedMesh,  previousMesh, PODRefinementDepth, initialTemperature )
-%PROJECTONTOENRICHEDMESH Summary of this function goes here
-%   Detailed explanation goes here
-
+%PROJECTONTOENRICHEDMESH 
 
 projectedTemperature = zeros(numel(refinedMesh) + (2.^PODRefinementDepth)*modes, 1);
 
