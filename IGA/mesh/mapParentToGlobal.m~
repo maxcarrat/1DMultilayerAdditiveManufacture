@@ -1,0 +1,24 @@
+function [ output_args ] = mapParentToGlobal( x, Xi1, Xi2, problem )
+%MAPPARENTTOGLOBAL map quadrature/parent space [-1, 1] onto the 
+%Global space 
+% inputs:
+% x = parent coordinates
+% Xi1 = knot coord left
+% Xi2 = knot coord right
+% problem = IGS physical problem struct
+% BSplines = BSplines shape functions vector
+% outputs:
+% X = global coordinates
+
+localCoords = mapParentToLocal(x, Xi1, Xi2);
+
+i = findspan(length(problem.coords)-1, problem.p, localCoords, problem.knotVector);
+J = 0.0;
+
+for j=1:problem.p+1
+    
+    J = J + BSplines((e-1)+j) * problem.coords(i - problem.p + j);
+end
+
+end
+
