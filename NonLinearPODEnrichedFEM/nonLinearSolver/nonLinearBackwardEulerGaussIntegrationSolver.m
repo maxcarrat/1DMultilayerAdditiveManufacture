@@ -1,7 +1,7 @@
 function [temperaturePostProcessing, heatFluxes, internalEnergy, computationalTime]= nonLinearBackwardEulerGaussIntegrationSolver(coords, postProcessingCoords, rhs, ...
     initialTemperature, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
     neumannBoundaryconditionValue, k, heatCapacity, timeVector, tolerance, maxIterations, numberOfRefinedElementsToBeKept,...
-    refinementDepth, numberOfTrainingLayers, numberOfLayersTimeSteps, numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder)
+    refinementDepth, PODRefinementDepth, numberOfTrainingLayers, numberOfLayersTimeSteps, numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder)
 % BackwardEulerSolver computes the 1D h-FEM numerical solution of a boundary value problem.
 % Moreover, the numerical solution for each element is also computed
 %   coords = coordinates of the mesh points
@@ -81,8 +81,8 @@ for layer = 1:numberOfTrainingLayers
         timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
         
         %Post-Processing
-        temperaturePostProcessing(:, t+1) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 0) ;
-        heatFluxes(:, t+1) = evaluateNumericalResults(postProcessingCoords, poissonTransientProblem, mergedTemperature, 1);
+        temperaturePostProcessing(:, t+1) = evaluateNumericalResults(postProcessingCoords, currentTime, poissonTransientProblem, mergedTemperature, 0) ;
+        heatFluxes(:, t+1) = evaluateNumericalResults(postProcessingCoords, currentTime, poissonTransientProblem, mergedTemperature, 1);
         %         internalEnergy(t+1) = refinedTemperatureSolutions'*K*refinedTemperatureSolutions;
         
     end
@@ -118,22 +118,22 @@ end
 previousMesh = refinedMeshEnriched;
 
 temperatureSolutions = projectOntoEnrichedMesh(poissonTransientProblem, refinedTemperatureSolutions,...
-    modes, refinedMeshEnriched, refinedMesh, initialTemperature);
+    modes, refinedMeshEnriched, refinedMesh, PODRefinementDepth, initialTemperature);
 end
 for layer = (numberOfTrainingLayers+1):numberOfLayers
     
     [activeMesh, numberOfActiveElementsLayer] = getLayerActiveCoords(coords, layer, numberOfLayers);
     activeMesh = refineLayerEnriched(activeMesh, numberOfActiveElementsLayer, refinementDepth, layer,...
-        numberOfTrainingLayers, numberOfRefinedElementsToBeKept-1);
+        numberOfTrainingLayers, PODRefinementDepth,  numberOfRefinedElementsToBeKept-1);
 
     poissonTransientProblemEnriched = poissonProblemXFEM(activeMesh,numberOfActiveElementsLayer, rhs, leftDirichletBoundaryConditionValue,...
-        rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
+        rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, PODRefinementDepth, solutionReductionOperator);
     
     %Project global solution onto the enriched modal space
 %     temperatureSolutions = eXtendedProjection(poissonTransientProblemEnriched,temperatureSolutions,...
 %         modes, initialTemperature);
     temperatureSolutions = eXtendedProjectionNoCoarse(poissonTransientProblemEnriched,temperatureSolutions,...
-        modes, activeMesh, previousMesh, initialTemperature);
+        modes, activeMesh, previousMesh, PODRefinementDepth, initialTemperature);
     
     timeToGenerateAndSolveTheSystem = 0.0;
 
@@ -148,7 +148,7 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
         %Generate Local problem
         poissonTransientProblemEnriched = poissonProblemXFEM(activeMesh,numberOfActiveElementsLayer, rhs, leftDirichletBoundaryConditionValue,...
-            rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, solutionReductionOperator);
+            rightDirichletBoundaryConditionValue, neumannBoundaryconditionValue, k, heatCapacity, currentTime, refinementDepth, PODRefinementDepth, solutionReductionOperator);
         
         disp(' Solve Local Enriched Problem ');
         
@@ -212,7 +212,7 @@ end
 end
 
 function [ projectedCoefficients ] = eXtendedProjectionNoCoarse(problem, previousTemperature,...
-    modes, updatedMesh, previousMesh, initialTemperature)
+    modes, updatedMesh, previousMesh, PODRefinementDepth, initialTemperature)
 % EXTENDEDPROJECTIONNOCOARSE project the previous solution onto the updated mesh at the
 % new time step considering the enrichement modes from POD.
 %   previousTemperature = temeprature distribution of the previous mesh
@@ -228,7 +228,7 @@ projectedCoefficients = zeros(problem.N + 1 +...
 %     previousMesh, initialTemperature, 0);
 
 projectedCoefficients = projectOntoEnrichedMesh(problem, previousTemperature, modes, updatedMesh,...
-    previousMesh, initialTemperature);
+    previousMesh, PODRefinementDepth, initialTemperature);
 
 % for e=1:problem.N
 % 

@@ -9,186 +9,50 @@ axes1 = axes;
 referenceFile = fopen('myMultiPhaseReferenceResultsFile.txt','r');
 formatSpec = '%f;\n';
 % referenceTemperatureSolution = fscanf(referenceFile, formatSpec);
-referenceTemperatureSolution = dlmread('myFEMMultiPhaseResultsFile_8.txt');
-referenceFluxSolution = dlmread('myFEMMultiPhaseFluxesFile_8.txt');
+referenceTemperatureSolution = dlmread('myMultiPhaseFEMResultsFileShort_IntegrationM+1_8_ref0.txt');
+referenceFluxSolution = dlmread('myMultiPhaseFEMFluxesFileShort_IntegrationM+1_8_ref0.txt');
 
 
-% %% hFEM plot
-% % plot the rlative error on the temperature L2 norm using diffrent level of
-% % refinement for classical FEM discretization
-% 
-% dofsVector=[41, 81, 161, 321, 641, 1281, 2561, 5121]; % refDepth = 1,..,8
-% relError = [];
-% relFluxError = [];
-% for depth=5:5
-%     formatSpec = 'myFEMMultiPhaseResultsFile_%d.txt';
-%     FEMFileID = sprintf(formatSpec,depth);
-%     FEMFile = fopen(FEMFileID, 'r');
-%     FEMTemperatureSolution = dlmread(FEMFileID);
-%     
-%     formatSpec = 'myFEMMultiPhaseFluxesFile_%d.txt';
-%     FEMFileID = sprintf(formatSpec,depth);
-%     FEMFile = fopen(FEMFileID, 'r');
-%     FEMFluxSolution = dlmread(FEMFileID);
-%     
-%     err = 0.0;
-%     fluxErr = 0.0;
-%     for i=1320:size(FEMTemperatureSolution,1)-1
-%         for j=1:size(FEMTemperatureSolution,2)-1
-%             err = err + sqrt(( referenceTemperatureSolution(i,j) - FEMTemperatureSolution(i,j))^2 ...
-%                 / referenceTemperatureSolution(i,j)^2 ) * 100;
-%             fluxErr = fluxErr + sqrt(( referenceFluxSolution(i,j) - FEMFluxSolution(i,j))^2 ...
-%                 / referenceFluxSolution(i,j)^2 ) * 100;
-%         end
-%     end
-%     
-%     relError = [relError err/size(FEMTemperatureSolution,1)/(size(FEMTemperatureSolution,2)-1)];
-%     relFluxError = [relFluxError fluxErr/size(FEMTemperatureSolution,1)/(size(FEMTemperatureSolution,2)-1)];
-% 
-% end
-% % Create multiple lines using matrix input to plot
-% % loglog(dofsVector(1:5),relError,'-kd');
-% % hold on
-% % loglog(dofsVector(1:1),relFluxError,'-.ko'); 
-% % hold on
-% 
-% % %% hFEM plot No Coarsening
-% % % plot the rlative error on the temperature L2 norm using diffrent level of
-% % % refinement for classical FEM discretization
-% % 
-% % dofsVector=[41, 81, 161, 321, 641, 1281, 2561, 5121]; % refDepth = 1,..,8
-% % relError = [];
-% % for depth=1:5
-% %     formatSpec = 'myFEMMultiPhaseResultsFile_NoCoarsening_%d.txt';
-% %     FEMFileID = sprintf(formatSpec,depth);
-% %     FEMFile = fopen(FEMFileID, 'r');
-% %     FEMTemperatureSolution = dlmread(FEMFileID);
-% %     
-% %     err = 0.0;
-% %     for i=1:size(FEMTemperatureSolution,1)
-% %         for j=1:size(FEMTemperatureSolution,2)-1
-% %             err = err + sqrt(( referenceTemperatureSolution(i,j) - FEMTemperatureSolution(i,j))^2 ...
-% %                 / referenceTemperatureSolution(i,j)^2 );
-% %         end
-% %     end
-% %     
-% %     relError = [relError err/size(FEMTemperatureSolution,1)/(size(FEMTemperatureSolution,2)-1)];
-% %     
-% % end
-% % % Create multiple lines using matrix input to plot
-% % loglog(dofsVector(1:5),relError,'-ro');
-% % hold on
-% 
-% % %% X-PODFEM plot M+1
-% % % plot the rlative error on the temperature L2 norm using diffrent level of
-% % % refinement for XPODFEM discretization
-% % 
-% % dofsVectorPOD=[22, 23, 24, 25, 26, 27, 28, 29]; % PODmodes = 1,..,8
-% % relErrorPOD = [];
-% % relFluxErrorPOD = [];
-% % pointwiseRelError = [];
-% % pointwiseFluxRelError = [];
-% % 
-% % for modes=1:3
-% %     formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+1_%d.txt';
-% %     XFEMFileID = sprintf(formatSpec,modes);
-% %     XFEMFile = fopen(XFEMFileID, 'r');
-% %     XFEMTemperatureSolution = dlmread(XFEMFileID);
-% %     
-% %     formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+1_%d.txt';
-% %     XFEMFileID = sprintf(formatSpec,modes);
-% %     XFEMFile = fopen(XFEMFileID, 'r');
-% %     XFEMFluxSolution = dlmread(XFEMFileID);
-% %     
-% %     err = 0.0;
-% %     fluxErr = 0.0;
-% %     for i=1:size(XFEMTemperatureSolution,1)-1
-% %         
-% %         timeStepErrorAtPoint = 0.0;
-% %         timeStepFluxErrorAtPoint = 0.0;
-% % 
-% %         for j=1:size(XFEMTemperatureSolution,2)-1
-% %             pointError = sqrt(( referenceTemperatureSolution(i,j) - XFEMTemperatureSolution(i,j))^2 ...
-% %                 / referenceTemperatureSolution(i,j)^2 );
-% %             timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
-% %             pointFluxError = sqrt(( referenceFluxSolution(i,j) - XFEMFluxSolution(i,j))^2 ...
-% %                 / referenceFluxSolution(i,j)^2 );            
-% %             timeStepFluxErrorAtPoint = timeStepFluxErrorAtPoint + pointFluxError;
-% % 
-% %         end
-% %         pointwiseRelError = [pointwiseRelError timeStepErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
-% %         pointwiseFluxRelError = [pointwiseFluxRelError timeStepFluxErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
-% % 
-% %         err = err + timeStepErrorAtPoint * 100;
-% %         fluxErr = fluxErr + timeStepFluxErrorAtPoint * 100;
-% %     end
-% %     
-% %     relErrorPOD = [relErrorPOD err/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
-% %     relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
-% % end
-% % 
-% % 
-% % % Create multiple lines using matrix input to plot
-% % % loglog(dofsVectorPOD(1:4),relErrorPOD, '--b*');
-% % % hold on
-% % loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.b*');
-% % hold on
-% 
-% %% X-PODFEM plot M+5 ref depth 0
-% % plot the rlative error on the temperature L2 norm using diffrent level of
-% % refinement for XPODFEM discretization
-% 
-% dofsVectorPOD=[22, 23, 24, 25, 26, 27, 28, 29]; % PODmodes = 1,..,8
-% relErrorPOD = [];
-% relFluxErrorPOD = [];
-% pointwiseRelError = [];
-% pointwiseFluxRelError = [];
-% 
-% for modes=1:1
-%     formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+5_%d_ref0.txt';
-%     XFEMFileID = sprintf(formatSpec,modes);
-%     XFEMFile = fopen(XFEMFileID, 'r');
-%     XFEMTemperatureSolution = dlmread(XFEMFileID);
-%     
-%     formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+5_%d_ref0.txt';
-%     XFEMFileID = sprintf(formatSpec,modes);
-%     XFEMFile = fopen(XFEMFileID, 'r');
-%     XFEMFluxSolution = dlmread(XFEMFileID);
-%     
-%     err = 0.0;
-%     fluxErr = 0.0;
-%     for i=1320:size(XFEMTemperatureSolution,1)-1
-%         
-%         timeStepErrorAtPoint = 0.0;
-%         timeStepFluxErrorAtPoint = 0.0;
-% 
-%         for j=1:size(XFEMTemperatureSolution,2)-1
-%             pointError = sqrt(( referenceTemperatureSolution(i,j) - XFEMTemperatureSolution(i,j))^2 ...
-%                 / referenceTemperatureSolution(i,j)^2 );
-%             timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
-%             pointFluxError = sqrt(( referenceFluxSolution(i,j) - XFEMFluxSolution(i,j))^2 ...
-%                 / referenceFluxSolution(i,j)^2 );            
-%             timeStepFluxErrorAtPoint = timeStepFluxErrorAtPoint + pointFluxError;
-% 
-%         end
-%         pointwiseRelError = [pointwiseRelError timeStepErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
-%         pointwiseFluxRelError = [pointwiseFluxRelError timeStepFluxErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
-% 
-%         err = err + timeStepErrorAtPoint * 100;
-%         fluxErr = fluxErr + timeStepFluxErrorAtPoint * 100;
-%     end
-%     
-%     relErrorPOD = [relErrorPOD err/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
-%     relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
-% end
-% 
-% % Create multiple lines using matrix input to plot
-% % loglog(dofsVectorPOD(1:4),relErrorPOD, '-.md');
-% % hold on
-% % loglog(dofsVectorPOD(1:1),relFluxErrorPOD, '-.md');
-% % hold on
-% 
-%% X-PODFEM plot M+5 ref depth 1
+%% hFEM plot
+% plot the rlative error on the temperature L2 norm using diffrent level of
+% refinement for classical FEM discretization
+
+dofsVector=[41, 81, 161, 321, 641, 1281, 2561, 5121]; % refDepth = 1,..,8
+relError = [];
+relFluxError = [];
+for depth=1:7
+    formatSpec = 'myMultiPhaseFEMResultsFileShort_IntegrationM+1_%d_ref0.txt';
+    FEMFileID = sprintf(formatSpec,depth);
+    FEMFile = fopen(FEMFileID, 'r');
+    FEMTemperatureSolution = dlmread(FEMFileID);
+    
+    formatSpec = 'myMultiPhaseFEMFluxesFileShort_IntegrationM+1_%d_ref0.txt';
+    FEMFileID = sprintf(formatSpec,depth);
+    FEMFile = fopen(FEMFileID, 'r');
+    FEMFluxSolution = dlmread(FEMFileID);
+    
+    err = 0.0;
+    fluxErr = 0.0;
+    for i=2:size(FEMTemperatureSolution,1)-1
+        for j=1:size(FEMTemperatureSolution,2)-1
+            err = err + sqrt(( referenceTemperatureSolution(i,j) - FEMTemperatureSolution(i,j))^2 ...
+                / referenceTemperatureSolution(i,j)^2 ) * 100;
+            fluxErr = fluxErr + sqrt(( referenceFluxSolution(i,j) - FEMFluxSolution(i,j))^2 ...
+                / referenceFluxSolution(i,j)^2 ) * 100;
+        end
+    end
+    
+    relError = [relError err/size(FEMTemperatureSolution,1)/(size(FEMTemperatureSolution,2)-1)];
+    relFluxError = [relFluxError fluxErr/size(FEMTemperatureSolution,1)/(size(FEMTemperatureSolution,2)-1)];
+
+end
+% Create multiple lines using matrix input to plot
+% loglog(dofsVector(1:5),relError,'-kd');
+% hold on
+loglog(dofsVector(1:7),relFluxError,'-.ko'); 
+hold on
+
+%% X-PODFEM plot M+1
 % plot the rlative error on the temperature L2 norm using diffrent level of
 % refinement for XPODFEM discretization
 
@@ -199,19 +63,74 @@ pointwiseRelError = [];
 pointwiseFluxRelError = [];
 
 for modes=1:3
-    formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+5_%d_ref1.txt';
+    formatSpec = 'myMultiPhaseXFEMResultsFileShort_IntegrationM+1_%d_ref0.txt';
     XFEMFileID = sprintf(formatSpec,modes);
     XFEMFile = fopen(XFEMFileID, 'r');
     XFEMTemperatureSolution = dlmread(XFEMFileID);
     
-    formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+5_%d_ref1.txt';
+    formatSpec = 'myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_%d_ref0.txt';
     XFEMFileID = sprintf(formatSpec,modes);
     XFEMFile = fopen(XFEMFileID, 'r');
     XFEMFluxSolution = dlmread(XFEMFileID);
     
     err = 0.0;
     fluxErr = 0.0;
-    for i=1320:size(XFEMTemperatureSolution,1)-1
+    for i=2:size(XFEMTemperatureSolution,1)-1
+        
+        timeStepErrorAtPoint = 0.0;
+        timeStepFluxErrorAtPoint = 0.0;
+
+        for j=1:size(XFEMTemperatureSolution,2)-1
+            pointError = sqrt(( referenceTemperatureSolution(i,j) - XFEMTemperatureSolution(i,j))^2 ...
+                / referenceTemperatureSolution(i,j)^2 );
+            timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
+            pointFluxError = sqrt(( referenceFluxSolution(i,j) - XFEMFluxSolution(i,j))^2 ...
+                / referenceFluxSolution(i,j)^2 );            
+            timeStepFluxErrorAtPoint = timeStepFluxErrorAtPoint + pointFluxError;
+
+        end
+        pointwiseRelError = [pointwiseRelError timeStepErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
+        pointwiseFluxRelError = [pointwiseFluxRelError timeStepFluxErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
+
+        err = err + timeStepErrorAtPoint * 100;
+        fluxErr = fluxErr + timeStepFluxErrorAtPoint * 100;
+    end
+    
+    relErrorPOD = [relErrorPOD err/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
+    relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
+end
+
+
+% Create multiple lines using matrix input to plot
+% loglog(dofsVectorPOD(1:4),relErrorPOD, '--b*');
+% hold on
+loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.b*');
+hold on
+
+%% X-PODFEM plot M+5 ref depth 0
+% plot the rlative error on the temperature L2 norm using diffrent level of
+% refinement for XPODFEM discretization
+
+dofsVectorPOD=[22, 23, 24, 25, 26, 27, 28, 29]; % PODmodes = 1,..,8
+relErrorPOD = [];
+relFluxErrorPOD = [];
+pointwiseRelError = [];
+pointwiseFluxRelError = [];
+
+for modes=1:3
+    formatSpec = 'myMultiPhaseXFEMResultsFileShort_IntegrationM+5_%d_ref0.txt';
+    XFEMFileID = sprintf(formatSpec,modes);
+    XFEMFile = fopen(XFEMFileID, 'r');
+    XFEMTemperatureSolution = dlmread(XFEMFileID);
+    
+    formatSpec = 'myMultiPhaseXFEMFluxesFileShort_IntegrationM+5_%d_ref0.txt';
+    XFEMFileID = sprintf(formatSpec,modes);
+    XFEMFile = fopen(XFEMFileID, 'r');
+    XFEMFluxSolution = dlmread(XFEMFileID);
+    
+    err = 0.0;
+    fluxErr = 0.0;
+    for i=2:size(XFEMTemperatureSolution,1)-1
         
         timeStepErrorAtPoint = 0.0;
         timeStepFluxErrorAtPoint = 0.0;
@@ -237,28 +156,28 @@ for modes=1:3
 end
 
 % Create multiple lines using matrix input to plot
-% loglog(dofsVectorPOD(1:4),relErrorPOD, '-.bo');
+% loglog(dofsVectorPOD(1:4),relErrorPOD, '-.md');
 % hold on
-% loglog(dofsVectorPOD(1:1),relFluxErrorPOD, '-.bo');
-% hold on
+loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.md');
+hold on
 
-%% X-PODFEM plot M+5 ref depth 2
-% plot the rlative error on the temperature L2 norm using diffrent level of
-% refinement for XPODFEM discretization
-
+% %% X-PODFEM plot M+5 ref depth 1
+% % plot the rlative error on the temperature L2 norm using diffrent level of
+% % refinement for XPODFEM discretization
+% 
 % dofsVectorPOD=[22, 23, 24, 25, 26, 27, 28, 29]; % PODmodes = 1,..,8
 % relErrorPOD = [];
 % relFluxErrorPOD = [];
 % pointwiseRelError = [];
 % pointwiseFluxRelError = [];
 % 
-% for modes=1:2
-%     formatSpec = 'myIGAMultiPhaseResultsFile_%d.txt';
+% for modes=1:3
+%     formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+5_%d_ref1.txt';
 %     XFEMFileID = sprintf(formatSpec,modes);
 %     XFEMFile = fopen(XFEMFileID, 'r');
 %     XFEMTemperatureSolution = dlmread(XFEMFileID);
 %     
-%     formatSpec = 'myIGAMultiPhaseFluxesFile_%d.txt';
+%     formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+5_%d_ref1.txt';
 %     XFEMFileID = sprintf(formatSpec,modes);
 %     XFEMFile = fopen(XFEMFileID, 'r');
 %     XFEMFluxSolution = dlmread(XFEMFileID);
@@ -290,13 +209,13 @@ end
 %     relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
 % end
 
-% Create multiple lines using matrix input to plot
-% loglog(dofsVectorPOD(1:4),relErrorPOD, '-.bo');
-% hold on
-% loglog(dofsVectorPOD(1:1),relFluxErrorPOD, '-.r*');
-% hold on
-
-% %% X-PODFEM plot M+10
+% % Create multiple lines using matrix input to plot
+% % loglog(dofsVectorPOD(1:4),relErrorPOD, '-.bo');
+% % hold on
+% % loglog(dofsVectorPOD(1:1),relFluxErrorPOD, '-.bo');
+% % hold on
+% 
+% % X-PODFEM plot M+5 ref depth 2
 % % plot the rlative error on the temperature L2 norm using diffrent level of
 % % refinement for XPODFEM discretization
 % 
@@ -306,25 +225,25 @@ end
 % pointwiseRelError = [];
 % pointwiseFluxRelError = [];
 % 
-% for modes=1:3
-%     formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+12_%d.txt';
+% for modes=1:4
+%     formatSpec = 'myIGAMultiPhaseResultsFile_p%d.txt';
 %     XFEMFileID = sprintf(formatSpec,modes);
 %     XFEMFile = fopen(XFEMFileID, 'r');
 %     XFEMTemperatureSolution = dlmread(XFEMFileID);
 %     
-%     formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+12_%d.txt';
+%     formatSpec = 'myIGAMultiPhaseFluxesFile_p%d.txt';
 %     XFEMFileID = sprintf(formatSpec,modes);
 %     XFEMFile = fopen(XFEMFileID, 'r');
 %     XFEMFluxSolution = dlmread(XFEMFileID);
 %     
 %     err = 0.0;
 %     fluxErr = 0.0;
-%     for i=1:size(XFEMTemperatureSolution,1)-1
+%     for i=1320:size(XFEMTemperatureSolution,1)-1
 %         
 %         timeStepErrorAtPoint = 0.0;
 %         timeStepFluxErrorAtPoint = 0.0;
 % 
-%         for j= 1:size(XFEMTemperatureSolution,2)-1
+%         for j=1:size(XFEMTemperatureSolution,2)-1
 %             pointError = sqrt(( referenceTemperatureSolution(i,j) - XFEMTemperatureSolution(i,j))^2 ...
 %                 / referenceTemperatureSolution(i,j)^2 );
 %             timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
@@ -345,11 +264,65 @@ end
 % end
 % 
 % % Create multiple lines using matrix input to plot
-% % loglog(dofsVectorPOD(1:4),relErrorPOD, '--b*');
-% % hold on
-% loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.r+');
+% loglog(dofsVectorPOD(1:4),relErrorPOD, '-.bo');
 % hold on
-% 
+% loglog(dofsVectorPOD(1:1),relFluxErrorPOD, '-.r*');
+% hold on
+
+%% X-PODFEM plot M+10
+% plot the rlative error on the temperature L2 norm using diffrent level of
+% refinement for XPODFEM discretization
+
+dofsVectorPOD=[22, 23, 24, 25, 26, 27, 28, 29]; % PODmodes = 1,..,8
+relErrorPOD = [];
+relFluxErrorPOD = [];
+pointwiseRelError = [];
+pointwiseFluxRelError = [];
+
+for modes=1:3
+    formatSpec = 'myMultiPhaseXFEMResultsFileShort_IntegrationM+10_%d_ref0.txt';
+    XFEMFileID = sprintf(formatSpec,modes);
+    XFEMFile = fopen(XFEMFileID, 'r');
+    XFEMTemperatureSolution = dlmread(XFEMFileID);
+    
+    formatSpec = 'myMultiPhaseXFEMFluxesFileShort_IntegrationM+10_%d_ref0.txt';
+    XFEMFileID = sprintf(formatSpec,modes);
+    XFEMFile = fopen(XFEMFileID, 'r');
+    XFEMFluxSolution = dlmread(XFEMFileID);
+    
+    err = 0.0;
+    fluxErr = 0.0;
+    for i=2:size(XFEMTemperatureSolution,1)-1
+        
+        timeStepErrorAtPoint = 0.0;
+        timeStepFluxErrorAtPoint = 0.0;
+
+        for j= 1:size(XFEMTemperatureSolution,2)-1
+            pointError = sqrt(( referenceTemperatureSolution(i,j) - XFEMTemperatureSolution(i,j))^2 ...
+                / referenceTemperatureSolution(i,j)^2 );
+            timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
+            pointFluxError = sqrt(( referenceFluxSolution(i,j) - XFEMFluxSolution(i,j))^2 ...
+                / referenceFluxSolution(i,j)^2 );            
+            timeStepFluxErrorAtPoint = timeStepFluxErrorAtPoint + pointFluxError;
+
+        end
+        pointwiseRelError = [pointwiseRelError timeStepErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
+        pointwiseFluxRelError = [pointwiseFluxRelError timeStepFluxErrorAtPoint/(size(XFEMTemperatureSolution,2)-1)];
+
+        err = err + timeStepErrorAtPoint * 100;
+        fluxErr = fluxErr + timeStepFluxErrorAtPoint * 100;
+    end
+    
+    relErrorPOD = [relErrorPOD err/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
+    relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XFEMTemperatureSolution, 1)-1)/(size(XFEMTemperatureSolution,2)-1)];
+end
+
+% Create multiple lines using matrix input to plot
+% loglog(dofsVectorPOD(1:4),relErrorPOD, '--b*');
+% hold on
+loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.r+');
+hold on
+
 % %% X-PODFEM plot M+20
 % % plot the rlative error on the temperature L2 norm using diffrent level of
 % % refinement for XPODFEM discretization
@@ -409,7 +382,7 @@ title({'\centering{\quad \quad \quad Non-linear X-PODFEM}'; '\centering{using re
     , 'Interpreter','latex');
 
 % Legend
-legend('FEM', 'POD (M+5) 1 Xelement', 'POD (M+5) 2 Xelements', 'POD (M+5) 4 Xelements', 'POD (M+20)','Location', 'southeast');
+legend('FEM', 'POD (M+5) 1 Xelement', 'POD (M+5) 2 Xelements', 'POD (M+5) 4 Xelements','Location', 'southeast');
 
 % Axis labels
 ylabel('\fontname{Latin Modern Math} Relative error on the energy norm [%]');

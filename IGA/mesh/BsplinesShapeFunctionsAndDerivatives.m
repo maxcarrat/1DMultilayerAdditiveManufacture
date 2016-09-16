@@ -14,7 +14,7 @@ end
 function N = BSplineBasis(x, pmax, knotVector)
 % Compute the nonvanishing basis function
 % input:
-% x = locl coordinate
+% x = local coordinate
 % pmax = max polynomial order
 % knotVector = knot vector
 % output:

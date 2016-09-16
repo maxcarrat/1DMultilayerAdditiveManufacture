@@ -60,7 +60,7 @@ for e=1:problem.N
             [N, B] = shapeFunctionsAndDerivatives(rGPXFEM(iGP));
             
             %% Integrate FEM block
-            %extrnal heat source
+            %External heat source
             f_FEM(problem.LM(e,1:ldof)) = f_FEM(problem.LM(e,1:ldof)) + N' * problem.rhs(mapLocalToGlobal(rGPXFEM(iGP), X1, X2),...
                 time) * wGPXFEM(iGP) * problem.F_map(X1,X2);
             
@@ -100,7 +100,7 @@ for e=1:problem.N
                     [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
                         subDomainShapeFunctionCoefficients);
                     
-                    [F, G] = PODModesAndDerivativesGaussIntegration( problem, rGPXFEM(iGP), modes, PODCoefficients,...
+                    [F, G] = PODModesAndDerivativesGaussIntegration(rGPXFEM(iGP), modes, PODCoefficients,...
                         integrationCoefficients, integrationSubDomainIndex, indexLocalEnrichedNodes );
                     
                     globalGP = mapLocalToGlobal(rGPXFEM(iGP), X1, X2);
@@ -251,7 +251,7 @@ for k=1:length(x)
     [N(k,:), ~] = shapeFunctionsAndDerivativesSubElements(localCoords(k), e,...
         subDomainShapeFunctionCoefficients);
     
-    [F(k,:), ~] = PODModesAndDerivativesGaussIntegration(problem, localCoords(k), modes,...
+    [F(k,:), ~] = PODModesAndDerivativesGaussIntegration(localCoords(k), modes,...
         problem.reductionOperator, shapeFunctionCoefficients, e, indexLocalEnrichedNodes);
 end
 

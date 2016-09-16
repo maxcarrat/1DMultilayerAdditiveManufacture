@@ -37,7 +37,7 @@ gdof = max(max(LM));
 FEMdof = numberOfElements + 1;
 XFEMdof = (2.^PODRefinementDepth) * modes;
 
-penalty = 1.0e+20;
+penalty = 1.0e+12;
 
 refinedLocalProblem = struct('LM', LM, 'LMC', LMCoupling, 'LME', LMEnriched, 'B_map', B_map,...
     'F_map', F_map, 'dirichlet_bc', dirichlet_bc, 'neumann_bc', neumann_bc, 'refinementDepth', refinementDepth,...

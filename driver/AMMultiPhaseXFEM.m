@@ -13,7 +13,7 @@ c = 600.0;                                                  % specific heat [J/(
 T0 = 20.0;                                                  % Initial temperature [°C]
 entalphyJump = 261e+03;                                     % entalphy [J/Kg]
 Tsource = 1500.0;                                           % source temperature [°C]
-Tmelt = 1475.0;                                             % melting temperature [°C]
+Tmelt = 1450.0;                                             % melting temperature [°C]
 
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar [m]
@@ -27,18 +27,22 @@ tolerance = 1.0e-03;
 maxIteration = 100;
 
 initialNumberOfModes = 1;
-maxNumberOfModes = 3;
+maxNumberOfModes = 1;
 DOFs = zeros(maxNumberOfModes, 1);
+% modes = 1;
 
 for modes = initialNumberOfModes:maxNumberOfModes
+% for refinementDepth = 1:8
     
-    numberOfLayers = 20;
+    numberOfLayers = 6;
     trainingTimeSteps = 5;
+%     trainingTimeSteps = 20;
+
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
+    
     refinementDepth = 6;
-
-    PODRefinementDepth = 1;
+    PODRefinementDepth = 0;
 
     integrationOrder = 2;
     integrationModesOrder = modes + 5;  %(modes - 1) ^ 2  + 1 + modes;
@@ -67,10 +71,9 @@ for modes = initialNumberOfModes:maxNumberOfModes
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                                           % spatial discretization X
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                                 % layer spatial discretization X
     
-    x_PostProcess = linspace(0.0, xEnd, ( numberOfElementsInX + 1 ) * 2.^6);                    % post-processing coordinates
-    
+%     x_PostProcess = linspace(0.0, xEnd, ( numberOfElementsInX + 1 ) * 2.^8);                    % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, 4000);                    % post-processing coordinates
     [X, T] = meshgrid(x_PostProcess, t);
-    
     
     %% Analysis
     [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(modes)] = multiPhaseBackwardEulerSolver(x, x_PostProcess, bodyLoad, T0,...
@@ -128,7 +131,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
         
         % Axis limit
         xlim(axes2,[0 xEnd]);
-        ylim(axes2,[0.0e+01 1.0e+09]);
+        ylim(axes2,[0.0e+01 4.0e+08]);
 
         box(axes2,'on');
         % Set the remaining axes properties
@@ -144,7 +147,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     hold off
     
     % Write results to a file
-    formatSpec = 'myXFEMMultiPhaseResultsFile_IntegrationM+5_%d_ref%d.txt';
+    formatSpec = 'myMultiPhaseXFEMResultsFileShort_IntegrationM+10_%d_ref%d.txt';
     filename = sprintf(formatSpec, modes, PODRefinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -157,7 +160,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'myXFEMMultiPhaseFluxesFile_IntegrationM+5_%d_ref%d.txt';
+    formatSpec = 'myMultiPhaseXFEMFluxesFileShort_IntegrationM+10_%d_ref%d.txt';
     filename = sprintf(formatSpec, modes, PODRefinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
@@ -170,19 +173,19 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myXFEMMultiPhaseTimeFile_IntegrationM+5_%d_ref%d.txt';
+    formatSpec = 'myMultiPhaseXFEMTimeFile_IntegrationM+10_%d_ref%d.txt';
     filename = sprintf(formatSpec, modes, PODRefinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
-        fprintf(resultFile, '%d, %\t', CPUTime(i));
+        fprintf(resultFile, '%d, %\t', t(i), '%d %n',  CPUTime(i));
     end
     
     fclose(resultFile);
     
     
     % Write DOFs to a file
-    formatSpec = 'myXFEMMultiPhaseDOFsFile_%d_ref%d.txt';
-    filename = sprintf(formatSpec, modes, PODRefinementDepth);
+    formatSpec = 'myMultiPhaseFEMMultiPhaseDOFsFileShort_%d_ref%d.txt';
+    filename = sprintf(formatSpec, refinementDepth, PODRefinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

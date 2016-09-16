@@ -104,7 +104,7 @@ for e=1:problem.N
                     mapIntegrationDomainForward = (Xi2 - Xi1)/2;
                     mapIntegrationDomainBackward = 2/(Xi2 - Xi1);
                     
-                   [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
+                   [N, B] = shapeFunctionsAndDerivatives(rGPXFEM(iGP));
 %                     [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
 %                         subDomainShapeFunctionCoefficients);
                     

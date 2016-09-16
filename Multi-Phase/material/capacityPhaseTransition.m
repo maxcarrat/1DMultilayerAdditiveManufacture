@@ -20,7 +20,7 @@ for i=1:numel(x)
     %         (tanh( (T - Tmel) / 10) + 1);
     
     h(i) = rho * specificHeat + rho * entalphyJump * ...
-        phaseChangeFuncDer(T, TlastConv, Tmel);% * (tanh( (T - Tmel) / 1) + 1);
+        phaseChangeFuncDer(T, TlastConv, Tmel) * (tanh( (T - Tmel) / 1) + 1);
 
     
 end

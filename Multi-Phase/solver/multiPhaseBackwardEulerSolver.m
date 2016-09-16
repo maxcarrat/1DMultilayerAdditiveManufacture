@@ -100,7 +100,7 @@ end
 
 %% Generate the reduced basis
 
-[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,1+numberOfLayersTimeSteps:numberOfTrainingLayers*numberOfLayersTimeSteps), numberOfPODModes);
+[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,3*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
 % [fluxesReductionOperator, modes] = properOrthogonalDecomposition(localHeatFluxes(:,1:numberOfTrainingLayers*numberOfLayersTimeSteps), numberOfPODModes);
 
 %% Enriched mesh using RB
@@ -403,7 +403,7 @@ for k=1:length(x)
     
     [N(k,:), B(k,:)] = shapeFunctionsAndDerivatives(localCoords(k));
     
-    [F(k,:), G(k,:)] = PODModesAndDerivativesGaussIntegration(problem, localCoords(k), modes, PODCoefficients,...
+    [F(k,:), G(k,:)] = PODModesAndDerivativesGaussIntegration(localCoords(k), modes, PODCoefficients,...
         subDomainShapeFunctionCoefficients, subDomainIndex, indexLocalEnrichedNodes);
 end
 
@@ -431,10 +431,10 @@ projectedCoefficients = projectionOperator * coefficients ;
 
 if derivative == 1
     for i=1:length(localCoords)
-        projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
+        projectionOperator_Temp(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
     end
     
-    temperature = projectionOperator * coefficients ;
+    temperature = projectionOperator_Temp * coefficients ;
     for i=1:numel(x)
         projectedCoefficients(i) = projectedCoefficients(i) .* ...
             problem.k(globalCoords(i), t, temperature(i));

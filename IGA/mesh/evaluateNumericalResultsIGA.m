@@ -13,7 +13,15 @@ Xi2 = problem.knotVector( 2 + problem.p );
 x = linspace(0, 1, length(x) / numberOfLayers * layer );
 numericalSolutions(x>=Xi1 & x<=Xi2) = element_num_sol( x(x>=Xi1 & x<=Xi2), t, problem, 1, coefficients, derivative);
 
-for e=2:size(problem.LM, 1)
+for e=2:layer-1
+    Xi1 = problem.knotVector( e + problem.p );
+    Xi2 = problem.knotVector( e + 1 + problem.p );
+      
+numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, problem, e, coefficients, derivative);
+
+end
+
+for e=layer+1:size(problem.LM, 1)
     Xi1 = problem.knotVector( e + problem.p );
     Xi2 = problem.knotVector( e + 1 + problem.p );
       
@@ -63,7 +71,7 @@ else
    
     r = (projectionOperator_der(:,problem.LM(element,:)) * coefficients(problem.LM(element,:))) .*...
         inverseJacobianX_Xi .*  ...
-        problem.k(x, t, projectionOperator(:,problem.LM(element,:)) * coefficients(problem.LM(element,:))) ;
+        problem.k(mapParametricToGlobal(x, problem), t, projectionOperator(:,problem.LM(element,:)) * coefficients(problem.LM(element,:))) ;
 end
 
 end

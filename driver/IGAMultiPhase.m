@@ -36,13 +36,12 @@ bodySource = 0.0e+00;
 tolerance = 1.0e-03;
 maxIteration = 100;
 
-p = 2;                                                      % polynomial degree
-integrationOrder = p+1;                                     % integration order
+pMax = 1;                                                      % polynomial degree
 
-maxRefinementDepth = 1;                                     % max refinement depth
-DOFs = zeros(maxRefinementDepth, 1);                        % DOFs vector to print
+depth = 5;                                     % max refinement depth
+DOFs = zeros(depth, 1);                        % DOFs vector to print
 
-for depth = 1:maxRefinementDepth
+for p = 1:pMax
     
     % bar specifics
     numberOfLayers = 20;
@@ -52,8 +51,10 @@ for depth = 1:maxRefinementDepth
     
     numberOfElementsInX = numberOfLayers;   % one element per layer
     timeSteps = numberOfLayers;
-    refinementDepth = depth;                % refinement depth on the last layer
-    
+
+    refinementDepth = depth;
+    integrationOrder = p+1;                                     % integration order
+
     if depth == 1
         PODRefinementDepth = 0;
     else
@@ -90,7 +91,7 @@ for depth = 1:maxRefinementDepth
     
     TotalNumberOfControlPoints =  numberOfElementsInX + p;
     
-    x_PostProcess = linspace(0.0, xEnd, 1000);        % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, 4000);                                  % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
     
@@ -104,7 +105,7 @@ for depth = 1:maxRefinementDepth
         numberOfLayers, numberOfPODModes, integrationOrder, integrationOrder, layerThickness);
     
     %% Post-Process
-    figure(depth+6)
+    figure(p+6)
     
     % Create axes
     axes1 = axes;
@@ -138,7 +139,7 @@ for depth = 1:maxRefinementDepth
     
     hold off
     
-    figure(depth+1006)
+    figure(p+1006)
     % Create axes
     axes2 = axes;
     
@@ -171,8 +172,8 @@ for depth = 1:maxRefinementDepth
     
     hold off
     % Write results to a file
-    formatSpec = 'myIGAMultiPhaseResultsFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myIGAMultiPhaseResultsFile_p%d.txt';
+    filename = sprintf(formatSpec,p);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -184,8 +185,8 @@ for depth = 1:maxRefinementDepth
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'myIGAMultiPhaseFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myIGAMultiPhaseFluxesFile_p%d.txt';
+    filename = sprintf(formatSpec,p);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -197,8 +198,8 @@ for depth = 1:maxRefinementDepth
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myIGAMultiPhaseTimeFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myIGAMultiPhaseTimeFile_p%d.txt';
+    filename = sprintf(formatSpec,p);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
         fprintf(resultFile, '%d, %\t', CPUTime(i));
@@ -207,8 +208,8 @@ for depth = 1:maxRefinementDepth
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'myIGAMultiPhaseDOFsFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myIGAMultiPhaseDOFsFile_p%d.txt';
+    filename = sprintf(formatSpec,p);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

@@ -1,5 +1,5 @@
 %% 1D Multi-layer Non-Linear Multi-phase Additive Manufacturing
-% evaluate a 1D poisson transient non-linear problem using XIGA
+% evaluate a 1D poisson transient non-linear problem using IGA
 
 clear all;
 clc;
@@ -36,29 +36,37 @@ bodySource = 0.0e+00;
 tolerance = 1.0e-03;
 maxIteration = 100;
 
-p = 2;                                                      % polynomial degree
-integrationOrder = p+1;                                     % integration order
+pMax = 2;                                                      % polynomial degree
 
-maxRefinementDepth = 2;                                     % max refinement depth
-initialNumberOfModes = 2;                                   % initial number of modes
-DOFs = zeros(maxRefinementDepth, 1);                        % DOFs vector to print
+modesMax = 2;
+depth = 6;                                                     % max refinement depth
+DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-for modes = 2:maxRefinementDepth
+for modes = 2:modesMax
     
     % bar specifics
-    numberOfLayers = 10;
-    trainingTimeSteps = 5;
-    numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
-    numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
+    numberOfLayers = 20;
+    trainingTimeSteps = 10;
+    numberOfTimeStepsPerLayer = 10;                             % total time per layer 0.225 sec
+    numberOfHeatingTimeSteps = 4;                               % heating laser time per layer 0.090 sec
     
     numberOfElementsInX = numberOfLayers;   % one element per layer
     timeSteps = numberOfLayers;
-    refinementDepth = 2;                % refinement depth on the last layer
     
-    PODRefinementDepth = 0;
-    integrationModesOrder = modes + 3;  %(modes - 1) ^ 2  + 1 + modes;
-    numberOfPODModes = 0;
+    p = pMax;
+    numberOfEnrichedControlPoints = 1;
+    numberOfPODModes = modes;
     
+    refinementDepth = depth;
+    integrationOrder = p+1;                                     % integration order
+    integrationModesOrder = modes + 5;                          %(modes - 1) ^ 2  + 1 + modes;
+    
+    %     if depth == 1
+    %         PODRefinementDepth = 0;
+    %     else
+    %         PODRefinementDepth = floor( depth / 2 );
+    %     end
+    %
     numberOfRefinedElementsToBeKept = 1;
     
     % Dirichlet condition on the bar tip
@@ -77,9 +85,9 @@ for modes = 2:maxRefinementDepth
     %     k = @(x, t, T) 27.0;
     
     % heat capacity function                                                    % heat capacity [kJ / kg °C]
-        heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
-            entalphyJump, Tsource, Tmelt);
-%     heatCapacity = @(x, T, T_last) rho * c;
+    heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
+        entalphyJump, Tsource, Tmelt);
+%         heatCapacity = @(x, T, T_last) rho * c;
     
     % discretization
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
@@ -87,21 +95,21 @@ for modes = 2:maxRefinementDepth
     
     TotalNumberOfControlPoints =  numberOfElementsInX + p;
     
-    x_PostProcess = linspace(0.0, xEnd, 1000);        % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, 4000);                                  % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
     
     
     %% Analysis
     [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(depth)] = ...
-        IGAMultiPhaseBackwardEulerSolver(p, x_PostProcess, bodyLoad, T0,...
+        XIGAMultiPhaseBackwardEulerSolver(p, x_PostProcess, bodyLoad, T0,...
         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance,...
         maxIteration,numberOfRefinedElementsToBeKept, TotalNumberOfControlPoints,...
-        refinementDepth, PODRefinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
+        refinementDepth, numberOfEnrichedControlPoints, trainingTimeSteps, numberOfTimeStepsPerLayer,...
         numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder, layerThickness);
     
     %% Post-Process
-    figure(modes)
+    figure(modes+1)
     
     % Create axes
     axes1 = axes;
@@ -135,7 +143,7 @@ for modes = 2:maxRefinementDepth
     
     hold off
     
-    figure(modes+1000)
+    figure(p+1006)
     % Create axes
     axes2 = axes;
     
@@ -153,7 +161,7 @@ for modes = 2:maxRefinementDepth
         
         % Axis limit
         xlim(axes2,[0 xEnd]);
-        ylim(axes2,[-1.0e+07 4.0e+08]);
+        ylim(axes2,[-1.0e+03 4.0e+08]);
         
         box(axes2,'on');
         % Set the remaining axes properties
@@ -169,7 +177,7 @@ for modes = 2:maxRefinementDepth
     hold off
     % Write results to a file
     formatSpec = 'myXIGAMultiPhaseResultsFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -181,8 +189,8 @@ for modes = 2:maxRefinementDepth
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'myXIGAMultiPhaseFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myXIGANonLInearFluxesFile_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -194,8 +202,8 @@ for modes = 2:maxRefinementDepth
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myXIGAMultiPhaseTimeFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myXIGANonLinearTimeFile_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
         fprintf(resultFile, '%d, %\t', CPUTime(i));
@@ -204,8 +212,8 @@ for modes = 2:maxRefinementDepth
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'myXIGAMultiPhaseDOFsFile_%d.txt';
-    filename = sprintf(formatSpec,depth);
+    formatSpec = 'myXIGANonLinearDOFsFile_p%d.txt';
+    filename = sprintf(formatSpec,p);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));
@@ -217,67 +225,67 @@ for modes = 2:maxRefinementDepth
 end % depth loop
 
 
-% figure(9999)
-% 
+% figure(10101)
+%
 % % Create axes
 % axes1 = axes;
-% 
+%
 % F(size(t,2)) = struct('cdata',[],'colormap',[]);
-% 
+%
 % for i=1:size(t,2)
 %     plot(x_PostProcess,temperatureSolution(:,i)')
-% 
+%
 %     % Title
 %     title('Temperature evolution of the bar', 'Interpreter','latex');
-% 
+%
 %     % Create ylabel
 %     ylabel('\fontname{Latin Modern Math} Temperature [°C]');
 %     xlabel('\fontname{Latin Modern Math} length [m]');
-% 
+%
 %     % Axis limit
 %     xlim(axes1,[0 xEnd]);
 %     ylim(axes1,[-100 3000]);
-% 
+%
 %     box(axes1,'on');
 %     % Set the remaining axes properties
 %     set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
-% 
+%
 %     grid on
 %     drawnow
 %     F(i) = getframe;
 %     writeVideo(writerObj1, getframe(gcf, [ 0 0 500 400 ]));
 % end
 % close(writerObj1);
-% 
-% figure(9998)
-% 
+%
+% figure(10102)
+%
 % % Create axes
 % axes1 = axes;
-% 
+%
 % F(size(t,2)) = struct('cdata',[],'colormap',[]);
-% 
+%
 % for i=1:size(t,2)
 %     plot(x_PostProcess,heatFlux(:,i)')
-% 
+%
 %     % Title
 %     title('Temperature evolution of the bar', 'Interpreter','latex');
-% 
+%
 %     % Create ylabel
 %     ylabel('\fontname{Latin Modern Math} Heat Flux [W/m^2]');
 %     xlabel('\fontname{Latin Modern Math} length [m]');
-% 
+%
 %     % Axis limit
 %     xlim(axes1,[0 xEnd]);
 %     ylim(axes1,[-1.0e+07 4.0e+08]);
-% 
+%
 %     box(axes1,'on');
 %     % Set the remaining axes properties
 %     set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
-% 
+%
 %     grid on
 %     drawnow
 %     F(i) = getframe;
 %     writeVideo(writerObj2, getframe(gcf, [ 0 0 500 400 ]));
 % end
-% 
+%
 % close(writerObj2);
