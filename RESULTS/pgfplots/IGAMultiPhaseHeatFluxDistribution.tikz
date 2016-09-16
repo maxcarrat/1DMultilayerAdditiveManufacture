@@ -1,0 +1,45 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=3, size=3.0cm, connect spies}]
+
+  \begin{axis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        xmin=0.0, xmax=1.0e-03,
+        ymin= 1.0e+7, ymax=1.0e+8,
+        xlabel={Bar length [$m$]},
+        ylabel={Heat Flux [$W/m^{2}$] },
+        legend pos=north west,
+        font=\small,
+        %mark size=0.05,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3},
+        legend cell align=left,
+		cycle list name=color list,
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot [color = black] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/FEMFluxesData/myMultiPhaseFEMFluxesFileShort_IntegrationM+1_8_ref0.txt};
+   \addlegendentry{FEM};
+	
+\addplot  [color = orange] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/IGA/myIGAMultiPhaseFluxesFile_p2.txt};
+   \addlegendentry{IGA};
+
+
+\end{axis} 
+
+ \spy on (8.25,4.75) in node at (6,2);
+
+
+\end{tikzpicture}
+\end{document}
+
+

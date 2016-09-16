@@ -1,0 +1,92 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+\begin{filecontents*}{FEM_time.csv}
+layer, time
+1,1.054878e+00
+2,1.155786e+00
+3,1.349891e+00 
+4,1.471933e+00 
+5,1.514473e+00 
+6,1.705673e+00 
+7,1.703924e+00 
+8,1.914231e+00 
+9,1.926309e+00 
+10,2.005086e+00 
+11,2.058687e+00 
+12,2.061115e+00 
+13,2.068673e+00 
+14,2.243857e+00 
+15,2.264305e+00 
+16,2.308644e+00 
+17,2.358845e+00 
+18,2.370356e+00 
+19,2.408284e+00 
+20,2.406819e+00 
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM1_time.csv}
+layer, time
+1,2.290676e+00
+2,2.435611e+00 
+3,2.706314e+00 
+4,3.051640e+00 
+5,3.161459e+00 
+6,2.831950e-01 
+7,1.709220e-01 
+8,1.719560e-01 
+9,1.931830e-01 
+10,2.125520e-01 
+11,2.344050e-01 
+12,2.487410e-01 
+13,2.695190e-01 
+14,2.861680e-01 
+15,3.099710e-01 
+16,3.315670e-01 
+17,3.498300e-01 
+18,3.725580e-01 
+19,3.852320e-01 
+20,4.065790e-01 
+
+\end{filecontents*}
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
+
+  \begin{semilogyaxis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        %xmin=1.0, xmax=1.0e+5,
+        %ymin=1e-3, ymax=1.0e2,
+        xlabel={Layer},
+        ylabel={CPU time [$\mu sec$] },
+        %legend pos= west,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3,at={(0.5,0.5)},anchor=west},
+        legend cell align=left,
+        %cycle list name=myCycleListColor,
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot table [ x = layer, y = time, col sep = comma] {FEM_time.csv};
+   \addlegendentry{Reference solution};
+	
+\addplot table [x = layer, y = time, col sep = comma] {XFEM1_time.csv};
+   \addlegendentry{X-PODFEM};
+ \end{semilogyaxis} 
+
+% \spy on (0.9,1.25) in node at (-3,3);
+
+
+\end{tikzpicture}
+\end{document}
+
+

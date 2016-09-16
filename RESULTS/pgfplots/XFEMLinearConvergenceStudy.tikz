@@ -1,0 +1,82 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+\begin{filecontents*}{FEM_data.csv}
+dofs,relError
+41,5.0796
+81,2.4251
+161,1.1521
+321,0.5434
+1281,0.2526
+2561,0.1154
+5121,0.0491
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM1_data.csv}
+dofs,relError
+21,0.0559
+22,0.0682
+23,0.0978
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM5_data.csv}
+dofs,relError
+21,0.0567
+22,0.0441
+23,0.0927
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM10_data.csv}
+dofs,relError
+21,0.0567
+22,0.0542
+23,0.0345
+
+\end{filecontents*}
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
+
+  \begin{loglogaxis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        %xmin=1.0, xmax=1.0e+5,
+        %ymin=1e-3, ymax=1.0e2,
+        xlabel={Number of unknowns},
+        ylabel={Relative error in the energy norm $[\%]$ },
+        legend pos=north east,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3},
+        legend cell align=left,
+        %cycle list name=myCycleListColor,
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot table [x=dofs, y=relError, col sep=comma] {FEM_data.csv};
+   \addlegendentry{FEM, $depth= 1...7$};
+	
+\addplot table [x=dofs, y=relError, col sep=comma] {XFEM1_data.csv};
+   \addlegendentry{X-FEM m+1, $modes= 1...3$};
+	
+\addplot table [x=dofs, y=relError, col sep=comma] {XFEM5_data.csv};
+   \addlegendentry{X-FEM m+5, $modes= 1...3$};
+
+\addplot table [x=dofs, y=relError, col sep=comma] {XFEM10_data.csv};
+   \addlegendentry{X-FEM m+10, $modes= 1...3$};	
+ \end{loglogaxis} 
+
+\spy on (0.9,1.25) in node at (-3,3);
+
+
+\end{tikzpicture}
+\end{document}

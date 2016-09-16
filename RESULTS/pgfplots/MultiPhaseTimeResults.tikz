@@ -1,0 +1,150 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+\begin{filecontents*}{FEM_time.csv}
+layer, time
+1,1.100770e+00
+2,1.225321e+00 
+3,1.432893e+00 
+4,1.554499e+00 
+5,1.618330e+00 
+6,1.777358e+00 
+7,1.784623e+00 
+8,1.937719e+00 
+9,1.998323e+00 
+10,2.071945e+00 
+11,2.223257e+00 
+12,2.193373e+00 
+13,2.172411e+00 
+14,2.388261e+00 
+15,2.392804e+00 
+16,2.432900e+00 
+17,2.444618e+00 
+18,2.482559e+00 
+19,2.543152e+00 
+20,6.568003e+00 
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM1_time.csv}
+layer, time
+1,2.327510e+00
+2,2.311416e+00
+3,2.684204e+00
+4,2.907819e+00
+5,3.130228e+00 
+6,2.697430e-01 
+7,1.655870e-01 
+8,1.721320e-01 
+9,1.958580e-01 
+10,2.161470e-01 
+11,2.413290e-01 
+12,2.586590e-01 
+13,2.843350e-01 
+14,2.910890e-01 
+15,3.086470e-01 
+16,3.330220e-01 
+17,3.582950e-01 
+18,3.837870e-01 
+19,3.975180e-01 
+20,4.152050e-01 
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM2_time.csv}
+layer, time
+1,2.359653e+00 
+2,2.434016e+00 
+3,2.765270e+00 
+4,2.939133e+00 
+5,3.143851e+00 
+6,3.938480e-01 
+7,2.456780e-01 
+8,2.507060e-01 
+9,2.772670e-01 
+10,3.008460e-01 
+11,9.322180e-01 
+12,3.411570e-01 
+13,3.645970e-01 
+14,3.753620e-01 
+15,3.974810e-01 
+16,4.286860e-01 
+17,1.216037e+00 
+18,5.233830e-01 
+19,4.892320e-01 
+20,5.124520e-01 
+
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM3_time.csv}
+layer, time
+1,2.349442e+00 
+2,2.331327e+00 
+3,2.718931e+00 
+4,2.919503e+00 
+5,3.194923e+00 
+6,5.515120e-01 
+7,3.752140e-01 
+8,3.847440e-01 
+9,4.318460e-01 
+10,4.554910e-01 
+11,4.815390e-01 
+12,4.948110e-01 
+13,5.202650e-01 
+14,1.472406e+00 
+15,5.649430e-01 
+16,6.040590e-01 
+17,6.201190e-01 
+18,6.489300e-01 
+19,7.104660e-01 
+20,6.880730e-01 
+
+\end{filecontents*}
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
+
+  \begin{semilogyaxis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        xmin=0, xmax=20,
+        ymin=1e-1, ymax=1.0e+2,
+        xlabel={Layer},
+        ylabel={CPU time [$\mu sec$] },
+        legend pos= north east,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3},
+        legend cell align=left,
+        %cycle list name=myCycleListColor,
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot table [ x = layer, y = time, col sep = comma] {FEM_time.csv};
+   \addlegendentry{Reference solution};
+	
+\addplot table [x = layer, y = time, col sep = comma] {XFEM1_time.csv};
+   \addlegendentry{X-PODFEM 1 $enr. node$};
+
+\addplot table [x = layer, y = time, col sep = comma] {XFEM2_time.csv};
+   \addlegendentry{X-PODFEM 2 $enr. nodes$};
+
+\addplot table [x = layer, y = time, col sep = comma] {XFEM3_time.csv};
+   \addlegendentry{X-PODFEM 4 $enr. nodes$};
+
+ \end{semilogyaxis} 
+
+% \spy on (0.9,1.25) in node at (-3,3);
+
+
+\end{tikzpicture}
+\end{document}
+
+
