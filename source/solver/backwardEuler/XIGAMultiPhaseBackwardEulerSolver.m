@@ -293,13 +293,13 @@ else % element is not enriched
     
     if derivative == 0
         for i=1:length(x)
-            [N(k,:), ~] = BsplinesShapeFunctionsAndDerivatives(x(k), problem.p, problem.knotVector);
+            [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
             projectionOperator(i,1:size(N,2)) = N(i,:);
         end
         r = projectionOperator(:,problem.LM(e,:)) * coefficients(problem.LM(e,:)) ;
     else
         for i=1:length(x)
-            [N(k,:), B(k,:)] = BsplinesShapeFunctionsAndDerivatives(x(k), problem.p, problem.knotVector);
+            [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
             projectionOperator(i,1:size(N,2)) = N(i,:);
             projectionOperator_der(i,1:size(B,2)) = B(i,:);
             JacobianX_Xi(i) = B(i,problem.LM(e, :)) *...

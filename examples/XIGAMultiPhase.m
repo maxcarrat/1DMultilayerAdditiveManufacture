@@ -54,7 +54,7 @@ for modes = 3:modesMax
     
     % bar specifics
     numberOfLayers = 20;
-    trainingTimeSteps = 20;
+    trainingTimeSteps = 5;
     numberOfTimeStepsPerLayer = 10;                             % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;                               % heating laser time per layer 0.090 sec
     
