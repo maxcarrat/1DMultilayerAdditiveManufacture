@@ -431,10 +431,10 @@ projectedCoefficients = projectionOperator * coefficients ;
 
 if derivative == 1
     for i=1:length(localCoords)
-        projectionOperator_Temp(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
+        projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
     end
     
-    temperature = projectionOperator_Temp * coefficients ;
+    temperature = projectionOperator * coefficients ;
     for i=1:numel(x)
         projectedCoefficients(i) = projectedCoefficients(i) .* ...
             problem.k(globalCoords(i), t, temperature(i));

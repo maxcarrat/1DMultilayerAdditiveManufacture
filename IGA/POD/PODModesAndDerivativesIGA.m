@@ -110,7 +110,7 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
 %         inverseJacobianX_Xi = 1 / detJacobianX_Xi;
         
         Phi_iMode = mapIntegrationDomainForward * N_subElement * Phi_coeff';
-        Phi_iModeContinuousDer = mapIntegrationDomainBackward * mapIntegrationSubDomainBackward *...
+        Phi_iModeContinuousDer =  mapIntegrationDomainBackward * mapIntegrationSubDomainBackward * ...
              B_subElement * Phi_coeff';
         
         derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;

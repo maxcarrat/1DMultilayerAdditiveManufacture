@@ -98,7 +98,7 @@ for e=1:problem.N
                         + ceil(refinedNodes/problem.XN),:);
 
                     [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXFEM(iGP), integrationSubDomainIndex,...
-                        subDomainShapeFunctionCoefficients);
+                        subDomainShapeFunctionCoefficients, integrationDomain);
                     
                     [F, G] = PODModesAndDerivativesGaussIntegration(rGPXFEM(iGP), modes, PODCoefficients,...
                         integrationCoefficients, integrationSubDomainIndex, indexLocalEnrichedNodes );
@@ -238,7 +238,9 @@ function [ projectedCoefficients ] = evaluateTemperatureSubElements(e, x, proble
 %   modes = number of enrichment modes
 
 numberOfProjectionPoints = length(x);
+refinedNodes = 2^problem.refinementDepth + 1;
 projectionOperator = zeros(numberOfProjectionPoints, length(solutionCoefficients(problem.N:end)) );
+integrationDomain = linspace(-1, 1, ceil(refinedNodes/problem.XN));
 
 N = zeros(length(x), 2);
 
@@ -249,7 +251,7 @@ localCoords = x;
 for k=1:length(x)
     
     [N(k,:), ~] = shapeFunctionsAndDerivativesSubElements(localCoords(k), e,...
-        subDomainShapeFunctionCoefficients);
+        subDomainShapeFunctionCoefficients, integrationDomain);
     
     [F(k,:), ~] = PODModesAndDerivativesGaussIntegration(localCoords(k), modes,...
         problem.reductionOperator, shapeFunctionCoefficients, e, indexLocalEnrichedNodes);

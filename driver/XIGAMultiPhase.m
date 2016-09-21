@@ -4,15 +4,20 @@
 clear all;
 clc;
 
-writerObj1 = VideoWriter('XIGAMultiPhaseTemperature.avi');
-writerObj1.Quality = 100;
-writerObj1.FrameRate = 5;
-open(writerObj1);
+% writerObj1 = VideoWriter('XIGAResults/XIGAMultiPhaseTemperature.avi');
+% writerObj1.Quality = 100;
+% writerObj1.FrameRate = 5;
+% open(writerObj1);
+% 
+% writerObj2 = VideoWriter('XIGAResults/XIGAMultiPhaseHeatFlux.avi');
+% writerObj2.Quality = 100;
+% writerObj2.FrameRate = 5;
+% open(writerObj2);
 
-writerObj2 = VideoWriter('XIGAMultiPhaseHeatFlux.avi');
-writerObj2.Quality = 100;
-writerObj2.FrameRate = 5;
-open(writerObj2);
+mkdir('XIGAResults/Temperature');
+mkdir('XIGAResults/Fluxes');
+mkdir('XIGAResults/Time');
+mkdir('XIGAResults/Dofs');
 
 %% Problem SetUp
 % Define the problem parameter, the boundary conditions
@@ -36,21 +41,24 @@ bodySource = 0.0e+00;
 tolerance = 1.0e-03;
 maxIteration = 100;
 
-pMax = 2;                                                      % polynomial degree
+pMax = 1;                                                      % polynomial degree
 
-modesMax = 2;
-depth = 6;                                                     % max refinement depth
+modesMax = 3;
+depth = 8;                                                     % max refinement depth
 DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-for modes = 2:modesMax
+% modes = 0;
+
+for modes = 3:modesMax
+% for refinementDepth = 1:depth
     
     % bar specifics
     numberOfLayers = 20;
-    trainingTimeSteps = 10;
+    trainingTimeSteps = 5;
     numberOfTimeStepsPerLayer = 10;                             % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;                               % heating laser time per layer 0.090 sec
     
-    numberOfElementsInX = numberOfLayers;   % one element per layer
+    numberOfElementsInX = numberOfLayers;                       % one element per layer
     timeSteps = numberOfLayers;
     
     p = pMax;
@@ -59,7 +67,7 @@ for modes = 2:modesMax
     
     refinementDepth = depth;
     integrationOrder = p+1;                                     % integration order
-    integrationModesOrder = modes + 5;                          %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 10;                         %(modes - 1) ^ 2  + 1 + modes;
     
     %     if depth == 1
     %         PODRefinementDepth = 0;
@@ -95,7 +103,7 @@ for modes = 2:modesMax
     
     TotalNumberOfControlPoints =  numberOfElementsInX + p;
     
-    x_PostProcess = linspace(0.0, xEnd, 4000);                                  % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, 10000);                                  % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
     
@@ -143,7 +151,7 @@ for modes = 2:modesMax
     
     hold off
     
-    figure(p+1006)
+    figure(modes+1000)
     % Create axes
     axes2 = axes;
     
@@ -176,7 +184,9 @@ for modes = 2:modesMax
     
     hold off
     % Write results to a file
-    formatSpec = 'myXIGAMultiPhaseResultsFile_%d.txt';
+   
+    
+    formatSpec = 'XIGAResults/Temperature/myXIGAMultiPhaseResultsFile_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -189,7 +199,7 @@ for modes = 2:modesMax
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'myXIGANonLInearFluxesFile_%d.txt';
+    formatSpec = 'XIGAResults/Fluxes/myXIGAMultiPhaseFluxesFile_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
@@ -202,7 +212,7 @@ for modes = 2:modesMax
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myXIGANonLinearTimeFile_%d.txt';
+    formatSpec = 'XIGAResults/Time/myXIGAMultiPhaseTimeFile_%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
@@ -212,8 +222,8 @@ for modes = 2:modesMax
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'myXIGANonLinearDOFsFile_p%d.txt';
-    filename = sprintf(formatSpec,p);
+    formatSpec = 'XIGAResults/Dofs/myXIGAMultiPhaseDOFsFile_p%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

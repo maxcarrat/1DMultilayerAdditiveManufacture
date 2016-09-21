@@ -45,7 +45,7 @@ for layer = 1:numberOfTrainingLayers
     % C0 continuous, i.e. we have to insert an additional knot at the layer
     % interface.
 
-    newKnots = linspace( knotVector(end-(p+1)),  knotVector(end-p), 2^refinementDepth + 1);
+    newKnots = linspace( knotVector(end-(p+1)),  knotVector(end-p), 2^refinementDepth + p);
     
     if layer == 1 || p == 1
         [ CPs, refinedKnotVector] = refineKnotVector( p, CPs, knotVector, newKnots(2:end-1));
@@ -111,7 +111,7 @@ end
 %% Generate the reduced basis
 % POD on the local/layer solution snapshots, omitt the first zero-solution
 % vector
-[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,5*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
+[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,3*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
 
 %% Enriched mesh using RB
 % for loop ROM phase layers
@@ -207,14 +207,17 @@ numericalSolutions=zeros(size(x));
 Xi1 = problem.knotVector( 1 + problem.p );
 Xi2 = problem.knotVector( 2 + problem.p );
 
-x = linspace(0, 1, length(x) / numberOfLayers * layer );
-numericalSolutions(x>=Xi1 & x<=Xi2) = element_num_sol( x(x>=Xi1 & x<=Xi2), t, modes, problem, 1, coefficients, derivative);
+localCoordinates = linspace(0, 1, length(x) / numberOfLayers * layer );
+
+numericalSolutions(localCoordinates>=Xi1 & localCoordinates<=Xi2) = element_num_sol...
+    ( localCoordinates(localCoordinates>=Xi1 & localCoordinates<=Xi2), t, modes, problem, 1, coefficients, derivative);
 
 for e=2:size(problem.LM, 1)
     Xi1 = problem.knotVector( e + problem.p );
     Xi2 = problem.knotVector( e + 1 + problem.p );
-      
-numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, modes, problem, e, coefficients, derivative);
+
+numericalSolutions(localCoordinates>Xi1 & localCoordinates<=Xi2) = element_num_sol...
+    ( localCoordinates(localCoordinates>Xi1 & localCoordinates<=Xi2), t, modes, problem, e, coefficients, derivative);
 
 end
 
@@ -255,9 +258,10 @@ if e > problem.N - problem.XN  % element is enriched
     end
     
     % On active elements use the refined domain as integration domain
-    refinedNodes = 2^problem.refinementDepth+1;
+    refinedNodes = 2^problem.refinementDepth+problem.p;
+%     refinedNodes = 2^problem.refinementDepth + 1;
+
     integrationDomain = linspace(-1, +1, ceil(refinedNodes/problem.XN));
-    subDomainShapeFunctionCoefficients = linspace(-1, +1, ceil(refinedNodes/problem.XN));
     
     Xi1 = integrationDomain(1);
     Xi2 = integrationDomain(2);
@@ -273,7 +277,7 @@ if e > problem.N - problem.XN  % element is enriched
     
     projectedCoefficients(localCoordinates>=xLocal1 & localCoordinates<=xLocal2) = postProcessingProjectionSubElements(1, elementEnrichedIndex,...
         localCoordinates(localCoordinates>=xLocal1 & localCoordinates<=xLocal2), t, problem, e,...
-        coefficients, modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes);    
+        coefficients, modes, derivative, integrationDomain, indexLocalEnrichedNodes);    
     
     for integrationSubDomainIndex=2:ceil(refinedNodes/problem.XN)-1
         
@@ -285,10 +289,10 @@ if e > problem.N - problem.XN  % element is enriched
         
         projectedCoefficients(localCoordinates>xLocal1 & localCoordinates<=xLocal2) = postProcessingProjectionSubElements(integrationSubDomainIndex, elementEnrichedIndex,...
             localCoordinates(localCoordinates>xLocal1 & localCoordinates<=xLocal2), t, problem, e,...
-            coefficients, modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes);
+            coefficients, modes, derivative, integrationDomain, indexLocalEnrichedNodes);
     end    
     
-    r = projectedCoefficients;% .* (2/(Xp2-Xp1)) ^ derivative;
+    r = projectedCoefficients; %.* (2/(Xp2-Xp1)) ^ derivative;
 
 
 else % element is not enriched
@@ -319,7 +323,7 @@ end
 
 function [ projectedCoefficients ] = postProcessingProjectionSubElements(subDomainIndex,...
     elementEnrichedIndex, x, t, problem, element, solutionCoefficients,...
-    modes, derivative, subDomainShapeFunctionCoefficients, indexLocalEnrichedNodes)
+    modes, derivative, integrationDomain, indexLocalEnrichedNodes)
 % POSTPROCESSINGPROJECTIONSUBELEMENTS project the previous solution onto the element.
 %   e = element index
 %   x = post-processing mesh in local coordinates of the integration domain
@@ -331,15 +335,20 @@ function [ projectedCoefficients ] = postProcessingProjectionSubElements(subDoma
 %   derivative = order of derivatives
 
 numberOfProjectionPoints = length(x);
-projectionOperator = zeros(numberOfProjectionPoints, 2 + modes * length(indexLocalEnrichedNodes) );
-projectionOperator_der = zeros(numberOfProjectionPoints, 2 + modes * length(indexLocalEnrichedNodes) );
+projectionOperator = zeros(numberOfProjectionPoints, problem.p+1 + modes * length(indexLocalEnrichedNodes) );
+projectionOperator_der = zeros(numberOfProjectionPoints, problem.p+-1 + modes * length(indexLocalEnrichedNodes) );
     
 localCoords = x;
 refinedNodes = 2^problem.refinementDepth + problem.p;
 % refinedNodes = 2^problem.refinementDepth + 1;
 
+subDomainShapeFunctionCoefficients = linspace(0, 1, ceil(refinedNodes/problem.XN));
+
 N = zeros(length(x), length(problem.knotVector)-problem.p-1);
 B = zeros(length(x), length(problem.knotVector)-problem.p-1);
+
+% N = zeros(length(x), problem.p+1);
+% B = zeros(length(x), problem.p+1);
 
 Xp1 = problem.knotVector( element + problem.p);
 Xp2 = problem.knotVector( element + problem.p + 1);
@@ -357,9 +366,12 @@ PODCoefficients = problem.reductionOperator(...
 for k=1:length(x)
     
     [N(k,:), B(k,:)] = BsplinesShapeFunctionsAndDerivatives(localCoords(k), problem.p, problem.knotVector);
-
+    
+%     [N(k,:), B(k,:)] = shapeFunctionsAndDerivativesIGASubElements(mapParametricToParent(localCoords(k), Xp1, Xp2), subDomainIndex,...
+%         subDomainShapeFunctionCoefficients, Xp1, Xp2, problem);
+%     
     [F(k,:), G(k,:)] = PODModesAndDerivativesIGA( problem, localCoords(k), modes, PODCoefficients,...
-        subDomainShapeFunctionCoefficients, subDomainIndex, indexLocalEnrichedNodes, element );
+        integrationDomain, subDomainIndex, indexLocalEnrichedNodes, element );
 end
 
 if length(indexLocalEnrichedNodes) == 1 %lhs
@@ -390,7 +402,9 @@ else
     for i=1:length(localCoords)
         JacobianX_Xi(i) = B(i,problem.LM(element, :)) *...
             problem.coords(problem.LM(element, :))';
-        inverseJacobianX_Xi(i) = 1 / JacobianX_Xi(i);
+%         JacobianX_Xi(i) = B(i,:) *...
+%             problem.coords(problem.LM(element, :))';
+        inverseJacobianX_Xi(i) = 1 / norm(JacobianX_Xi(i));
     end
     
     projectedCoefficients_der = projectionOperator_der(:, end-problem.p-modes:end) * coefficients ;

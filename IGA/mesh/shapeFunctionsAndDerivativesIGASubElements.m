@@ -1,8 +1,9 @@
-function [ N, B ] = shapeFunctionsAndDerivativesIGASubElements( localCoordinates,...
-    integrationSubDomainIndex, coefficients, leftKnot, rightKnot, problem )
+function [ N, B ] = shapeFunctionsAndDerivativesIGASubElements( x,...
+    integrationSubDomainIndex, coefficients, leftKnot, rightKnot,...
+    leftIntegrationDomain, rightIntegrationDomain, problem )
 %SHAPEFUNCTIONSANDDERIVATIVESIGASUBELEMENTS  Evaluate the shape functions and their derivatives 
 % on the integration sub-elements 
-%   localCoordinate = integration point local coordinate
+%   x = integration point local coordinate
 %   coefficients = nodal values of shape function at the element level
 %   integrationSubDomainIndex = index of the integration sub-domain
 %   leftKnot = knot on the elemnt left end side
@@ -11,6 +12,8 @@ function [ N, B ] = shapeFunctionsAndDerivativesIGASubElements( localCoordinates
 
 if problem.p == 1
     %% Matrix of shape functions
+    
+    localCoordinates = mapGlobalToLocal(x, leftIntegrationDomain, rightIntegrationDomain);
 
     N_subElement =  0.5 * [(1 - localCoordinates), (1 + localCoordinates)];
     N1 = coefficients(integrationSubDomainIndex);
@@ -22,6 +25,7 @@ if problem.p == 1
     
     %% Matrix of shape functions derivatives
     
+    inverseJacobianDeterminantSubParentToParent = 2/(rightIntegrationDomain - leftIntegrationDomain);
     inverseJacobianDeterminantParentToParametric = 2/(rightKnot - leftKnot);
     
     B_subElement =  0.5 * [-1, 1];
@@ -29,12 +33,13 @@ if problem.p == 1
     B2 = coefficients(integrationSubDomainIndex+1);
     B_coeff = [B1, B2];
     
-    B = [B_subElement * ( 1 - B_coeff)', B_subElement *  B_coeff'] * inverseJacobianDeterminantParentToParametric;
+    B = [B_subElement * ( 1 - B_coeff)', B_subElement *  B_coeff'] * inverseJacobianDeterminantSubParentToParent * inverseJacobianDeterminantParentToParametric;
     
 else
     
     m = length(coefficients);
     evaluationBSplinesPoint = linspace(leftKnot, rightKnot, m);
+    localCoordinates = mapGlobalToLocal(x, leftIntegrationDomain, rightIntegrationDomain);
     
     N = [];
     B = [];
@@ -57,15 +62,16 @@ else
     
     %% Matrix of shape functions derivatives
     
+    inverseJacobianDeterminantSubParentToParent = 2/(rightIntegrationDomain - leftIntegrationDomain);
     inverseJacobianDeterminantParentToParametric = 2/(rightKnot - leftKnot);
     
-    B_subElement =  0.5 * [-1, 1]; 
-    B_coeff1 = NSpline1(end-problem.p:end);
-    B_coeff2 = NSpline2(end-problem.p:end);    
+    B_subElement =  0.5 * [-1, 1];  
+    B_coeff1 = BSpline1(end-problem.p:end);
+    B_coeff2 = BSpline2(end-problem.p:end);
 
     for i =1:problem.p+1
-        B_vector = B_subElement(1) * B_coeff1(i) + B_subElement(2) * B_coeff2(i);
-        B = [B, B_vector * inverseJacobianDeterminantParentToParametric ];
+        B_vector = B_subElement(1) * N_coeff1(i) + B_subElement(2) * N_coeff2(i);
+        B = [B, B_vector * inverseJacobianDeterminantSubParentToParent * inverseJacobianDeterminantParentToParametric];
     end
 end
 

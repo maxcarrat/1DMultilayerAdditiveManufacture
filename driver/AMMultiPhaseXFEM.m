@@ -4,6 +4,13 @@
 clear all;
 clc;
 
+
+mkdir('XFEMResults/Temperature');
+mkdir('XFEMResults/Fluxes');
+mkdir('XFEMResults/Time');
+mkdir('XFEMResults/Dofs');
+
+
 %% Problem SetUp
 % Define the problem parameter, the boundary conditions
 % and the discretization.
@@ -27,25 +34,25 @@ tolerance = 1.0e-03;
 maxIteration = 100;
 
 initialNumberOfModes = 1;
-maxNumberOfModes = 1;
+maxNumberOfModes = 3;
 DOFs = zeros(maxNumberOfModes, 1);
-% modes = 1;
+modes = 1;
 
-for modes = initialNumberOfModes:maxNumberOfModes
-% for refinementDepth = 1:8
+% for modes = initialNumberOfModes:maxNumberOfModes
+for refinementDepth = 1:8
     
-    numberOfLayers = 6;
-    trainingTimeSteps = 5;
-%     trainingTimeSteps = 20;
+    numberOfLayers = 20;
+%     trainingTimeSteps = 5;
+    trainingTimeSteps = 20;
 
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
     
-    refinementDepth = 6;
+%     refinementDepth = 8;
     PODRefinementDepth = 0;
 
     integrationOrder = 2;
-    integrationModesOrder = modes + 5;  %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 10;  %(modes - 1) ^ 2  + 1 + modes;
     
     numberOfRefinedElementsToBeKept = 1;
 
@@ -147,8 +154,10 @@ for modes = initialNumberOfModes:maxNumberOfModes
     hold off
     
     % Write results to a file
-    formatSpec = 'myMultiPhaseXFEMResultsFileShort_IntegrationM+10_%d_ref%d.txt';
-    filename = sprintf(formatSpec, modes, PODRefinementDepth);
+   
+    
+    formatSpec = 'XFEMResults/Temperature/myFEMMultiPhaseResultsFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -160,8 +169,8 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'myMultiPhaseXFEMFluxesFileShort_IntegrationM+10_%d_ref%d.txt';
-    filename = sprintf(formatSpec, modes, PODRefinementDepth);
+    formatSpec = 'XFEMResults/Fluxes/myFEMMultiPhaseFluxesFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -173,19 +182,18 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'myMultiPhaseXFEMTimeFile_IntegrationM+10_%d_ref%d.txt';
-    filename = sprintf(formatSpec, modes, PODRefinementDepth);
+    formatSpec = 'XFEMResults/Time/myFEMMultiPhaseTimeFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
-        fprintf(resultFile, '%d, %\t', t(i), '%d %n',  CPUTime(i));
+        fprintf(resultFile, '%d, %\t', CPUTime(i));
     end
     
     fclose(resultFile);
     
-    
     % Write DOFs to a file
-    formatSpec = 'myMultiPhaseFEMMultiPhaseDOFsFileShort_%d_ref%d.txt';
-    filename = sprintf(formatSpec, refinementDepth, PODRefinementDepth);
+    formatSpec = 'XIGAResults/Dofs/myFEMMultiPhaseDOFsFile_p%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

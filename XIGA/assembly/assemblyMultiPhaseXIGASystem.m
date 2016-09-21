@@ -49,10 +49,9 @@ incrementModes = 0;
 
 % On active elements use the refined domain as integration domain
 
-% refinedControlPoints = 2^problem.refinementDepth + problem.p;
-refinedControlPoints = 2^problem.refinementDepth + 1;
+refinedControlPoints = 2^problem.refinementDepth + problem.p;
+% refinedControlPoints = 2^problem.refinementDepth + 1;
 integrationDomain = linspace(-1, 1, ceil(refinedControlPoints/problem.XN));
-integrationCoefficients = linspace(-1, 1, ceil(refinedControlPoints/problem.XN));
 subDomainShapeFunctionCoefficients = linspace(0, 1, ceil(refinedControlPoints/problem.XN));
 subDomainKnotVector =  getOpenKnotVector( ceil(refinedControlPoints/problem.XN) , problem.p );
 
@@ -120,15 +119,17 @@ for e=1:problem.N
 %            
 %                     xSub = mapParentToLocal(rGPXIGA(iGP), Xsub1, Xsub2);
 % 
-%                     [N, B] = BsplinesShapeFunctionsAndDerivatives(xSub, problem.p, subDomainKnotVector);
 %                     [N, B] = shapeFunctionsAndDerivativesSubElements(rGPXIGA(iGP), integrationSubDomainIndex, N);
-%                   
+%           
+% 
+%                     [N, B] = BsplinesShapeFunctionsAndDerivatives(x, problem.p, subDomainKnotVector);
 
-                    [N, B] = shapeFunctionsAndDerivativesIGASubElements(rGPXIGA(iGP), integrationSubDomainIndex,...
-                        subDomainShapeFunctionCoefficients, Xp1, Xp2, problem);
+                    [N, B] = shapeFunctionsAndDerivativesIGASubElements( rGPXIGA(iGP), integrationSubDomainIndex,...
+                        subDomainShapeFunctionCoefficients,  Xp1, Xp2,...
+                        integrationDomain(integrationSubDomainIndex), integrationDomain(integrationSubDomainIndex+1), problem );
                     
                     [F, G] = PODModesAndDerivativesIGA( problem, x, modes, PODCoefficients,...
-                        integrationCoefficients, integrationSubDomainIndex, indexLocalEnrichedNodes, e );
+                        integrationDomain, integrationSubDomainIndex, indexLocalEnrichedNodes, e );
                   
 %                     [F, G] = PODModesAndDerivativesGaussIntegration(rGPXIGA(iGP), modes, PODCoefficients,...
 %                         integrationCoefficients, integrationSubDomainIndex, 2 );                    
@@ -144,10 +145,10 @@ for e=1:problem.N
                         problem.heatCapacity(globalGP,...
                         evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e),...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain),...
                         evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         oldSolutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e))...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain))...
                         * F' * N(end-problem.p:end) * wGPXIGA(iGP) *  detJacobianX_Xi * problem.F_map(Xp1,Xp2);
                     
                     %Diffusion matrix
@@ -158,7 +159,7 @@ for e=1:problem.N
                         problem.k(globalGP,...
                         time, evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e))...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain))...
                         * G' * B(end-problem.p:end) * wGPXIGA(iGP) * inverseJacobianX_Xi * problem.F_map(Xp1,Xp2);
                     
                     %% Integrate XIGA block
@@ -172,10 +173,10 @@ for e=1:problem.N
                         problem.heatCapacity(globalGP,...
                         evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e),...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain),...
                         evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         oldSolutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e))...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain))...
                         * ( F' * F ) * wGPXIGA(iGP) * detJacobianX_Xi * problem.F_map(Xp1,Xp2);
                     
                     %Diffusion matrix
@@ -184,7 +185,7 @@ for e=1:problem.N
                         problem.k(globalGP,...
                         time, evaluateTemperatureSubElements(integrationSubDomainIndex, rGPXIGA(iGP), problem,...
                         solutionCoefficients, problem.modes, subDomainShapeFunctionCoefficients,...
-                        integrationCoefficients, indexLocalEnrichedNodes, e))...
+                        integrationDomain, indexLocalEnrichedNodes, e, integrationDomain))...
                         * ( G' * G ) * wGPXIGA(iGP) * inverseJacobianX_Xi * problem.F_map(Xp1,Xp2);
                     break;
                 end
@@ -266,8 +267,8 @@ projectedCoefficients = projectionOperator(:, problem.LM(e,:)) * solutionCoeffic
 end
 
 
-function [ projectedCoefficients ] = evaluateTemperatureSubElements(e, x, problem, solutionCoefficients,...
-    modes, subDomainShapeFunctionCoefficients, shapeFunctionCoefficients, indexLocalEnrichedNodes, element)
+function [ projectedCoefficients ] = evaluateTemperatureSubElements(integrationDomainIndex, x, problem, solutionCoefficients,...
+    modes, subDomainShapeFunctionCoefficients, shapeFunctionCoefficients, indexLocalEnrichedNodes, element, integrationDomain)
 % EVALUATETEMPERATURESUBELEMENTS project the previous solution onto the element.
 %   e = element index
 %   x = post-processing mesh in local coordinates of the integration domain
@@ -278,30 +279,35 @@ function [ projectedCoefficients ] = evaluateTemperatureSubElements(e, x, proble
 %   modes = number of enrichment modes
 
 numberOfProjectionPoints = length(x);
-projectionOperator = zeros(numberOfProjectionPoints, length(solutionCoefficients(problem.N:end)) );
+projectionOperator = zeros(numberOfProjectionPoints, problem.p+1 + modes * length(indexLocalEnrichedNodes) );
 
-N = zeros(length(x), problem.p+1);
-% N = zeros(length(x), length(problem.knotVector)- 1 - problem.p);
+% N = zeros(length(x), problem.p+1);
+N = zeros(length(x), problem.p + 1);
 
 F = zeros(length(x), modes * numel(indexLocalEnrichedNodes));
 
-localCoords = x;
+parentCoords = x;
 
 XiParametric1 = problem.knotVector( element + problem.p );
 XiParametric2 = problem.knotVector( element + 1 + problem.p );
 
+Xi1 = integrationDomain( integrationDomainIndex );
+Xi2 = integrationDomain( integrationDomainIndex + 1 );
+
 for k=1:length(x)
 
-    [N(k,:), ~] = shapeFunctionsAndDerivativesIGASubElements(localCoords(k), e,...
-        subDomainShapeFunctionCoefficients, XiParametric1, XiParametric2, problem);
+    [N(k,:), ~] = shapeFunctionsAndDerivativesIGASubElements(parentCoords(k), integrationDomainIndex,...
+        subDomainShapeFunctionCoefficients, XiParametric1, XiParametric2, Xi1, Xi2, problem);
     
-%     [N(k,:), ~] = BsplinesShapeFunctionsAndDerivatives(mapParentToLocal(localCoords(k), XiParametric1, XiParametric2), problem.p, subDomainShapeFunctionCoefficients(problem.p+1:end-problem.p));
+%     [N(k,:), ~] = BsplinesShapeFunctionsAndDerivatives(mapParentToLocal(parentCoords(k),...
+%         XiParametric1, XiParametric2), problem.p, problem.knotVector);
     
-    [F(k,:), ~] = PODModesAndDerivativesIGA(problem, mapParentToLocal(localCoords(k), XiParametric1, XiParametric2), modes,...
-        problem.reductionOperator, shapeFunctionCoefficients, e, indexLocalEnrichedNodes, element);
+    [F(k,:), ~] = PODModesAndDerivativesIGA(problem, mapParentToLocal(parentCoords(k),...
+        XiParametric1, XiParametric2), modes,...
+        problem.reductionOperator, shapeFunctionCoefficients, integrationDomainIndex, indexLocalEnrichedNodes, element);
 end
 
-for i=1:length(localCoords)
+for i=1:length(parentCoords)
     projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
 end
 

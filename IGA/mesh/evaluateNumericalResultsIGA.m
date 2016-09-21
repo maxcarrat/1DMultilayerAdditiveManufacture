@@ -21,7 +21,7 @@ numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, prob
 
 end
 
-for e=layer+1:size(problem.LM, 1)
+for e=layer+(problem.p-1):size(problem.LM, 1)
     Xi1 = problem.knotVector( e + problem.p );
     Xi2 = problem.knotVector( e + 1 + problem.p );
       
