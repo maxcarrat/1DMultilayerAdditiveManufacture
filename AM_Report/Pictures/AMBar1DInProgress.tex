@@ -1,0 +1,142 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+\usepackage{amsmath}
+
+\begin{document}
+\tdplotsetmaincoords{60}{30}
+
+
+
+\begin{tikzpicture}
+    [ tdplot_main_coords,
+      bar/.style={black,draw=black, fill=gray!25, fill opacity=0.25},
+      gamma/.style={black,draw=black, fill=gray!75, fill opacity=0.75},
+      grid/.style={very thin,black},
+      axis/.style={black,->,>=latex, thin},
+      load/.style={black,fill=gray!70, fill opacity=0.4},
+      dim/.style={latex-latex}]
+      
+  \scriptsize%
+
+
+  %draw the axes
+  \draw[axis] (-0.5,-0.5,-0.5) -- ++(0.5,0,0) node[anchor=west]{$x$};
+  \draw[axis] (-0.5,-0.5,-0.5) -- ++(0,0.5,0) node[anchor=west]{$y$};
+  \draw[axis] (-0.5,-0.5,-0.5) -- ++(0,0,0.5) node[anchor=west]{$z$};
+
+  %draw the cube
+  \draw[bar]   (0,0,0) 
+            -- (+0.5,0,0) 
+            -- (+0.5,0,2) 
+            -- (0,0,2) 
+            -- cycle;
+            
+  \draw[bar]   (+0.5,0,0) 
+            -- (+0.5,0.5,0) 
+            -- (+0.5,0.5,2) 
+            -- (+0.5,0,2) 
+            -- cycle;
+  
+  \draw[gamma]   (0,0,2) 
+            -- (+0.5,0,2) 
+            -- (+0.5,0.5,2) 
+            -- (0,0.5,2) 
+            -- cycle;  
+            
+  \draw[gamma]   (0,0,0) 
+            -- (+0.5,0,0) 
+            -- (+0.5,0.5,0) 
+            -- (0,0.5,0) 
+            -- cycle;  
+            
+
+  % Boundary conditions
+   \tikzset{xzplane/.style={canvas is xz plane at y=#1}}
+   \tikzset{yzplane/.style={canvas is yz plane at x=#1}}
+   \tikzset{xyplane/.style={canvas is xy plane at z=#1}}
+
+
+  % Draw base mesh
+
+
+%   \begin{scope}[xyplane=0.25]
+%
+%      \foreach \x in {0.0,0.1,...,2.5} 
+%      {
+%        \draw[grid] (\x,0.0,0.0) -- ++(0.0,1.0,0.0);
+%      }
+%
+%      \foreach \y in {0.0,0.1,...,1.0} 
+%      {
+%        \draw[grid] (0.0,\y,0.0) -- ++(2.5,0.0,0.0);
+%      }
+%
+%   \end{scope}
+%
+
+      \foreach \z in {0.0,0.05,...,2} 
+      {
+        \draw[grid] (0.0,0.0,\z) -- ++(0.5,0.0,0.0);
+      }
+
+      \foreach \z in {0.0,0.05,...,2} 
+      {
+        \draw[grid] (0.5,0.0,\z) -- ++(0.0,0.5,0.0);
+      }
+      
+
+
+
+%  % draw the load surface
+%  \coordinate (a) at (0.5,0.47,0.1875);
+%  \coordinate (b) at (2.0,0.47,0.1875);    
+%  \draw[load] (a) ellipse (0.075 and 0.06);
+%
+%  \draw[grid, ->,>=latex, thick]  (a) -- (b) node[align=center, sloped, midway, above] {\small $laser \quad path$};
+%  
+%  \coordinate (b) at (0.5,0.53,0.1875);
+%  \coordinate (a) at (2.0,0.53,0.1875);  
+%  \draw[load] (a) ellipse (0.075 and 0.06);
+%  \draw[grid, ->,>=latex, thick]  (a) -- (b);
+  
+   
+  % dimensions
+  
+%  \draw[black, thin] (0.5,0.5,0) -- ++(0.5,0.0,0);
+%  \draw[black, thin] (0.5,0.5,10) -- ++(0.5,0.0,0) ;
+%  \draw[dim] (0.75,0.5,0.0) -- ++(0,0,10)node[ midway, yshift=-0.0, xshift=0.0, right] {\small $10$} ;
+%  
+%  \draw (0,0,0.0) -- ++(0.0,-0.5,0);
+%  \draw (0.5,0,0.0) -- ++(0.0,-0.5,0);
+%  \draw[dim] (0,-0.45,0) -- ++(0.5,0,0.0) node[align=center, midway, below] {\small $0.5$};
+%  
+%  \draw (0.5,0.0,0.0) -- ++(0.5,0,0);
+%  \draw[dim] (1,0,0) -- ++(0.0,0.5,0.0) node[align=center, midway, right] {\small $0.5$};
+  
+%  
+%  \draw (2.5,0,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (+2.5,0,+0.6) -- ++(0,1,0) node[midway,above] {\small $1.03$};
+%  
+%  \draw (0,+1,0.25) -- ++(0,0,0.4);
+%  \draw (+2.5,+1,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
+%
+%  \draw (0.5,+1,+0.25) -- ++(0,0,0.4);
+%  \draw[dim] (0.5,+1,+0.6) -- ++(1.5,0,0) node[midway,above] {\small $1.5$};
+%
+%  \draw (2,+1,0.25) -- ++(0,0,0.4);
+%  \draw[dim] (2.0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
+%  
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,2.5) -- ++(0,0,-0.5)node[black, right, midway] {\small $\Gamma_{d,max}= 
+   \begin{cases}
+      2020^{\circ}C, & \text{if}\quad t_{layer}=0.0\div 0.09 sec \\
+      0^{\circ}C, & \text{if}\quad t_{layer}=0.09\div 0.225 sec
+    \end{cases}$ } ;
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,-0.8) -- ++(0,0,0.5)node[black, right, midway] {\small $\Gamma_{d,min}=20^{\circ}C$} ;
+
+  \draw[ very thin, opacity=1.0] (0.7,0.6,1) -- ++(0,0.0,0.0)node[black] {\small $\Omega$} ;
+  
+\end{tikzpicture}
+\end{document}

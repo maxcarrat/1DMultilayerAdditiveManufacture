@@ -1,0 +1,36 @@
+\documentclass[3p]{article}
+\usepackage{amsmath,amsfonts}
+
+\begin{document}
+
+\title{Additive Manufacturing State of Art}
+\author{Massimo Carraturo}
+\maketitle
+
+The simulation of an Additive Manufacturing (AM) process presents several computational issues due to the high complexity of the physical problem. In particular, the problem turns out to be:
+\begin{itemize}
+\item \textit{Transient}: the high speed of the laser beam does not allow to neglect the thermal inertia of the material.
+\item \textit{Non-linear}: due to the broad range of temperatures involved, both the heat capacity and the conductivity depends on the temperature.
+\item \textit{Multi-Phase}: three different phase of the material have to be considered: powder, liquid and solid.
+\item \textit{Multi-Scale}: the dimension of the laser beam is order of magnitude smaller than the size of the problem domain.
+\end{itemize}
+The high number of computational challenges involved calls for more sophisticated methods: Reduced Order Model (ROM) seems to be a promising direction \cite{Rozza2009}.
+\\
+\\
+\indent ROM can be efficiently applied in the context of AM. In facts, this technique allows to speed up the overall computational time, when several evaluation of the same problem has to be computed varying one or more parameters. There are no restrictions on the nature of the parameters which can be varied, they can include: the laser power, the laser beam size as well as the boundary conditions at different positions along the laser path.
+In the literature the ROM is applied to AM by means of different techniques:
+\begin{enumerate}
+\item Classical Model Reduction: The full order model (FOM) is solved for a small number of different parameter values. From the set of FOM solution (\textit{snapshots}) a reduction operator is constructed using the proper orthogonal decomposition (POD). The analysis is then performed on the ROM simply projecting the discrete system onto the reduced model by means of the reduction operator \cite{Michopoulos2014a}.
+The main limit of this method is that speed up is limited to the time required to solve the system, because the integration has to be performed always on the full model.
+\item {POD-GFEM}: In this method \cite{Aquino2008} the POD modes extracted from the set of snapshots are used to enriched the FEM basis via partition of unity \cite{Babuska1997} approach (GFEM/XFEM). The POD-GFEM allows to integrate and solve the problem on a coarse mesh enriched by means of the POD modal basis. A well approximated solution can be recovered with a relatively small number of DOFs.
+\item {V-GFEM}: The \textit{Vademecum}-GFEM \cite{Canales2016a} uses a different decomposition method: the so called proper generalized decomposition (PGD). The PGD solution are again used to enrich the FEM basis following the GFEM approach. The two main advantages of this method are the reduced number of additional DOFs - introduced by the PGD enrichment functions - compared to the POD enrichments and the local/global feature of the method itself. The \textit{Vademecum} can be generated separately on a local domain with an eulerian reference frame and later plugged in the global discretized domain, allowing to enrich only the nodes around the laser beam.
+\end{enumerate}
+
+\indent The main limit of the aforementioned methods is that they have not been applied to strongly non-linear problem (i.e. problem including kink or jumps in the non-linear parameter) yet. We are, thus, investigating the possibility to apply ROM-based methods for phase-change problems, i.e. where the heat capacity of the problem presents a high jump at the melting temperature. In particular we seek for a method which, on one hand allows to capture with a relatively low number of DOFs the non-linear behaviour of the problem, and on the other hand leads to a considerable computational speed up. Our method starts from a set of layer-solutions, obtained computing on the FOM - discretized with a fine-enough mesh - few layers of the AM process. From these set of snapshots the POD modal basis are generated and used as enrichment functions in a much coarser mesh for the remaining layers computation. The computational speed up factor obtained for slightly non-linear problem (where the conductivity is modelled using a smooth temperature-dependent function) is approximatively four, with an accuracy comparable to the fine mesh results. In case of phase-change problems the accuracy of the method decreases. Refining the enriched mesh it leads to better results, but the computational speed up is consequently strongly affected. A first idea to achieve our goal, consists in employing BSpline functions as basis functions to be enriched with the POD-modes. The hope is that the higher continuity of the BSpline basis can lead to a higher accuracy, when enriched using POD-modes in phase-change problems. A second possibility might be to include an additional enrichment function - which allows to capture the discontinuity in the solution - beside the POD-modes  \cite{Strouboulis2004}. Both these possibilities still have to be properly investigated.
+
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography.bib}
+
+\end{document}
+

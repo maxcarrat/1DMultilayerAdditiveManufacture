@@ -1,0 +1,191 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{tikz-3dplot}
+
+\begin{document}
+\tdplotsetmaincoords{60}{30}
+
+
+
+\begin{tikzpicture}
+    [ tdplot_main_coords,
+      bar/.style={black,draw=black, fill=gray!25, fill opacity=0.25},
+      lastLayer/.style={black,draw=black, fill=gray!95},
+      grid/.style={very thin,black},
+      axis/.style={black,->,>=latex, thin},
+      load/.style={black,fill=gray!70, fill opacity=0.4},
+      dim/.style={latex-latex}]
+      
+  \scriptsize%
+
+
+  %draw the axes
+  \draw[axis] (-1,-1,-1) -- ++(1,0,0) node[anchor=west]{$x$};
+  \draw[axis] (-1,-1,-1) -- ++(0,1,0) node[anchor=west]{$y$};
+  \draw[axis] (-1,-1,-1) -- ++(0,0,1) node[anchor=west]{$z$};
+
+  %draw the cube
+  \draw[bar]   (0,0,0) 
+            -- (+0.5,0,0) 
+            -- (+0.5,0,10) 
+            -- (0,0,10) 
+            -- cycle;
+            
+  \draw[bar]   (+0.5,0,0) 
+            -- (+0.5,0.5,0) 
+            -- (+0.5,0.5,10) 
+            -- (+0.5,0,10) 
+            -- cycle;
+  
+  \draw[bar]   (0,0,10) 
+            -- (+0.5,0,10) 
+            -- (+0.5,0.5,10) 
+            -- (0,0.5,10) 
+            -- cycle;  
+            
+
+
+  % Boundary conditions
+   \tikzset{xzplane/.style={canvas is xz plane at y=#1}}
+   \tikzset{yzplane/.style={canvas is yz plane at x=#1}}
+   \tikzset{xyplane/.style={canvas is xy plane at z=#1}}
+
+
+  % Draw base mesh
+
+
+%   \begin{scope}[xyplane=0.25]
+%
+%      \foreach \x in {0.0,0.1,...,2.5} 
+%      {
+%        \draw[grid] (\x,0.0,0.0) -- ++(0.0,1.0,0.0);
+%      }
+%
+%      \foreach \y in {0.0,0.1,...,1.0} 
+%      {
+%        \draw[grid] (0.0,\y,0.0) -- ++(2.5,0.0,0.0);
+%      }
+%
+%   \end{scope}
+%
+
+      \foreach \z in {0.0,0.05,...,10} 
+      {
+        \draw[grid] (0.0,0.0,\z) -- ++(0.5,0.0,0.0);
+      }
+
+      \foreach \z in {0.0,0.05,...,10} 
+      {
+        \draw[grid] (0.5,0.0,\z) -- ++(0.0,0.5,0.0);
+      }
+      
+
+
+
+   %draw the last layer
+  \draw[lastLayer]   (0,0,9.95) 
+            -- (+0.5,0,9.95) 
+            -- (+0.5,0,10) 
+            -- (0,0,10) 
+            -- cycle;
+            
+  \draw[lastLayer]   (+0.5,0,9.95) 
+            -- (+0.5,0.5,9.95) 
+            -- (+0.5,0.5,10) 
+            -- (+0.5,0,10) 
+            -- cycle;
+  
+  \draw[lastLayer]   (0,0,10) 
+            -- (+0.5,0,10) 
+            -- (+0.5,0.5,10) 
+            -- (0,0.5,10) 
+            -- cycle;  
+   
+  % dimensions
+  
+  \draw[black, thin] (0.5,0.5,0) -- ++(0.5,0.0,0);
+  \draw[black, thin] (0.5,0.5,10) -- ++(0.5,0.0,0) ;
+  \draw[dim] (0.75,0.5,0.0) -- ++(0,0,10)node[ midway, yshift=-0.0, xshift=0.0, right] {\small $10$} ;
+  
+  \draw (0,0,0.0) -- ++(0.0,-0.5,0);
+  \draw (0.5,0,0.0) -- ++(0.0,-0.5,0);
+  \draw[dim] (0,-0.45,0) -- ++(0.5,0,0.0) node[align=center, midway, below] {\small $0.5$};
+  
+  \draw (0.5,0.0,0.0) -- ++(0.5,0,0);
+  \draw[dim] (1,0,0) -- ++(0.0,0.5,0.0) node[align=center, midway, right] {\small $0.5$};
+  
+  
+  % zoom single layer
+  \path[axis] (0.25, 0.25, 10) edge [out= 60, in= 135] (2.0, 2.0, 3.0);  
+
+  %draw the cube
+  \draw[lastLayer]   (2.0+0,0,2.5) 
+            -- (2.0+5,0,2.5) 
+            -- (2.0+5,0,3.0) 
+            -- (2.0+0,0,3.0) 
+            -- cycle;
+            
+  \draw[lastLayer]   (2.0+5,0,2.5) 
+            -- (2.0+5,5,2.5) 
+            -- (2.0+5,5,3.0) 
+            -- (2.0+5,0,3.0) 
+            -- cycle;
+  
+  \draw[bar]   (2.0+0,0,3.0) 
+            -- (2.0+5,0,3.0) 
+            -- (2.0+5,5,3.0) 
+            -- (2.0+0,5,3.0) 
+            -- cycle;  
+            
+
+
+  % Boundary conditions
+   \tikzset{xzplane/.style={canvas is xz plane at y=#1}}
+   \tikzset{yzplane/.style={canvas is yz plane at x=#1}}
+   \tikzset{xyplane/.style={canvas is xy plane at z=#1}}
+
+      \foreach \x in {2.5,4.5,...,6.5} 
+      {
+        \draw[->,>=latex] (\x,0.5,3.0) -- ++(0.0,4,0.0);
+      }
+
+      \foreach \x in {3.5,4.5,...,5.5} 
+      {
+        \draw[-,>=latex] (\x,0.5,3.0) -- ++(0.0,4,0.0);
+      }
+      
+  %draw arcs
+	\draw (6.5,4.5,3.0) arc (0.0:180:0.5);	
+	\draw (5.5,0.5,3.0) arc (0.0:-180:0.5);	
+	\draw (4.5,4.5,3.0) arc (0.0:180:0.5);	
+	\draw (3.5,0.5,3.0) arc (0.0:-180:0.5);	
+
+  % draw the load surface
+  \coordinate (a) at (2.0+4.5,0.0,3.0);
+  \coordinate (b) at (2.0+4.5,5,3.0);
+  \coordinate (c) at (2.0+2,2,3.0);
+  \coordinate (d) at (2.0+3,3,3.0);
+  \coordinate (e) at (2.0+2.5,2.5,3.0);
+  \coordinate (f) at (2.0+4.5,2.5,3.0);
+  \coordinate (g) at (2.0+5.5,6,5.0);
+
+
+  \draw[load] (e) ellipse (0.5 and 0.5);
+
+  \draw[<-,>=latex] (f) -- ++ (0.5, 2.0, 3.0)  node[align=center, sloped, above] {\small $laser \quad path$};
+  
+  \draw[black, thin] (2.0+2.5,2,3.0) -- ++(-1.35,0.0,0);
+  \draw[black, thin] (2.0+2.5,3,3.0) -- ++(-1.35,0.0,0) ;
+  \draw[dim] (2.0+1.25,2,3.0) -- ++(0,1,0.0)node[ align=center, midway, yshift=-0.0, xshift=0.0, above, sloped] {\small $0.05$} ;
+  
+   
+  % dimensions
+  
+  \draw[black, thin] (2.0+5,5,2.5) -- ++(0.55,0.0,0);
+  \draw[black, thin] (2.0+5,5,3.0) -- ++(0.55,0.0,0) ;
+  \draw[dim] (2.0+5.5,5,2.5) -- ++(0,0,0.5)node[ align=center, midway, yshift=-0.0, xshift=0.0, right] {\small $0.05$} ;
+
+  
+\end{tikzpicture}
+\end{document}

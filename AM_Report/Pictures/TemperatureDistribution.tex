@@ -1,0 +1,47 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+
+\usetikzlibrary{3d}
+\usetikzlibrary{spy}
+\usetikzlibrary{snakes,arrows,shapes}    
+\usetikzlibrary{spy}
+\usetikzlibrary{backgrounds}  
+\usetikzlibrary{decorations}
+\usetikzlibrary{positioning}
+\usetikzlibrary{patterns}
+\usetikzlibrary{calc} 
+
+\begin{tikzpicture} [spy using outlines= {circle, magnification=6, connect spies}]
+  \begin{axis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        xmin=0.0, xmax=0.01,
+        ymin=0.0, ymax=2.020e3,
+        %xlabel={$\sqrt[3]{\text{Number of unknowns}}$},
+				xlabel={\text{length of the bar [m]}},
+        ylabel={\text{Temperature [°C]}},
+     legend pos=south west,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	legend style={font=\small, mark size=3},
+        legend cell align=left,
+    	grid = both,
+   	grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!20 }
+      ]
+		%2 levels of refinement		
+   \addplot table[ x index= 1 , y index = 2001 ]{myFEMNonLinearResultsFile_7.txt};
+   \addlegendentry{FEM reference solution};
+	
+%	  \addplot table[ x expr={\thisrowno{0}^(1)}, y index = 201 ]{myFEMNonLinearResultsFile_7.txt};
+%   \addlegendentry{POD 1 mode, $m+1$ GPs};
+
+         
+ \end{axis} 
+  \ifdrawboundingbox
+      \draw[dashed] (current bounding box.south west) rectangle (current bounding box.north east);
+  \fi 
+
+\end{tikzpicture}

@@ -1,0 +1,47 @@
+\begin{thebibliography}{1}
+
+\bibitem{Aquino2008}
+W.~Aquino, J.~C. Brigham, C.~J. Earls, and N.~Sukumar.
+\newblock Generalized finite element method using proper orthogonal
+  decomposition.
+\newblock {\em Int. J. Numer. Meth. Engng}, (00):1--31, 2008.
+
+\bibitem{Babuska1997}
+I.~Babu{\v s}ka and J.~M. Melenk.
+\newblock The {{Partition}} of {{Unity Method}}.
+\newblock {\em Int. J. Numer. Meth. Engng.}, 40(4), 1997.
+
+\bibitem{Canales2016a}
+D.~Canales, A.~Leygue, F.~Chinesta, D.~Gonz{\'a}lez, E.~Cueto, E.~Feulvarch,
+  J.-M. Bergheau, and A.~Huerta.
+\newblock Vademecum-based {{GFEM}} ({{V-GFEM}}): optimal enrichment for
+  transient problems.
+\newblock {\em Int. J. Numer. Meth. Engng}, 2016.
+
+\bibitem{Celentano1994}
+D.~Celentano, E.~O{\~ n}ate, and S.~Oller.
+\newblock A temperature-based formulation for finite eleemnt analysis of
+  generalized phase-change problems.
+\newblock {\em Int. J. Numer. Meth. Engng}, (37):3441--3465, 1994.
+
+\bibitem{EN1993}
+En 1993-1-2 (2005) (english): Eurocode 3: Design of steel structures - part
+  1-2: General rules - structural fire design [authority: The european union
+  per regulation 305/2011, directive 98/34/ec, directive 2004/18/ec].
+
+\bibitem{Michopoulos2014a}
+J.~G. Michopoulos, B.~Dennis, F.~Komninelli, A.~Iliopoulos, and A.~Akbariyeh.
+\newblock Performance of reduced order models of moving heat source deposition
+  problems for efficient inverse analysis.
+\newblock {\em Proceedings of the ASME 2013 International Design ENgineering
+  Technical Conferences and Computers and Information in Engineering Conference
+  IDETC/CIE}, 2014.
+
+\bibitem{Rozza2009}
+G.~Rozza, D.~B.~P. Huynh, and A.~T. Patera.
+\newblock Reduced {{Basis Approximation}} and a {{Posteriori Error Estimation}}
+  for {{Affinely Parametrized Elliptic Coercive Partial Differential
+  Equations}}: {{Application}} to {{Transport}} and {{Continuum Mechanics}}.
+\newblock 15(3), 2009.
+
+\end{thebibliography}

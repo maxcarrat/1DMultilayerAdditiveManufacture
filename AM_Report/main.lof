@@ -1,0 +1,1 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces X-PODFEM learing process: In the training phase the last element is enriched using classical $h$-refinement, while in the POD phase the last node of the original (coarse) mesh is enriched using POD modes via PU expansion.}}{3}

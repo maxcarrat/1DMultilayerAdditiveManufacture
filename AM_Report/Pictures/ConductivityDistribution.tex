@@ -1,0 +1,51 @@
+\documentclass{standalone}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{filecontents}
+
+\usepackage{tikz}
+\usepackage{tikzscale}
+\usepackage{tikz-3dplot}
+\usepackage{graphicx}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[
+        scale only axis, 
+	% The height and width argument only apply to the actual axis
+        xmin=0, 
+	xmax=3000,
+        ymin=20, 
+	ymax=60,
+        xlabel={Temperature [$^{\circ}C$]},
+        ylabel={Conductivity [W / m $^{\circ}C$]},
+     	legend pos=north east,
+        font=\large,
+        mark size=4,
+        line width = 1.0,
+	legend style={font=\large, mark size=4, fill=none, draw=none},
+               legend cell align=left,
+    	grid = both,
+   	grid style={ dash pattern = on 0.05 off 1, line cap = round, draw=gray!20 },
+   	samples=500,
+   	domain=0:3e+03,
+   	restrict y to domain =20:60,
+   	axis lines=left,
+   	xtick={0, 1000, 2000},
+               ytick={20, 26.7, 54},
+ ]
+
+\addplot[ blue ] plot ( {\x},{ 54 - 26.7 * tanh( ( \x - 800 ) / 800 + 1 ) } );
+   \addlegendentry{Smoothed Distribution};
+   
+
+ \addplot [black, dashed, no markers] coordinates {(0,54) (800,26.7)};
+ \addplot [black, dashed, no markers] coordinates {(800,26.7) (3000,26.7)};
+    \addlegendentry{EURONORM 3};
+    
+\end{axis}
+
+\end{tikzpicture}
+\end{document}
