@@ -6,37 +6,37 @@
 
 \begin{filecontents*}{FEM_data.csv}
 dofs,relError
-41,3.8179
-81,1.8125
-161,0.8528
-321,0.3983
-1281,0.1842
-2561,0.0857
-5121,0.0404
+22,3.8179
+24,1.8125
+28,0.8528
+36,0.3983
+52,0.1842
+84,0.0857
+148,0.0404
 
 \end{filecontents*}
 
 \begin{filecontents*}{XPODFEM1_data.csv}
 dofs,relError
-21,0.1423
-22,0.0730
-23,0.4636
+22,0.1423
+23,0.0730
+24,0.4636
 
 \end{filecontents*}
 
 \begin{filecontents*}{XPODFEM5_data.csv}
 dofs,relError
-21,0.1107
-22,0.0584
-23,0.1875
+22,0.1107
+23,0.0584
+24,0.1875
 
 \end{filecontents*}
 
 \begin{filecontents*}{XPODFEM10_data.csv}
 dofs,relError
-21,0.1074
-22,0.0696
-23,0.0422
+22,0.1074
+23,0.0696
+24,0.0422
 
 \end{filecontents*}
 
@@ -75,7 +75,7 @@ dofs,relError
    \addlegendentry{X-PODFEM m+10, $modes= 1...3$};	
  \end{loglogaxis} 
 
-%\spy on (0.9,1.25) in node at (-3,3);
+\spy on (0.9,1.25) in node at (-3,3);
 
 
 \end{tikzpicture}

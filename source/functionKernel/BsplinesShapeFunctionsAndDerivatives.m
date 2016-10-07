@@ -44,9 +44,9 @@ for p=2:pmax+1
         end
         
         if abs(knotVector(i+p)-knotVector(i+1))>2*eps
-        b=(knotVector(i+p)-x)/(knotVector(i+p)-knotVector(i+1));      
+            b=(knotVector(i+p)-x)/(knotVector(i+p)-knotVector(i+1));
         else
-        b=0;
+            b=0;
         end
         
         N(i,p)=a*N(i,p-1)+b*N(i+1,p-1);

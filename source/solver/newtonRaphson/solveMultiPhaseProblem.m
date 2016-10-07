@@ -26,7 +26,7 @@ for i=1:maxNumberOfIterations
    J = K * timeStepSize + M;
    
    solutionIncrement = J\r;
-   resNorm = norm(solutionIncrement);
+   resNorm = sqrt(solutionIncrement'*solutionIncrement);
    
    %check convergence
    if resNorm <= tolerance

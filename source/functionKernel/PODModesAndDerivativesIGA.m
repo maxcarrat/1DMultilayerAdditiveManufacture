@@ -1,5 +1,5 @@
 function [ Phi, PhiDerivative ] = PODModesAndDerivativesIGA( problem, parametricCoordinates, numberOfModes,...
-    PODCoefficients, coefficients, integrationSubDomainIndex, indexLocalEnrichedNodes, e )
+    PODCoefficients, coefficients, integrationSubDomainIndex, indexLocalEnrichedNodes, e, knotVector )
 % PODMODESANDDERIVATIVESIGA Evaluate the POD modes and their derivatives
 
 %% Matrix of modal shape functions
@@ -15,8 +15,8 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         
         % Evaluate the ithMode basis function Phi(x)
         % linear interpolation function on the integration subdomain
-        Xp1 = problem.knotVector(e + problem.p);
-        Xp2 = problem.knotVector(e + problem.p + 1);
+        Xp1 = knotVector(e + problem.p);
+        Xp2 = knotVector(e + problem.p + 1);
         
         Xi1 = coefficients(integrationSubDomainIndex);
         Xi2 = coefficients(integrationSubDomainIndex + 1);
@@ -29,7 +29,7 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         % element shape function
         
         [N, ~] = BsplinesShapeFunctionsAndDerivatives(...
-            parametricCoordinates, problem.p, problem.knotVector);
+            parametricCoordinates, problem.p, knotVector);
 %         [N, ~] = shapeFunctionsAndDerivatives(localCoordinates);
         
         %POD coefficients vector
@@ -64,8 +64,8 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         
         % Evaluate the ithMode basis function Phi(x)
         % linear interpolation function on the integration subdomain
-        Xp1 = problem.knotVector(e + problem.p);
-        Xp2 = problem.knotVector(e + problem.p + 1);
+        Xp1 = knotVector(e + problem.p);
+        Xp2 = knotVector(e + problem.p + 1);
         
         Xi1 = coefficients(integrationSubDomainIndex);
         Xi2 = coefficients(integrationSubDomainIndex + 1);
@@ -86,7 +86,7 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
 %         x1 = problem.knotVector( e + problem.p);
 %         x2 = problem.knotVector( e + problem.p + 1);
         [N, B] = BsplinesShapeFunctionsAndDerivatives(...
-            parametricCoordinates, problem.p, problem.knotVector);
+            parametricCoordinates, problem.p, knotVector);
         
         %POD coefficients vector
         if indexLocalEnrichedNodes(nodalIndex) == problem.IGAdof %length( PODCoefficients ) - problem.p

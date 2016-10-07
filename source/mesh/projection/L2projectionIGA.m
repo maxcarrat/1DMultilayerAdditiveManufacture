@@ -1,77 +1,33 @@
-function [ projectedTemperature ] = L2projectionIGA(problem, previousTemperature, controlPoints, previousKnotVector,...
-    initialTemperature)
+function [ projectedTemperature ] = L2projectionIGA( previousTemperature, problem, integrationOrder,...
+    integrationModalOrder, layerLength, initialTemperature, eXtendedFlag, previousProblem)
 %L2PROJECTIONLINEARDISTRIBUTION project the previous solution onto the updated mesh at the
 %new time step
-%   previousTemperature = temeprature distribution of the previous mesh
-%   controlPoint = control points at new time step
-%   previousKnotVector = previous knot vector
-%   initialTemperature = initial temperature of the powder
+%Input:
+%previousTemperature = temperature coefficients of the last converged
+%solution
+%problem = poisson Problem struct
+%integrationOrder = number of quadrature points for Gauss integration
+%integrationModalOrder = number of quadrature points for the enriched
+%elements
+%layerLength = length of the layer
+%initialTemperature = initial temperature of the powder
+%eXtendedFlag = true if ROM-phase, false if training-phase
+%previousProblem = poisson problem struct of the previous layer
+%Output:
+%projectedTemperature = L2 projection of the last converged solution onto
+%the new domain
 
-projectedTemperature = zeros(size(controlPoints, 2), 1);
-
-for j=1:size(controlPoints, 2)
-    
-    x = linspace(0, 1, length(controlPoints));
-    globalProjectedValue = globalProjection(x, previousKnotVector, previousTemperature, problem);
-    
-    if globalProjectedValue(j) ~= 0.0
-        projectedTemperature(j) = globalProjectedValue(j);
-    else
-        projectedTemperature(j) = (previousTemperature(end))/(2^problem.refinementDepth)...
-            * (-j + (size(problem.coords,2))) + initialTemperature;
-    end
+if strcmp(eXtendedFlag,'true')
+    [ M, f ] = assemblyL2ProjectionXIGAMatrixAndVector( previousTemperature, problem, integrationOrder,...
+        integrationModalOrder, layerLength, initialTemperature, previousProblem );
+elseif strcmp(eXtendedFlag,'transition')
+    [ M, f ] = assemblyL2ProjectionIGAOntoXIGAMatrixAndVector( previousTemperature, problem, integrationOrder,...
+        integrationModalOrder, layerLength, initialTemperature, previousProblem );
+else
+    [ M, f ] = assemblyL2ProjectionIGAMatrixAndVector( previousTemperature, problem, integrationOrder,...
+        layerLength, initialTemperature );
 end
 
-end
-
-
-function [ numericalSolutions ] = globalProjection(x, previousMesh, coefficients, problem)
-% numericalSolutions = GLOBALPROJECTION(x, previousMesh, coefficients, problem) evaluates the numerical solution
-% x = coordinates to post process
-% previousMesh = mesh onto whom I project
-% coefficients = coefficients of the basis function obtained by solving the mass matrix-load vector system of equations
-% problem = transient poisson problem struct
-
-previousKnotVector = previousMesh;
-numericalSolutions=zeros(size(x));
-Xi1 = previousKnotVector(1+problem.p);
-Xi2 = previousKnotVector(2+problem.p);
-
-numericalSolutions(x>=Xi1 & x<=Xi2) = localProjection(x(x>=Xi1 & x<=Xi2), 1,...
-    coefficients, problem);
-
-for e=2:problem.N
-    Xi1 = previousKnotVector(e + problem.p);
-    Xi2 = previousKnotVector(e + 1 + problem.p);
-    
-    numericalSolutions(x>Xi1 & x<=Xi2) = localProjection(x(x>Xi1 & x<=Xi2), e,...
-        coefficients, problem);
-end
+projectedTemperature = M\f;
 
 end
-
-function r = localProjection(x, element, coefficients, problem)
-% r = LOCALPROJECTION(x, coords, p, problem, element, coefficients, derivative) evaluates the numerical solution associated with a single specific element
-%   x = points where the element numerical solution has to be evaluated
-%   element = index of the element where to evaluate the element numerical solution
-%   coefficients = coefficients of the basis function obtained by solving the mass matrix-load vector system of equations
-%   problem = IGA physical problem struct
-
-% Xi1 = problem.knotVector( element + problem.p );
-% Xi2 = problem.knotVector( element + problem.p + 1);
-
-r = zeros(size(x));
-
-for k=1:length(x)
-    [N, ~] = BsplinesShapeFunctionsAndDerivatives(x(k), problem.p, problem.knotVector);
-    
-    if isempty(r) == 0
-        r(k) = r(k) + N(problem.LM(element,:)) * coefficients(problem.LM(element,:));
-    end
-    
-end
-
-end
-
-
-

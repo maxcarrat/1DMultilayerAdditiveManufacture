@@ -23,6 +23,7 @@ mkdir('XIGAResults/Dofs');
 % Define the problem parameter, the boundary conditions
 % and the discretization.
 
+%% Material parameters
 rho = 7500.0;                                               % density [kg/m^3]
 c = 600.0;                                                  % specific heat [J/(kg°C)]
 T0 = 20.0;                                                  % Initial temperature [°C]
@@ -33,28 +34,33 @@ Tmelt = 1450.0;                                             % melting temperatur
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar 0.001 [m]
 
+%% Boundary conditions
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue = T0 + Tsource;
 nuemannRightBC = 0.0e+04;
 bodySource = 0.0e+00;
 
-tolerance = 1.0e-03;
-maxIteration = 100;
-
-pMax = 1;                                                      % polynomial degree
-
-modesMax = 5;
+%% Non-linear parameters
+tolerance = 1.0e-03;                                           % N-R convergence tolerance
+maxIteration = 20;                                             % max number of N-R iterations
+pMax = 2;                                                      % polynomial degree
+modesMax = 3;                                                  % max number of POD-modes
 depth = 8;                                                     % max refinement depth
 DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-% modes = 0;
+modes = 0;
 
-for modes = 3:modesMax
-% for refinementDepth = 1:depth
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%for loop to generate the convergence study for either different number of
+%modes or differents refinement depths
+
+% for modes = 1:modesMax
+for refinementDepth = 1:depth
     
-    % bar specifics
+    %% Bar specifics
     numberOfLayers = 20;
-    trainingTimeSteps = 5;
+%     trainingTimeSteps = 5;
+    trainingTimeSteps = 20;
     numberOfTimeStepsPerLayer = 10;                             % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;                               % heating laser time per layer 0.090 sec
     
@@ -65,16 +71,11 @@ for modes = 3:modesMax
     numberOfEnrichedControlPoints = 1;
     numberOfPODModes = modes;
     
-    refinementDepth = depth;
+%     refinementDepth = depth;
     integrationOrder = p+1;                                     % integration order
-    integrationModesOrder = modes + 10;                         %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 15;                         %(modes - 1) ^ 2  + 1 + modes;
     
-    %     if depth == 1
-    %         PODRefinementDepth = 0;
-    %     else
-    %         PODRefinementDepth = floor( depth / 2 );
-    %     end
-    %
+
     numberOfRefinedElementsToBeKept = 1;
     
     % Dirichlet condition on the bar tip
@@ -90,14 +91,14 @@ for modes = 3:modesMax
     % conductivity function                                                     % thermal conductivity [W/(m K)]
     k = @(x, t, T) steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, T);
-    %     k = @(x, t, T) 27.0;
+%         k = @(x, t, T) 27.0;
     
     % heat capacity function                                                    % heat capacity [kJ / kg °C]
     heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
         entalphyJump, Tsource, Tmelt);
 %         heatCapacity = @(x, T, T_last) rho * c;
     
-    % discretization
+    %% Discretization
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
     layerThickness = xEnd/numberOfLayers;                                       % thickness of the single layer
     
@@ -117,7 +118,7 @@ for modes = 3:modesMax
         numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder, layerThickness);
     
     %% Post-Process
-    figure(modes+1)
+    figure(refinementDepth+20)
     
     % Create axes
     axes1 = axes;
@@ -151,7 +152,7 @@ for modes = 3:modesMax
     
     hold off
     
-    figure(modes+1000)
+    figure(refinementDepth+2000)
     % Create axes
     axes2 = axes;
     
@@ -186,8 +187,8 @@ for modes = 3:modesMax
     % Write results to a file
    
     
-    formatSpec = 'XIGAResults/Temperature/myXIGAMultiPhaseResultsFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XIGAResults/Temperature/myIGAMultiPhaseResultsFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -199,8 +200,8 @@ for modes = 3:modesMax
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XIGAResults/Fluxes/myXIGAMultiPhaseFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -212,18 +213,19 @@ for modes = 3:modesMax
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XIGAResults/Time/myXIGAMultiPhaseTimeFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XIGAResults/Time/myIGAMultiPhaseTime_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
-        fprintf(resultFile, '%d, %\t', CPUTime(i));
+        fprintf(resultFile, '%d, %\t', i);
+        fprintf(resultFile, '%d, %\n', CPUTime(i));
     end
     
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XIGAResults/Dofs/myXIGAMultiPhaseDOFsFile_p%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XIGAResults/Dofs/myIGAMultiPhaseDOFsFile_p%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

@@ -1,14 +1,26 @@
 function [ solution, convergenceFlag ] = solveMultiPhaseProblemIGA( problem, time, timeStepSize,...
     integrationOrder, tolerance, maxNumberOfIterations, oldSolution )
-%SOLVENONLINEARPROBLEMGAUSSINTEGRATION returns the nodal temperature values of the
-%coarse/global problem using Backward Euler implictit scheme, if it
-%converges the flag is et to 0, 1 otherwise.
-%   problemCoarse = problem struct on the coarse mesh
-%   activeMesh = active elements at teh current time step
+%SOLVEMULTIPHASEPROBLEMIGA returns the nodal temperature values of the
+%coarse/global problem using Backward Euler implicit scheme, if it
+%converges the flag is set to 0, 1 otherwise.
+%Input:
+%problem = poisson problem struct
+%time = actual time 
+%timeStepSize =size of the integration time steps in Backward Euler
+%integrationOrder = number of quadrature points
+%tolerance = Newton-Raphson tolerance for convergece
+%oldSolution = last converged solution
+%Output:
+%solution = converged solution
+%convergenceFlag = flag to check if the solution converged or not
+
+%% Initialize variables
 
 solution = oldSolution;
 lastConvergedSolution = oldSolution;
 convergenceFlag = 1;
+
+%% Newton-Raphson scheme
 
 for i=1:maxNumberOfIterations
     
@@ -24,7 +36,7 @@ for i=1:maxNumberOfIterations
    
    %jacobian of the residuum
    J = K * timeStepSize + M;
-   
+      
    solutionIncrement = J\r;
    resNorm = norm(solutionIncrement);
    
@@ -34,20 +46,16 @@ for i=1:maxNumberOfIterations
        fprintf(formatSpec, i);
        solution = solution + solutionIncrement;
        convergenceFlag = 0;
-       
-%        u = solution;
-%        internalEnergy = 0.5*u'*(K_unconstrained*u)
        return
    end
    
    formatSpec = '\t\t Residuum Norm %1.5f \n';
    fprintf(formatSpec, resNorm);
    
+   %update solution
    solution = solution + solutionIncrement;
     
 end
-
-
 
 formatSpec = '\t\t Warning: Solution did not converge after %1.0f iterations!!!\n';
 fprintf(formatSpec, maxNumberOfIterations);

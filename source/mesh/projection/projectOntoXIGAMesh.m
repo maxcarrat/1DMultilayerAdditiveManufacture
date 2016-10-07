@@ -11,7 +11,7 @@ for j=1:numel(problem.coords)
     if globalProjectedValue ~= 0.0
         projectedTemperature(j) = globalProjectedValue;
     else
-        projectedTemperature(j) = initialTemperature;
+        projectedTemperature(j) = 0.0; %initialTemperature;
     end
 end
 

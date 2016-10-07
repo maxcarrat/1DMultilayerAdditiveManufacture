@@ -42,7 +42,7 @@ gdof = max(max(LM));
 IGAdof = numberOfElements + p;
 XIGAdof = numberOfEnrichedControlPoints * modes;
 
-penalty = 1.0e+15;
+penalty = 1.0e+12;
 
 problemXIGA = struct('LM', LM, 'LMC', LMCoupling, 'LME', LMEnriched, 'B_map', B_map,...
     'F_map', F_map, 'dirichlet_bc', dirichlet_bc, 'neumann_bc', neumann_bc, 'refinementDepth', refinementDepth,...

@@ -4,7 +4,6 @@
 clear all;
 clc;
 
-
 mkdir('XFEMResults/Temperature');
 mkdir('XFEMResults/Fluxes');
 mkdir('XFEMResults/Time');
@@ -27,11 +26,11 @@ xEnd = 0.001;                                               % length of the bar 
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue =  T0 + Tsource;
-nuemannRightBC = 0.0e+00;
+nuemannRightBC = 0.0e+04;
 bodySource = 0.0e+13;
 
 tolerance = 1.0e-03;
-maxIteration = 100;
+maxIteration = 20;
 
 initialNumberOfModes = 1;
 maxNumberOfModes = 3;
@@ -48,7 +47,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
     
-    refinementDepth = 8;
+    refinementDepth = 6;
     PODRefinementDepth = 0;
 
     integrationOrder = 2;
@@ -79,7 +78,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                                 % layer spatial discretization X
     
 %     x_PostProcess = linspace(0.0, xEnd, ( numberOfElementsInX + 1 ) * 2.^8);                    % post-processing coordinates
-    x_PostProcess = linspace(0.0, xEnd, 4000);                    % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, 6000);                    % post-processing coordinates
     [X, T] = meshgrid(x_PostProcess, t);
     
     %% Analysis
@@ -186,13 +185,14 @@ for modes = initialNumberOfModes:maxNumberOfModes
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
-        fprintf(resultFile, '%d, %\t', CPUTime(i));
+        fprintf(resultFile, '%d, %\t', i);
+        fprintf(resultFile, '%d, %\n', CPUTime(i));
     end
     
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XIGAResults/Dofs/myXFEMMultiPhaseDOFsFile_p%d.txt';
+    formatSpec = 'XFEMResults/Dofs/myXFEMMultiPhaseDOFsFile_p%d.txt';
     filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)

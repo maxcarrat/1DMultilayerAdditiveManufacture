@@ -26,22 +26,23 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-03;
 maxIteration = 20;
 
-maxRefinementDepth = 1;
+maxRefinementDepth = 6;
 DOFs = zeros(maxRefinementDepth, 1);
 
-p_analytical = zeros(1,1);
+% allocate plots 
+p_analytical = zeros(1,1);                                  
 p_ABAQUS = zeros(1,1);
 p_numerical = zeros(1,1);
 pFlux_ABAQUS = zeros(1,1);
 pFlux_numerical = zeros(1,1);
 
-for depth = 1:maxRefinementDepth
+for depth = 6:maxRefinementDepth
     
     integrationOrder = 2;
-    numberOfElementsInX = 150;
+    numberOfElementsInX = 10;
     
     timeSteps = 10;
-    refinementDepth = 0;
+    refinementDepth = depth;
     
     dirichletRightBC = @(t) [];                     % No RHS Dirichlet condition
     
@@ -71,7 +72,7 @@ for depth = 1:maxRefinementDepth
     
     %% Post-Process
     
-    figure(depth+6)
+    figure(depth)
     % Create axes
     axes1 = axes;
     
@@ -156,7 +157,7 @@ abaqusSolution = dlmread('abaqusFluxes.txt');
     hold off
     
     
-    figure(depth+1006)
+    figure(depth+100)
     % Create axes
     axes2 = axes;
     

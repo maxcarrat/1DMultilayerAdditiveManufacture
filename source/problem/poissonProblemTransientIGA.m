@@ -31,7 +31,7 @@ function problem = poissonProblemTransientIGA(coords, rhs, leftDirichletBoundary
             
             gdof = max(max(LM));
             
-            penalty = 1.0e+15;
+            penalty = 1.0e+12;
 
             problem = struct('LM', LM,  'B_map', B_map, 'F_map', F_map, 'refinementDepth', refinementDepth, ...
                 'dirichlet_bc', dirichlet_bc, 'N', N, 'gdof', gdof, 'rhs', rhs, 'coords', coords, 'penalty', penalty, ...

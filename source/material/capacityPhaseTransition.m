@@ -8,21 +8,9 @@ h = zeros(numel(x),1);
 
 for i=1:numel(x)
     
-    %    if T > 0.0 &&  T < Tmel
-    %        h(i) = rho * specificHeat;
-    %    elseif T >= Tmel  &&  T <= Tliq
-    %        h(i) = rho * specificHeat + rho * entalphyJump / (10);
-    %    else
-    %        h(i) = rho * specificHeat + rho * entalphyJump;
-    %    end
-    
-    %     h(i) = rho * specificHeat + rho * entalphyJump / 2 / (Tliq-Tmel) *...
-    %         (tanh( (T - Tmel) / 10) + 1);
-    
     h(i) = rho * specificHeat + rho * entalphyJump * ...
         phaseChangeFuncDer(T, TlastConv, Tmel) * (tanh( (T - Tmel) / 1) + 1);
 
-    
 end
 
 end
