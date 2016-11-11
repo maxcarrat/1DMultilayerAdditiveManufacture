@@ -40,9 +40,9 @@ end
 neumann_bc = [LM(N,end) rhs(coords(end), time)];
 
 
-gdof = max(max(LMBaseCoupling));
 overlayDofs = N + 1;
 Xdof = (2*numberOfEnrichedDofs-1) * modes;
+gdof = overlayDofs + Xdof;
 
 penaltyL2 = 1.0e+15;
 penalty = 1.0e+12;
