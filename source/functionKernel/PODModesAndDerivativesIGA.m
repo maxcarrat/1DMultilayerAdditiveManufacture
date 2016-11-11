@@ -30,7 +30,7 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         
         [N, ~] = BsplinesShapeFunctionsAndDerivatives(...
             parametricCoordinates, problem.p, knotVector);
-%         [N, ~] = shapeFunctionsAndDerivatives(localCoordinates);
+%         [N, ~] = shapeFunctionsAndDerivatives(parentCoords);
         
         %POD coefficients vector
         if indexLocalEnrichedNodes(nodalIndex) == problem.IGAdof %length( PODCoefficients ) - problem.p
@@ -83,8 +83,7 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         
         % element shape function and derivatives
 %         [NFEM, BFEM] = shapeFunctionsAndDerivatives(parentCoords);
-%         x1 = problem.knotVector( e + problem.p);
-%         x2 = problem.knotVector( e + problem.p + 1);
+
         [N, B] = BsplinesShapeFunctionsAndDerivatives(...
             parametricCoordinates, problem.p, knotVector);
         
@@ -99,20 +98,11 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode)  - Phi_Nodal;
         Phi_coeff = [Phi1, Phi2];
         
-%         Phi1Der = PODCoefficients(integrationSubDomainIndex, iMode);
-%         Phi2Der = PODCoefficients(integrationSubDomainIndex+1, iMode);
-%         Phi_coeff_der = [Phi1Der, Phi2Der];  
-   
-%         ldof = problem.p+1;
-% 
-%         JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
-%         detJacobianX_Xi = norm(JacobianX_Xi);
-%         inverseJacobianX_Xi = 1 / detJacobianX_Xi;
-        
         Phi_iMode = mapIntegrationDomainForward * N_subElement * Phi_coeff';
         Phi_iModeContinuousDer =  mapIntegrationDomainBackward * mapIntegrationSubDomainBackward * ...
              B_subElement * Phi_coeff';
-        
+         
+         
         derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;
         derivative_2 =  B(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode;
         

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  1 SEP 2016 11:33
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  26 OCT 2016 13:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -583,7 +583,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 Here is how much of TeX's memory you used:
  18119 strings out of 493304
  447244 string characters out of 6139871
- 3841361 words of memory out of 5000000
+ 3841364 words of memory out of 5000000
  21211 multiletter control sequences out of 15000+600000
  5463 words of font info for 20 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
@@ -595,7 +595,7 @@ st/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts
 ublic/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
 msfonts/cm/cmsy9.pfb>
 Output written on MultiPhaseTemperatureDistributionXFEMvsReference.pdf (1 page,
- 402399 bytes).
+ 402403 bytes).
 PDF statistics:
  31 PDF objects out of 1000 (max. 8388607)
  22 compressed objects within 1 object stream

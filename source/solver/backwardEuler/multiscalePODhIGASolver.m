@@ -2,13 +2,13 @@ function [temperaturePostProcessing, heatFluxes, internalEnergy, computationalTi
     multiscalePODhIGASolver( p, postProcessingCoords, rhs, ...
     initialTemperature, leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
     neumannBoundaryconditionValue, k, heatCapacity, timeVector, tolerance,...
-    maxIterations, totalNumberOfControlPoints, refinementDepth, numberOfEnrichedControlPoints,...
+    maxIterations, totalNumberOfControlPoints, refinementDepth, numberOfEnrichedRefinementDepth,...
     numberOfTrainingLayers, numberOfLayersTimeSteps, numberOfLayers, numberOfPODModes,...
-    integrationSplinesOrder, integrationModesOrder, layerThickness)
+    integrationSplinesOrder, integrationModesOrder, layerThickness, steelThermalConductivityDerivative, heatCapacityDerivative)
 %%MULTISCALEPODHIGASOLVER the function solve a AM process of a 1D bar using
 %multiscale POD h-IGA method. The process is devided in two sperate phases:
 %1. Training phase: a base IGA mesh and an overlay h-FEM mesh are
-%solved using multilevel hp-d approach (Rank, E. (1992b). A combination of 
+%solved using multilevel hp-d approach (Rank, E. (1992b). A combination of
 %hp-version finite elements and a domain decomposition method. Proceedings
 %of the First European Conference on Numerical Methods in Engineering). The
 %overlay h-FEM mesh is created at each time step at the last layer of the
@@ -32,7 +32,7 @@ function [temperaturePostProcessing, heatFluxes, internalEnergy, computationalTi
 %tolerance = converegence tolerance for Gauss-Seidel-Newton nonlinear
 %solver
 %maxIterations = max iteration number in Gauss-Seidel_Newton solver
-%totalNumberOfControlPoints = number of control pioints on the initial 
+%totalNumberOfControlPoints = number of control pioints on the initial
 %coarse mesh
 %refinementDepth = refinement level depth at the last layer
 %numberOfEnrichedControlPoints = enriched control points on the last layer
@@ -42,6 +42,10 @@ function [temperaturePostProcessing, heatFluxes, internalEnergy, computationalTi
 %integrationSplinesOrder = number of Gauss points on the base mesh
 %integrationModesOrder = number of Gauss points on the overlay eXtended mesh
 %layerThickness = thickness of the single layer
+%steelThermalConductivityDerivative = derivative of the conductivity of the
+%material
+%heatCapacityDerivative = derivative of the heat capacity of the
+%material
 %
 %Output:
 %temperaturePostProcessing = temperature solution at the post-processing
@@ -67,37 +71,43 @@ formatSpec = 'Begin Time Integration Scheme \n' ;
 fprintf(formatSpec)
 
 %% Training phase ---------------------------------------------------------
-for layer = 1:numberOfTrainingLayers
+for layer = 2:numberOfTrainingLayers
     
     timeToGenerateAndSolveTheSystem = 0.0;
-    tic 
-    
+    tic
+    if layer==1
+        ansatzOrder=p;
+    else
+        ansatzOrder=p;
+    end
     %Generate a coarse IGA mesh
-    knotVector = getOpenKnotVector( layer, p );
-    CPs = getControlPoints( layer, layerThickness, p );
+    knotVector = getOpenKnotVector( layer, ansatzOrder );
+    CPs = getControlPoints( layer, layerThickness, ansatzOrder );
     
     %Generate a fine overlay FEM mesh
-    nodalCoordinates = linspace( knotVector(end-(p+1)),  knotVector(end-p), 2^refinementDepth);
+    nodalCoordinates = linspace( (layer-1) * layerThickness,  CPs(end), 2^refinementDepth + 1);
     
     %Project old solution onto the new mesh
-    if layer > 1
+    if layer > 2
         %Create a fictitious problem for the projection
-            %Base mesh problem
-            baseProblem = poissonProblemTransientIGA(CPs, rhs,...
-                leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-                neumannBoundaryconditionValue, k, heatCapacity, 0.0,...
-                knotVector, p, refinementDepth);
-
-            %Overlay mesh problem
-            overlayProblem = poissonProblemOverlayMesh(nodalCoordinates,...
-                numberOfEnrichedControlPoints, rhs,...
-                leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-                neumannBoundaryconditionValue, p, k, heatCapacity, 0.0);   
+        %Base mesh problem
+        baseProblem = poissonProblemBaseMesh(CPs, rhs,...
+            leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+            neumannBoundaryconditionValue, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, 0.0,...
+            knotVector, p, refinementDepth);
+        
+        %Overlay mesh problem
+        overlayProblem = poissonProblemOverlayMesh(nodalCoordinates,...
+            numberOfEnrichedRefinementDepth, rhs,...
+            neumannBoundaryconditionValue, p, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, 0.0);
         
         %L2 projection onto new IGA mesh
         [baseTemperatureSolutions, overlayTemperatureSolutions] = L2MultiscaleProjection...
-            ( baseTemperatureSolutions, overlayTemperatureSolutions,baseProblem,...
-            overlayProblem, integrationSplinesOrder, 0, initialTemperature, 'false', previousBaseProblem );
+            ( baseTemperatureSolutions, overlayTemperatureSolutions, baseProblem,...
+             overlayProblem, integrationSplinesOrder, ansatzOrder + 1, layerThickness, initialTemperature,...
+            'false', previousBaseProblem, previousOverlayProblem, layer );
     else
         baseTemperatureSolutions = zeros(length(CPs), 1);
         overlayTemperatureSolutions = zeros(length(nodalCoordinates), 1);
@@ -116,23 +126,35 @@ for layer = 1:numberOfTrainingLayers
         
         %Generate the Poisson problem at timeStep t
         %Base mesh problem
-        baseProblem = poissonProblemTransientIGA(CPs, rhs,...
+        baseProblem = poissonProblemBaseMesh(CPs, rhs,...
             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
-            knotVector, p, refinementDepth);
+            neumannBoundaryconditionValue, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, currentTime,...
+            knotVector, ansatzOrder, refinementDepth);
         
-        %Overlay meah problem
-        overlayProblem = poissonProblemOverlayMesh(nodalCoordinates, numberOfEnrichedControlPoints, rhs,...
-            leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            neumannBoundaryconditionValue, p, k, heatCapacity, currentTime);
+        %Overlay mesh problem
+        overlayProblem = poissonProblemOverlayMesh(nodalCoordinates, numberOfEnrichedRefinementDepth, rhs,...
+            neumannBoundaryconditionValue, ansatzOrder, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, currentTime);
         
-        %Update and merge temperature into global domain
-        overlayIntegrationOrder = 2;
-        [baseTemperatureSolutions, overlayTemperatureSolutions, convergenceFlag] = solveOneStepGaussSeidelNewton( baseProblem,...
-            overlayProblem, currentTime, timeStepSize, integrationSplinesOrder, overlayIntegrationOrder,...
-            tolerance, maxIterations, baseTemperatureSolutions, overlayTemperatureSolutions );
-                
+        %Solve multiscale problem using one-step Gauss-Seidel-Newton method
+        %set the eXtended index = 'false' since we are in the training
+        %phase!
+        overlayIntegrationOrder = integrationSplinesOrder - 1;
+        [baseTemperatureSolutions, overlayTemperatureSolutions, convergenceFlag] = solveOneStepGaussSeidelNewton( ...
+            overlayProblem, overlayProblem, baseProblem, currentTime, timeStepSize, integrationSplinesOrder, overlayIntegrationOrder,...
+            tolerance, maxIterations, baseTemperatureSolutions, overlayTemperatureSolutions, initialTemperature, 'false' );
+        
         %Cache the local solution for POD
+        %in order to get the correct POD modes we need to decompose the
+        %temperature evaluated at the nodes of the overlay mesh and not
+        %only the overlay mesh nodal values!
+
+%         temperatureAtOverlayNodes = evaluateNumericalResultsMultiscale(nodalCoordinates,...
+%             currentTime, baseProblem, overlayProblem, baseTemperatureSolutions,...
+%             overlayTemperatureSolutions, 1, numberOfLayers, 0);
+%        localRefinedTemperatureSolutions(:, t+1) = temperatureAtOverlayNodes;
+
         localRefinedTemperatureSolutions(:, t+1) = overlayTemperatureSolutions;
         
         %Update convergence flag and register time to solve the time step
@@ -150,17 +172,19 @@ for layer = 1:numberOfTrainingLayers
         DOFs = numel(baseTemperatureSolutions) + numel(overlayTemperatureSolutions);
         
     end
- 
+    
     previousBaseProblem = baseProblem;
+    previousOverlayProblem = overlayProblem;
     timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
     computationalTime = [computationalTime, timeToGenerateAndSolveTheSystem];
-
+    
 end
 
 %% Generate the reduced basis ---------------------------------------------
 % POD on the local/layer solution snapshots, omitt the first zero-solution
 % vector
-[solutionReductionOperator, modes] = properOrthogonalDecomposition(localRefinedTemperatureSolutions(:,3*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
+[solutionReductionOperator, ~] = properOrthogonalDecomposition...
+    (localRefinedTemperatureSolutions(:,3*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
 
 % Project refined solution onto enriched mesh
 
@@ -171,18 +195,52 @@ layer = (numberOfTrainingLayers+1);
 knotVector = getOpenKnotVector( layer, p );
 CPs = getControlPoints( layer, layerThickness, p );
 
-%Enrich only the bar tip CP
-activeNumberOfCPs = numberOfEnrichedControlPoints;
+%Generate a one-element FEM mesh
+nodalCoordinates = linspace( (layer-1) * layerThickness,  CPs(end), 2^(numberOfEnrichedRefinementDepth)+1);
 
-%Generate the XIGA Poisson problem at layer for projection
-poissonXProblem = poissonProblemTransientXIGA(CPs, activeNumberOfCPs, rhs,...
+%Generate the Poisson problem at timeStep t
+%Cache previous problem
+previousBaseProblem = baseProblem;
+
+% %Base mesh problem
+baseProblem = poissonProblemBaseMesh(CPs, rhs,...
     leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-    neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
-    knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
+    neumannBoundaryconditionValue, k, steelThermalConductivityDerivative,...
+    heatCapacity, heatCapacityDerivative, currentTime,...
+    knotVector, p, refinementDepth);
 
-%Project global solution onto the enriched modal space
-temperatureSolutions = L2projectionIGA( refinedTemperatureSolutions, poissonXProblem, integrationOrder,...
-            integrationModesOrder, layerThickness, initialTemperature, 'transition', poissonProblem );
+%eXtended overlay mesh problem
+overlayXProblem = poissonProblemXtendedOverlayMesh(nodalCoordinates,...
+    numberOfEnrichedRefinementDepth, rhs, neumannBoundaryconditionValue, p, k,...
+    steelThermalConductivityDerivative, heatCapacity, heatCapacityDerivative,...
+    solutionReductionOperator, currentTime);
+
+%         problemXtended = poissonProblemTransientXIGA(CPs, numberOfEnrichedControlPoints, rhs,...
+%             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+%             neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
+%             knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
+        
+
+% %Project global solution onto the enriched modal space
+[ baseTemperatureSolutions, overlayTemperatureSolutions ] = L2MultiscaleProjection(...
+    baseTemperatureSolutions, overlayTemperatureSolutions,...
+    baseProblem, overlayXProblem, integrationSplinesOrder, integrationModesOrder,...
+    layerThickness, initialTemperature, 'transition', previousBaseProblem,...
+    overlayProblem, layer);
+
+% temperatureSolutions = L2MultiscaleOntoEnrichedProjection(...
+%     baseTemperatureSolutions, problemXtended, integrationSplinesOrder, integrationModesOrder,...
+%     layerThickness, initialTemperature);
+
+% %% TEST
+% %Post-Processing temperatures and heat fluxes
+% temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords,...
+%     currentTime, baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions,...
+%     overlayTemperatureSolutions, layer, numberOfLayers, 0) ;
+% heatFluxes(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords, currentTime,...
+%     baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions, overlayTemperatureSolutions,...
+%     layer, numberOfLayers, 1);
+% %% END TEST
 
 %% ROM phase --------------------------------------------------------------
 
@@ -196,22 +254,52 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         knotVector = getOpenKnotVector( layer, p );
         CPs = getControlPoints( layer, layerThickness, p );
         
-        %Enrich only the bar tip CP
-        activeNumberOfCPs = numberOfEnrichedControlPoints;
+        %Generate a one-element FEM mesh
+        nodalCoordinates = linspace( (layer-1) * layerThickness,  CPs(end), 2^(numberOfEnrichedRefinementDepth)+1);
         
-        %Generate the XIGA Poisson problem at layer for projection
-        poissonXProblem = poissonProblemTransientXIGA(CPs, activeNumberOfCPs, rhs,...
+        %Base mesh problem
+        baseProblem = poissonProblemBaseMesh(CPs, rhs,...
             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
-            knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
+            neumannBoundaryconditionValue, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, currentTime,...
+            knotVector, p, refinementDepth);
+        
+        %eXtended overlay mesh problem
+        overlayXProblem = poissonProblemXtendedOverlayMesh(nodalCoordinates,...
+            numberOfEnrichedRefinementDepth, rhs, neumannBoundaryconditionValue, p, k,...
+            steelThermalConductivityDerivative, heatCapacity, heatCapacityDerivative,...
+            solutionReductionOperator, currentTime);
+
+%         problemXtended = poissonProblemTransientXIGA(CPs, numberOfEnrichedControlPoints, rhs,...
+%             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+%             neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
+%             knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
+        
         
         % L2 projection
-        temperatureSolutions = L2projectionIGA( refinedTemperatureSolutions, poissonXProblem, integrationOrder,...
-            integrationModesOrder, layerThickness, initialTemperature, 'true', poissonProblem );
+                [ baseTemperatureSolutions, overlayTemperatureSolutions ]  = L2MultiscaleProjection(...
+                    baseTemperatureSolutions, overlayTemperatureSolutions,...
+                    baseProblem, overlayXProblem, integrationSplinesOrder, integrationModesOrder,...
+                    layerThickness, initialTemperature, 'reduced', previousBaseProblem,...
+                    overlayProblem, layer);
         
+%         temperatureSolutions = L2projectionIGA( temperatureSolutions, problemXtended, integrationSplinesOrder,...
+%             integrationModesOrder, layerThickness, initialTemperature, 'true', previousXtendedProblem );
+        
+        
+        %         %% TEST
+        %         %Post-Processing temperatures and heat fluxes
+        %         temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords,...
+        %             currentTime, baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions,...
+        %             overlayTemperatureSolutions, layer, numberOfLayers, 0) ;
+        %         heatFluxes(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords, currentTime,...
+        %             baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions, overlayTemperatureSolutions,...
+        %             layer, numberOfLayers, 1);
+        %         %% END TEST
+
     end
     
-
+    
     % for loop time integration @layer
     for iTime = 1:numberOfLayersTimeSteps
         
@@ -222,38 +310,63 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
         currentTime = timeStepSize * t;
         
-        %Generate Local problem
-        poissonXProblem = poissonProblemTransientXIGA(CPs, activeNumberOfCPs, rhs,...
+        %Base mesh problem
+        baseProblem = poissonProblemBaseMesh(CPs, rhs,...
             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
-            neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
-            knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
+            neumannBoundaryconditionValue, k, steelThermalConductivityDerivative,...
+            heatCapacity, heatCapacityDerivative, currentTime,...
+            knotVector, p, refinementDepth);
+        
+        %eXtended overlay mesh problem
+        overlayXProblem = poissonProblemXtendedOverlayMesh(nodalCoordinates,...
+            numberOfEnrichedRefinementDepth, rhs, neumannBoundaryconditionValue, p, k,...
+            steelThermalConductivityDerivative, heatCapacity, heatCapacityDerivative,...
+            solutionReductionOperator, currentTime);
+        
+
+%         problemXtended = poissonProblemTransientXIGA(CPs, numberOfEnrichedControlPoints, rhs,...
+%             leftDirichletBoundaryConditionValue, rightDirichletBoundaryConditionValue,...
+%             neumannBoundaryconditionValue, k, heatCapacity, currentTime,...
+%             knotVector, p, refinementDepth, numberOfEnrichedControlPoints, solutionReductionOperator);
         
         disp(' Solve Local Enriched Problem ');
         
-        %Solve Local problem enriched
-        [temperatureSolutions, convergenceFlag] = solveXIGAMultiPhase( poissonXProblem, currentTime,...
-            timeStepSize,integrationOrder, integrationModesOrder, tolerance, maxIterations, temperatureSolutions );
+        %Solve using one-step Gauss-Seidel-Newton solver
+        %%N.B. set the eXtended flag to true
+        [baseTemperatureSolutions, overlayTemperatureSolutions, convergenceFlag] = solveOneStepGaussSeidelNewton( ...
+            overlayProblem, overlayXProblem, baseProblem, currentTime, timeStepSize, integrationSplinesOrder, integrationModesOrder,...
+            tolerance, maxIterations, baseTemperatureSolutions, overlayTemperatureSolutions, initialTemperature, 'true' );
+  
+%         [temperatureSolutions, convergenceFlag] = solveXIGAMultiPhase( problemXtended, currentTime,...
+%             timeStepSize, integrationSplinesOrder, integrationModesOrder, tolerance, maxIterations, temperatureSolutions );
         
         %Check convergence
         convergence = convergence + convergenceFlag;
         
         %Post-Processing temperatures and heat fluxes
-        temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXIGA(postProcessingCoords, currentTime, modes,...
-        poissonXProblem, temperatureSolutions,...
-            layer, numberOfLayers, 0);
-        heatFluxes(:, t+1) = evaluateNumericalResultsXIGA(postProcessingCoords, currentTime, modes,...
-            poissonXProblem,temperatureSolutions,...
+        temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords,...
+            currentTime, baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions,...
+            overlayTemperatureSolutions, layer, numberOfLayers, 0) ;
+        heatFluxes(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords, currentTime,...
+            baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions, overlayTemperatureSolutions,...
             layer, numberOfLayers, 1);
+       
+%         modes = problemXtended.modes;
+%         
+%         temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXIGA(postProcessingCoords, currentTime, modes,...
+%         problemXtended, temperatureSolutions, layer, numberOfLayers, 0);
+%         heatFluxes(:, t+1) = evaluateNumericalResultsXIGA(postProcessingCoords, currentTime, modes,...
+%             problemXtended,temperatureSolutions, layer, numberOfLayers, 1);
         
         %register dofs
-        DOFs = numel(temperatureSolutions);
+        DOFs = numel(baseTemperatureSolutions)+numel(overlayTemperatureSolutions);
         
     end
     
-    poissonProblem = poissonXProblem;
-    refinedTemperatureSolutions = temperatureSolutions;
-    timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;   
-
+    timeToGenerateAndSolveTheSystem = timeToGenerateAndSolveTheSystem + toc;
+%     previousXtendedProblem = problemXtended;
+    previousBaseProblem = baseProblem;
+    
     computationalTime = [computationalTime, timeToGenerateAndSolveTheSystem];
     
 end

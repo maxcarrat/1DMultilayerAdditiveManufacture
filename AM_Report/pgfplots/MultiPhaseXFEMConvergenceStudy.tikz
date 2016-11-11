@@ -63,19 +63,19 @@ dofs,relError
 		%2 levels of refinement		
 
 \addplot table [x=dofs, y=relError, col sep=comma] {FEM_data.csv};
-   \addlegendentry{FEM, $depth= 1...7$};
+   \addlegendentry{FEM};
 	
-\addplot table [x=dofs, y=relError, col sep=comma] {XPODFEM1_data.csv};
-   \addlegendentry{X-PODFEM m+1, $modes= 1...3$};
-	
-\addplot table [x=dofs, y=relError, col sep=comma] {XPODFEM5_data.csv};
-   \addlegendentry{X-PODFEM m+5, $modes= 1...3$};
+%\addplot table [x=dofs, y=relError, col sep=comma] {XPODFEM1_data.csv};
+%   \addlegendentry{X-PODFEM m+1, $modes= 1...3$};
+%	
+%\addplot table [x=dofs, y=relError, col sep=comma] {XPODFEM5_data.csv};
+%   \addlegendentry{X-PODFEM m+5, $modes= 1...3$};
 
 \addplot table [x=dofs, y=relError, col sep=comma] {XPODFEM10_data.csv};
-   \addlegendentry{X-PODFEM m+10, $modes= 1...3$};	
+   \addlegendentry{POD X-FEM};	
  \end{loglogaxis} 
 
-\spy on (0.9,1.25) in node at (-3,3);
+%\spy on (0.9,1.25) in node at (-3,3);
 
 
 \end{tikzpicture}

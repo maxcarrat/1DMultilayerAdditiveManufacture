@@ -67,7 +67,7 @@ layer, time
         font=\small,
         mark size=2,
         line width = 0.5,
-	      legend style={font=\small, mark size=3, at={(0.5,0.5)},anchor=west},
+	      legend style={font=\small, mark size=3, at={(1.0,0.6)}},
         legend cell align=left,
         %cycle list name=myCycleListColor,
     	grid = both,
@@ -77,10 +77,10 @@ layer, time
 		%2 levels of refinement		
 
 \addplot table [ x = layer, y = time, col sep = comma] {FEM_time.csv};
-   \addlegendentry{Reference solution};
+   \addlegendentry{FEM};
 	
 \addplot table [x = layer, y = time, col sep = comma] {XFEM1_time.csv};
-   \addlegendentry{X-PODFEM};
+   \addlegendentry{POD X-FEM};
  \end{semilogyaxis} 
 
 % \spy on (0.9,1.25) in node at (-3,3);

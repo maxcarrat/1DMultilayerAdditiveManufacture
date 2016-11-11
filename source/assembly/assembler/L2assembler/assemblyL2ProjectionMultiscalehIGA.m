@@ -1,5 +1,7 @@
-function [ M, f ] = assemblyL2ProjectionMultiscalehIGA( solutionCoefficients, baseProblem,...
-    overlayProblem, previousBaseProblem, integrationOrder, initialTemperature )
+function [ M, f ] = assemblyL2ProjectionMultiscalehIGA( solutionBaseCoefficients,...
+    solutionOverlayCoefficients, baseProblem, overlayProblem,...
+    previousBaseProblem, previousOverlayProblem, integrationOrder,...
+    initialTemperature, layer )
 %ASSEMBLYL2PROJECTIONMULTISCALEPODXIGA assemble the matrix M and the vector f for
 %the L2 projection system
 %Input:
@@ -9,6 +11,7 @@ function [ M, f ] = assemblyL2ProjectionMultiscalehIGA( solutionCoefficients, ba
 %previousBaseProblem = problem of the previous layer base mesh
 %layerLength = length of the layer
 %initialtemperature = initial temperature of the powder
+%layer = index of the actual layer
 %Output:
 %M = L2 projection matrix
 %f = L2 projection rhs vector
@@ -17,214 +20,212 @@ function [ M, f ] = assemblyL2ProjectionMultiscalehIGA( solutionCoefficients, ba
 %base  matrix
 M_bb = zeros(baseProblem.gdof, baseProblem.gdof);
 %overlay matrix
-M_oo = zeros(overProblem.gdof, overlayProblem.gdof);
+M_oo = zeros(overlayProblem.gdof, overlayProblem.gdof);
 %coupling matrix
-M_ob = zeros(baseProblem.gdof, overlayProblem.gdof);
+M_ob = zeros(overlayProblem.gdof, baseProblem.gdof);
 %base  vector
 f_b = zeros(baseProblem.gdof, 1);
 %overlay vector
 f_o = zeros(overlayProblem.gdof, 1);
 
-%gauss points and weights
+%gauss points base elements
 [rGP, wGP] = gaussPoints( integrationOrder );
-
 numberOfIntegrationPoints = length(rGP);
-integrationDomain = linspace(-1, 1, overlayProblem.gdof);
-subDomainShapeFunctionCoefficients = linspace(0, 1, overlayProblem.gdof);
 
-
-%loop over all base elements
-for e=1:baseProblem.N
+%loop over non-overlapped base elements of previous mesh
+for e=1:previousBaseProblem.N-1
     
-    %local dofs of the element
-    ldof = baseProblem.p + 1;
+    ldof_b = previousBaseProblem.p+1;
     
-    %knot span left and right end
-    Xp1 = baseProblem.knotVector(e + baseProblem.p);
-    Xp2 = baseProblem.knotVector(e + baseProblem.p + 1);
+    Xi1 = baseProblem.knotVector(e + baseProblem.p);
+    Xi2 = baseProblem.knotVector(e + baseProblem.p + 1);
     
-  
-        % Gauss integration
-        for iGP = 1:numberOfIntegrationPoints
-            
-            %map GPs onto parametric space
-            localCoords = mapParentToLocal(rGP(iGP), Xp1, Xp2);
-            
-            %map GPs onto global coordinates system
-            globalCoords = mapParentToGlobal(rGP(iGP), Xp1, Xp2, baseProblem, e);
-            
-            %evaluate element basis functions and derivatives
-            [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords, baseProblem.p, baseProblem.knotVector);
-            
-            %Jacobian from parametric to global space
-            JacobianX_Xi = B(baseProblem.LM(e, 1:ldof)) * baseProblem.coords(baseProblem.LM(e, 1:ldof))';
-            %determinant of the Jacobian
-            detJacobianX_Xi = norm(JacobianX_Xi);
-            
-            %Evaluate temperature@GP
-            %if last element of the mesh in previous time step
-            if globalCoords > baseProblem.knotVector(end - baseProblem.p - 2)
-                for integrationSubDomainIndex =...
-                        1 : overlayProblem.gdof-1
-                    
-                    if rGP(iGP) <= integrationDomain(integrationSubDomainIndex + 1) &&...
-                            rGP(iGP) > integrationDomain(integrationSubDomainIndex)
-                        temperatureAtGaussPoint = evaluateTemperatureSubElements(integrationSubDomainIndex,...
-                            rGP(iGP), baseProblem, previousBaseProblem, solutionCoefficients,...
-                            subDomainShapeFunctionCoefficients, e, integrationDomain);
-                    end
-                end
-            else
-                temperatureAtGaussPoint = evaluateTemperature(e,localCoords, baseProblem,...
-                    solutionCoefficients);
-            end
-            %% Integrate IGA block
-            %rhs
-            f_b(baseProblem.LM(e,1:ldof)) = f_b(baseProblem.LM(e,1:ldof)) + N(baseProblem.LM(e, 1:ldof))' * temperatureAtGaussPoint...
-                * wGP(iGP) * detJacobianX_Xi * baseProblem.F_map(Xp1, Xp2);
-            
-            %projection matrix
-            M_bb(baseProblem.LM(e, 1:ldof), baseProblem.LM(e, 1:ldof)) = M_bb(baseProblem.LM(e, 1:ldof), baseProblem.LM(e, 1:ldof)) +...
-                (N(baseProblem.LM(e, 1:ldof))' * N(baseProblem.LM(e, 1:ldof))) * wGP(iGP) * detJacobianX_Xi * baseProblem.F_map(Xp1, Xp2);
-            
-        end
+    % Gauss integration
+    for iGP = 1:numberOfIntegrationPoints
+        parametricGPCoord = mapParentToLocal(rGP(iGP),Xi1, Xi2);
+        
+        [Nsplines, ~] = BsplinesShapeFunctionsAndDerivatives(parametricGPCoord, baseProblem.p, baseProblem.knotVector);
+        
+        detJacobianX_Xi = baseProblem.coords(end) - baseProblem.coords(1);
+        
+        %% Integrate IGA block
+        %Base vector
+        f_b(baseProblem.LM(e,1:ldof_b)) = f_b(baseProblem.LM(e,1:ldof_b)) + Nsplines(baseProblem.LM(e, 1:ldof_b))' * evaluateTemperature(e, rGP(iGP), previousOverlayProblem,...
+            previousBaseProblem, solutionBaseCoefficients) * wGP(iGP) * baseProblem.F_map(Xi1,Xi2) * detJacobianX_Xi;
+        
+        %Base matrix
+        M_bb(previousBaseProblem.LM(e, 1:ldof_b), baseProblem.LM(e, 1:ldof_b)) = M_bb(baseProblem.LM(e, 1:ldof_b), baseProblem.LM(e, 1:ldof_b)) +...
+            (Nsplines(baseProblem.LM(e, 1:ldof_b))' * Nsplines(baseProblem.LM(e, 1:ldof_b))) * wGP(iGP) * baseProblem.F_map(Xi1,Xi2) * detJacobianX_Xi;
+    end
+    
 end
 
-%integration domain for BSpline to be integarted onto the overlay domain
-integrationDomain = linspace(-1, 1, overlayProblem.N + 1);
-subDomainShapeFunctionCoefficients = linspace(0, 1, overlayProblem.N + 1);
+%Last layer of the previous mesh using composed integration
+[rGP, wGP] = gaussPoints( 2 );
+numberOfIntegrationPoints = length(rGP);
 
-%loop over all overlay elements
+%loop over overlapping elements of the previous mesh
+for e=1:previousOverlayProblem.N
+    
+    ldof_b = previousBaseProblem.p+1;
+    
+    %overlay mesh element boundaries
+    X1 = previousOverlayProblem.coords(e);
+    X2 = previousOverlayProblem.coords(e+1);
+    
+    
+    % Gauss integration
+    for iGP = 1:numberOfIntegrationPoints
+        
+        globalGPCoord = mapLocalToGlobal(rGP(iGP),X1, X2);
+        
+        [Nsplines, ~] = BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric(...
+            globalGPCoord, baseProblem.coords(1), baseProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+        
+        %% Integrate IGA block
+        %Base vector
+        f_b(previousBaseProblem.LM(end,1:ldof_b)) = f_b(previousBaseProblem.LM(end,1:ldof_b)) + Nsplines(layer-1:end-1)' * evaluateTemperatureComposed(e, rGP(iGP), previousOverlayProblem, previousBaseProblem,...
+            solutionOverlayCoefficients, solutionBaseCoefficients) * wGP(iGP) * previousBaseProblem.F_map(X1,X2);
+        
+        %Base matrix
+        M_bb(previousBaseProblem.LM(end, 1:ldof_b), previousBaseProblem.LM(end, 1:ldof_b)) = M_bb(previousBaseProblem.LM(end, 1:ldof_b), previousBaseProblem.LM(end, 1:ldof_b)) +...
+            (Nsplines(layer-1:end-1)' * Nsplines(layer-1:end-1)) * wGP(iGP) * previousBaseProblem.F_map(X1,X2);
+        
+        
+    end
+end
+
+%New layer at initial temperature
+%Composed Integration------------------------------------------------------
+
+%gauss points composed integration
+%Composed integration allows to integrate discontinuous functions over a
+%domain. The quadrature points are distributed over the smaller sub-domain
+%where the function is still continuous. This technique is essential to
+%correctly integrate the basis function of the overlapping mesh.
+
+[rGPComposed, wGPComposed] = gaussPoints( 2 ); %linear elements in the overlay mesh
+numberOfComposedIntegrationPoints = length(rGPComposed);
+
+%loop over non-overlapped base elements
 for e=1:overlayProblem.N
     
-    %local dofs of the element
-    ldof = overlayProblem.p + 1;
+    ldof_b = baseProblem.p+1;
     
-    %nodal coordinates
-    Xn1 = overlayProblem.coords(e);
-    Xn2 = overlayProblem.coords(e + 1);
+    %overlay mesh element boundaries
+    X1 = overlayProblem.coords(e);
+    X2 = overlayProblem.coords(e+1);
+    
+    % Gauss integration
+    for iGP = 1:numberOfComposedIntegrationPoints
         
-    %knot span left and right end
-    Xp1 = baseProblem.knotVector(end-1-baseProblem.p);
-    Xp2 = baseProblem.knotVector(end - baseProblem.p);
-    
-  
-        % Gauss integration
-        for iGP = 1:numberOfIntegrationPoints
-            
-            %evaluate element basis functions and derivatives
-            [N, B] = BSplinesShapeFunctionsAndDerivativesSubElements( rGP(iGP), e, subDomainShapeFunctionCoefficients,...
-                Xp1, Xp2, integrationDomain(e), integrationDomain(e+1), baseProblem );
-            
-            %Jacobian from parametric to global space
-            JacobianX_Xi = B(baseProblem.LM(end, 1:ldof)) * baseProblem.coords(baseProblem.LM(end, 1:ldof))';
-            %determinant of the Jacobian
-            detJacobianX_Xi = norm(JacobianX_Xi);
-            
-            %Evaluate temperature@GP
-            temperatureAtGaussPoint = initialTemperature;
-            
-            %% Integrate FEM block
-            %rhs
-            f_o(overlayProblem.LM(e,1:ldof)) = f_o(overlayProblem.LM(e,1:ldof)) + N(overlayProblem.LM(e, 1:ldof))' * temperatureAtGaussPoint...
-                * wGP(iGP) * overlayProblem.F_map(Xp1, Xp2);
-            
-            %projection matrix
-            M_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) = M_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) +...
-                (N(overlayProblem.LM(e, 1:ldof))' * N(overlayProblem.LM(e, 1:ldof))) * wGP(iGP) * overlayProblem.F_map(Xn1, Xn2);
-            
-            %Integrate Coupling matrix
-            M_ob(overlayProblem.LM(e, 1:ldof), overlayProblem.LCoupling(e, 1:ldof)) = M_ob(overlayProblem.LCoupling(e, 1:ldof), overlayProblem.LCoupling(e, 1:ldof)) +...
-                (N(overlayProblem.LM(e, 1:ldof))' * N(overlayProblem.LM(e, 1:ldof))) * wGP(iGP) * detJacobianX_Xi * overlayProblem.F_map(Xp1, Xp2);            
-            
-        end
+        [N, ~] = shapeFunctionsAndDerivatives(rGPComposed(iGP));
+        globalGPCoord = mapLocalToGlobal(rGPComposed(iGP),X1, X2);
+        
+        [Nsplines, ~] = BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric(...
+            globalGPCoord, baseProblem.coords(1), baseProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+        
+        detJacobianX_Xi = baseProblem.coords(end) - baseProblem.coords(1);
+        
+        %% Integrate IGA block
+        %Base vector
+        f_b(baseProblem.LM(end,1:ldof_b)) = f_b(baseProblem.LM(end,1:ldof_b)) + Nsplines(layer:end)' * initialTemperature...
+            * wGPComposed(iGP) * detJacobianX_Xi * baseProblem.F_map(X1,X2);
+        
+        %Base matrix
+        M_bb(baseProblem.LM(end, 1:ldof_b), baseProblem.LM(end, 1:ldof_b)) = M_bb(baseProblem.LM(end, 1:ldof_b), baseProblem.LM(end, 1:ldof_b)) +...
+             (Nsplines(layer:end)' * Nsplines(layer:end)) * wGPComposed(iGP) * detJacobianX_Xi * baseProblem.F_map(X1,X2);
+        
+        %% Integrate Coupling block
+        %Coupling matrix
+        M_ob(overlayProblem.LM(e,:), baseProblem.LM(end,:)) = M_ob(overlayProblem.LM(e,:), baseProblem.LM(end,:)) +...
+             (N' * Nsplines(layer:end)) * wGP(iGP) * overlayProblem.F_map(X1,X2);
+        
+        %% Integrate FEM block
+        %Overlay vector
+        f_o(overlayProblem.LM(e,:)) = f_o(overlayProblem.LM(e,:)) + N' * initialTemperature * wGP(iGP) * overlayProblem.F_map(X1,X2);
+        
+        %Overlay matrix
+        M_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) = M_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) +...
+             (N' * N) * wGP(iGP) * overlayProblem.F_map(X1,X2);
+        
+    end
 end
+
+[M_oo, f_o] = constrainOverlayMeshL2Projection( M_oo, f_o, overlayProblem );
 
 M = [M_bb, M_ob'; M_ob, M_oo];
-f = [f_b, f_o];
+f = [f_b; f_o];
 
 end
 
+%% Evaluate temperature in the non-overlapped base mesh
+function [ projectedCoefficients ] = evaluateTemperature(e, x, overlayProblem,...
+    baseProblem, solutionBaseCoefficients)
+% EVALUATETEMPERATURE project the previous solution onto the element.
+%   e = element index
+%   x = post-processing mesh
+%   overlayProblem = problem struct of the overlay mesh
+%   baseProblem = problem struct of the base mesh
+%   solutionBaseCoefficients = temeprature distribution of the previous base mesh
 
-function [ projectedCoefficients ] = evaluateTemperature(e, xLocal,...
-    problem, solutionCoefficients)
-%%EVALUATETEMPERATURE project the previous solution onto the element.
-%Input:
-%e = element index
-%xGlobal = global coordinates of the point to be evaluated
-%xLocal = parametric coordinates of the point to be evaluated
-%problem = poisson problem struct
-%layerLength = length of the layer
-%initialtemperature = initial temperature of the powder
-%Output:
-%projectedCoefficients = temperature values 
-
-%% Initialize variables
-numberOfProjectionPoints = length(xLocal);
-projectionOperator = zeros(numberOfProjectionPoints, size(problem.LM, 2));
-N = zeros(length(xLocal), 2);
-localCoords = xLocal;
-
-%loop over points and evaluate the BSplines at that point
-for k=1:length(xLocal)
-    [N, ~] = BsplinesShapeFunctionsAndDerivatives(localCoords(k),problem.p, problem.knotVector);
-end
-
-%assembly projection operator
-for i=1:length(xLocal)
-    projectionOperator(i,1:size(N,2)) = N(i,:);
-end
-
-projectedCoefficients = projectionOperator(:, problem.LM(e,:)) * solutionCoefficients(problem.LM(e,:));
-
-end
-
-function [ projectedCoefficients ] = evaluateTemperatureSubElements(integrationDomainIndex,...
-    x, baseProblem, previousBaseProblem, solutionBaseCoefficients, solutionOverlayCoefficients, ...
-    subDomainShapeFunctionCoefficients, element, integrationDomain)
-% EVALUATETEMPERATURESUBELEMENTS project the previous solution onto the element.
-%Input:
-%integrationDomainIndex = index of the integration domain element
-%x = projection local coordinates
-%baseProblem = base mesh problem struct
-%previousBaseProblem = previous layer mesh problem struct
-%solutionBaseCoefficients = coefficients of the base mesh solutions
-%solutionOverlayCoefficients = coefficients of the overlay mesh solutions
-%subDomainShapeFunctionCoefficients = coefficients of the base mesh shape 
-%functions (used only if p=1 !!!)
-%element = index of the element
-%integrationDomain = subDOmain for the integration of the BSplines basis
-%Output:
-%projectedCoefficients = temperature values 
 
 numberOfProjectionPoints = length(x);
+projectionOperatorSpline = zeros(numberOfProjectionPoints, size(baseProblem.LM, 2));
+Nspline = zeros(length(x), size(baseProblem.LM, 2));
 
-%projection operator has :
-% #rows = number of projection points
-% #columns = base elemnts order +1 + overlay elements order + 1
-projectionOperator = zeros(numberOfProjectionPoints, baseProblem.p + 1 + 2);
+Xi1 = baseProblem.knotVector(e + baseProblem.p);
+Xi2 = baseProblem.knotVector(e + baseProblem.p + 1);
 
-solutionCoefficients = [solutionBaseCoefficients; solutionOverlayCoefficients];
+localCoord = mapParentToLocal(x,Xi1, Xi2);
 
-N = zeros(length(x), problem.p + 1);
-F = zeros(length(x), 2);
-
-XiParametric1 = problem.knotVector( element + problem.p );
-XiParametric2 = problem.knotVector( element + 1 + problem.p );
-
-Xi1 = integrationDomain( integrationDomainIndex );
-Xi2 = integrationDomain( integrationDomainIndex + 1 );
-
-for k=1:length(x)    
-    [N(k,:), ~] = BSplineShapeFunctionsAndDerivativesComposedIntegration(x(k), integrationDomainIndex,...
-        subDomainShapeFunctionCoefficients, XiParametric1, XiParametric2, Xi1, Xi2, previousBaseProblem);
-    [F(k,:), ~] = shapeFunctionsAndDerivatives(x(k));
+for k=1:length(x)
+    [NIga, ~] =  BsplinesShapeFunctionsAndDerivatives(localCoord, baseProblem.p, baseProblem.knotVector);
+    projectionOperatorSpline(k,1:size(Nspline,2)) = NIga(baseProblem.LM(e,:));
 end
 
-for i=1:length(x)
-    projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,1:end), F(i,:)];
+%evaluate the base solution
+projectedBaseCoefficients = projectionOperatorSpline(:,:) *...
+    solutionBaseCoefficients(baseProblem.LM(e,:));
+projectedCoefficients = projectedBaseCoefficients;
+
 end
 
-projectedCoefficients = projectionOperator(:, end-problem.p-modes:end) * solutionCoefficients(problem.N-1:end);
+%% Evaluate temperature for composed inetgartion
+function [ projectedCoefficients ] = evaluateTemperatureComposed(e, x, overlayProblem,...
+    baseProblem, solutionOverlayCoefficients, solutionBaseCoefficients)
+% EVALUATETEMPERATURE project the previous solution onto the element.
+%   e = element index
+%   x = post-processing mesh
+%   overlayProblem = problem struct of the overlay mesh
+%   baseProblem = problem struct of the base mesh
+%   solutionOverlayCoefficients = temeprature distribution of the previous overlay mesh
+%   solutionBaseCoefficients = temeprature distribution of the previous base mesh
+
+
+numberOfProjectionPoints = length(x);
+projectionOperator = zeros(numberOfProjectionPoints, size(overlayProblem.LM, 2));
+projectionOperatorSpline = zeros(numberOfProjectionPoints, size(baseProblem.LM, 2));
+
+N = zeros(length(x), 2);
+Nspline = zeros(length(x), size(baseProblem.LM, 2));
+
+localCoords = x;
+globalCoord = mapLocalToGlobal(x,overlayProblem.coords(e), overlayProblem.coords(e+1));
+
+for k=1:length(x)
+    [projectionOperator(k,1:size(N,2)), ~] = shapeFunctionsAndDerivatives(localCoords(k));    
+    [NIga, ~] =  BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric...
+        (globalCoord, baseProblem.coords(1), baseProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+    projectionOperatorSpline(k,1:size(Nspline,2)) = NIga(baseProblem.LM(end,:));
 end
 
+%evaluate the overlay solution
+projectedOverlayCoefficients = projectionOperator * solutionOverlayCoefficients(overlayProblem.LM(e,:));
+
+%evaluate the base solution
+projectedBaseCoefficients = projectionOperatorSpline(:,:) * solutionBaseCoefficients(baseProblem.LM(end,:));
+
+projectedCoefficients = projectedOverlayCoefficients + projectedBaseCoefficients;
+
+end

@@ -54,6 +54,55 @@ layer, time
 
 \end{filecontents*}
 
+\begin{filecontents*}{XFEM3OverIntegration10_time.csv}
+layer, time
+1, 2.159990e+00,
+2, 2.272188e+00,
+3, 2.647960e+00,
+4, 2.843388e+00, 
+5, 3.082213e+00, 
+6, 5.755600e-01, 
+7, 6.104180e-01, 
+8, 6.223010e-01, 
+9, 6.934310e-01, 
+10, 7.322470e-01, 
+11, 7.755690e-01, 
+12, 7.917230e-01, 
+13, 8.187010e-01, 
+14, 8.314330e-01, 
+15, 8.588600e-01, 
+16, 9.051300e-01, 
+17, 9.330540e-01, 
+18, 9.748830e-01, 
+19, 9.938170e-01, 
+20, 1.028788e+00, 
+\end{filecontents*}
+
+\begin{filecontents*}{XFEM2OverIntegration1_time.csv}
+layer, time
+1, 2.095172e+00,
+2, 2.240334e+00,
+3, 2.598695e+00,
+4, 2.830740e+00,
+5, 3.042654e+00,
+6, 2.474020e-01,
+7, 2.056500e-01,
+8, 2.109430e-01,
+9, 2.422890e-01,
+10, 2.653430e-01,
+11, 2.893090e-01,
+12, 3.032680e-01,
+13, 3.224890e-01,
+14, 3.396530e-01,
+15, 3.624450e-01,
+16, 3.870230e-01,
+17, 4.133650e-01,
+18, 4.328680e-01,
+19, 4.590000e-01,
+20, 4.682750e-01, 
+\end{filecontents*}
+
+
 \begin{document}
 \begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
 
@@ -67,20 +116,20 @@ layer, time
         font=\small,
         mark size=2,
         line width = 0.5,
-	      legend style={font=\small, mark size=3,at={(0.5,0.5)},anchor=west},
+	    legend style={font=\small, mark size=3, at={(1.0,0.6)}},
         legend cell align=left,
         %cycle list name=myCycleListColor,
-    	grid = both,
+    		grid = both,
    	    grid style={ dash pattern = on 0.05 off 1,
     		line cap = round, draw=gray!60 }
       ]
 		%2 levels of refinement		
 
 \addplot table [ x = layer, y = time, col sep = comma] {FEM_time.csv};
-   \addlegendentry{Reference solution};
+   \addlegendentry{FEM};
 	
-\addplot table [x = layer, y = time, col sep = comma] {XFEM1_time.csv};
-   \addlegendentry{X-PODFEM};
+\addplot table [x = layer, y = time, col sep = comma] {XFEM2OverIntegration1_time.csv};
+   \addlegendentry{POD X-FEM};
  \end{semilogyaxis} 
 
 % \spy on (0.9,1.25) in node at (-3,3);

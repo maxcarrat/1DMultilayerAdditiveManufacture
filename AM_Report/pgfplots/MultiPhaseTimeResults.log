@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  15 SEP 2016 15:06
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  26 OCT 2016 13:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -504,21 +504,33 @@ LaTeX Warning: Overwriting file `./XFEM3_time.csv'.
 \openout15 = `XFEM3_time.csv'.
 
 
+
+LaTeX Warning: Overwriting file `./XFEM3Integration+10_time.csv'.
+
+\openout15 = `XFEM3Integration+10_time.csv'.
+
+
+
+LaTeX Warning: Overwriting file `./XFEM2Integration+10_time.csv'.
+
+\openout15 = `XFEM2Integration+10_time.csv'.
+
+
 (./MultiPhaseTimeResults.aux)
 \openout1 = `MultiPhaseTimeResults.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 159.
+LaTeX Font Info:    ... okay on input line 159.
  ABD: EveryShipout initializing macros
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -576,27 +588,27 @@ e
 Package pgfplots Warning: running in backwards compatibility mode (unsuitable t
 ick labels; missing features). Consider writing \pgfplotsset{compat=1.9} into y
 our preamble.
- on input line 108.
+ on input line 159.
 
 PGFPlots: reading {FEM_time.csv}
 Missing character: There is no ; in font nullfont!
-PGFPlots: reading {XFEM1_time.csv}
+PGFPlots: reading {XFEM2Integration+10_time.csv}
 Missing character: There is no ; in font nullfont!
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 142.
+(Font)              <9> on input line 195.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 142.
+(Font)              <6> on input line 195.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 142.
+(Font)              <5> on input line 195.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 (./MultiPhaseTimeResults.aux) ) 
 Here is how much of TeX's memory you used:
- 18061 strings out of 493304
- 444190 string characters out of 6139871
+ 18064 strings out of 493304
+ 444296 string characters out of 6139871
  590193 words of memory out of 5000000
- 21159 multiletter control sequences out of 15000+600000
+ 21160 multiletter control sequences out of 15000+600000
  5463 words of font info for 20 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  63i,19n,94p,743b,2048s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -605,7 +617,7 @@ c/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
 nts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb
 >
-Output written on MultiPhaseTimeResults.pdf (1 page, 43067 bytes).
+Output written on MultiPhaseTimeResults.pdf (1 page, 40640 bytes).
 PDF statistics:
  27 PDF objects out of 1000 (max. 8388607)
  19 compressed objects within 1 object stream

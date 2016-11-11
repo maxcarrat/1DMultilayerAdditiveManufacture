@@ -19,7 +19,7 @@ c = 600.0;                                                  % specific heat [J/(
 T0 = 20.0;                                                  % Initial temperature [°C]
 entalphyJump = 261e+03;                                     % entalphy [J/Kg]
 Tsource = 1500.0;                                           % source temperature [°C]
-Tmelt = 1450.0;                                             % melting temperature [°C]
+Tmelt = 1475.0;                                             % melting temperature [°C]
 
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar [m]
@@ -29,11 +29,11 @@ dirichletRightBCValue =  T0 + Tsource;
 nuemannRightBC = 0.0e+04;
 bodySource = 0.0e+13;
 
-tolerance = 1.0e-03;
-maxIteration = 20;
+tolerance = 1.0e-05;
+maxIteration = 50;
 
 initialNumberOfModes = 1;
-maxNumberOfModes = 3;
+maxNumberOfModes = 1;
 DOFs = zeros(maxNumberOfModes, 1);
 % modes = 1;
 
@@ -41,13 +41,13 @@ for modes = initialNumberOfModes:maxNumberOfModes
 % for refinementDepth = 1:8
     
     numberOfLayers = 20;
-    trainingTimeSteps = 5;
-%     trainingTimeSteps = 20;
+%     trainingTimeSteps = 5;
+    trainingTimeSteps = 20;
 
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
     
-    refinementDepth = 6;
+    refinementDepth = 8;
     PODRefinementDepth = 0;
 
     integrationOrder = 2;
@@ -69,9 +69,9 @@ for modes = initialNumberOfModes:maxNumberOfModes
   k = @(x, t, T)  steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, T);                                                          % thermal conductivity [W/(m K)]
     
-%     heatCapacity= @(x, t, T) 7500 * 600;
-  heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
-      entalphyJump, Tsource, Tmelt);                              % heat capacity [kJ / kg °C]
+    heatCapacity= @(x, t, T) 7500 * 600;
+%   heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
+%       entalphyJump, Tsource, Tmelt);                              % heat capacity [kJ / kg °C]
 
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);                        % time discretization
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                                           % spatial discretization X
@@ -155,8 +155,8 @@ for modes = initialNumberOfModes:maxNumberOfModes
     % Write results to a file
    
     
-    formatSpec = 'XFEMResults/Temperature/myXFEMMultiPhaseResultsFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XFEMResults/Temperature/myFEMNonLinearResultsFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -168,8 +168,8 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XFEMResults/Fluxes/myXFEMMultiPhaseFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XFEMResults/Fluxes/myFEMNonLinearFluxesFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -181,19 +181,20 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XFEMResults/Time/myXFEMMultiPhaseTimeFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XFEMResults/Time/myFEMNonLinearTimeFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
         fprintf(resultFile, '%d, %\t', i);
         fprintf(resultFile, '%d, %\n', CPUTime(i));
+        fprintf(resultFile, '\n');
     end
     
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XFEMResults/Dofs/myXFEMMultiPhaseDOFsFile_p%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XFEMResults/Dofs/myFEMNonLinearDOFsFile_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

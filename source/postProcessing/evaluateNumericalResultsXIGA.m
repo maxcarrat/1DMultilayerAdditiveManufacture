@@ -76,7 +76,7 @@ if e > problem.N - problem.XN  % element is enriched
     end
     
     % On active elements use the refined domain as integration domain
-    refinedNodes = 2^problem.refinementDepth+problem.p;    
+    refinedNodes = length(problem.reductionOperator)-1;    
     integrationDomain = linspace(-1, +1, ceil(refinedNodes/problem.XN));
     
     %left and right end of the integration sub-domain
@@ -176,10 +176,10 @@ function [ projectedCoefficients ] = postProcessingProjectionSubElements(subDoma
 %% Initialize variables
 numberOfProjectionPoints = length(x);
 projectionOperator = zeros(numberOfProjectionPoints, problem.p+1 + modes * length(indexLocalEnrichedNodes) );
-projectionOperator_der = zeros(numberOfProjectionPoints, problem.p+-1 + modes * length(indexLocalEnrichedNodes) );
+projectionOperator_der = zeros(numberOfProjectionPoints, problem.p+1 + modes * length(indexLocalEnrichedNodes) );
 
 localCoords = x;
-refinedNodes = 2^problem.refinementDepth + problem.p;
+refinedNodes = length(problem.reductionOperator)-1;
 
 N = zeros(length(x), length(problem.knotVector)-problem.p-1);
 B = zeros(length(x), length(problem.knotVector)-problem.p-1);
@@ -247,5 +247,3 @@ else
 end
 
 end
-
-

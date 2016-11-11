@@ -43,7 +43,7 @@ incrementModes = 0;
 
 %On active elements use the refined domain as integration domain
 
-refinedControlPoints = 2^problem.refinementDepth + problem.p;
+refinedControlPoints = length(problem.reductionOperator)-1;
 integrationDomain = linspace(-1, 1, ceil(refinedControlPoints/problem.XN));
 subDomainShapeFunctionCoefficients = linspace(0, 1, ceil(refinedControlPoints/problem.XN));
 

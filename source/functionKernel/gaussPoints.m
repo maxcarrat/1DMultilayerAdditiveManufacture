@@ -640,9 +640,7 @@ switch integrationOrder
         w(1+24) = 1.139379850102629e-02;
         
     otherwise
-        p = [];
-        w = [];
-        disp(1+ 'integrationOrder not supported...' );
+        [p, w] = GaussQuad(integrationOrder);
 end
 
 end

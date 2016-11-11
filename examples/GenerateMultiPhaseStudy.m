@@ -9,8 +9,11 @@ axes1 = axes;
 referenceFile = fopen('myMultiPhaseReferenceResultsFile.txt','r');
 formatSpec = '%f;\n';
 % referenceTemperatureSolution = fscanf(referenceFile, formatSpec);
-referenceTemperatureSolution = dlmread('XIGAResults/Temperature/myIGAMultiPhaseResultsFile_8.txt');
-referenceFluxSolution = dlmread('XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_8.txt');
+% referenceTemperatureSolution = dlmread('XIGAResults/Temperature/myIGAMultiPhaseResultsFile_8.txt');
+referenceTemperatureSolution = dlmread('XMultiscaleIGAProblem/Temperature/myMultiscaleResultsFile_4.txt');
+referenceFluxSolution = dlmread('XMultiscaleIGAProblem/Fluxes/myMultiscaleFluxesFile_4.txt');
+% referenceFluxSolution = dlmread('XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_8.txt');
+% referenceFluxSolution = dlmread('XFEMResults/Fluxes/myFEMNonLinearFluxesFile_8.txt');
 
 
 %% hIGA plot
@@ -20,21 +23,23 @@ referenceFluxSolution = dlmread('XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_8.
 dofsVector=[23, 25, 29, 37, 53, 85, 149, 277]; % refDepth = 1,..,8
 relError = [];
 relFluxError = [];
-for depth=1:7
-    formatSpec = 'XIGAResults/Temperature/myIGAMultiPhaseResultsFile_%d.txt';
+for depth=1:3
+    formatSpec = 'XMultiscaleIGAProblem/Temperature/myMultiscaleResultsFile_%d.txt';
     IGAFileID = sprintf(formatSpec,depth);
-    IGAFile = fopen(IGAFileID, 'r');
     IGATemperatureSolution = dlmread(IGAFileID);
     
-    formatSpec = 'XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_%d.txt';
+    formatSpec = 'XMultiscaleIGAProblem/Fluxes/myMultiscaleFluxesFile_%d.txt';
     IGAFileID = sprintf(formatSpec,depth);
     IGAFile = fopen(IGAFileID, 'r');
     IGAFluxSolution = dlmread(IGAFileID);
     
     err = 0.0;
     fluxErr = 0.0;
+    
     for i=2:size(IGATemperatureSolution,1)-1
+        
         for j=1:size(IGATemperatureSolution,2)-1
+            
             err = err + sqrt(( referenceTemperatureSolution(i,j) - IGATemperatureSolution(i,j))^2 ...
                 / referenceTemperatureSolution(i,j)^2 ) * 100;
             fluxErr = fluxErr + sqrt(( referenceFluxSolution(i,j) - IGAFluxSolution(i,j))^2 ...
@@ -47,10 +52,10 @@ for depth=1:7
 
 end
 % Create multiple lines using matrix input to plot
-% loglog(dofsVector(1:5),relError,'-kd');
-% hold on
-loglog(dofsVector(1:7),relFluxError,'-.ko'); 
+loglog(dofsVector(1:3),relError,'-kd');
 hold on
+% loglog(dofsVector(1:6),relFluxError,'-.ko'); 
+% hold on
 grid on
 
 % %% hFEM plot
@@ -105,12 +110,12 @@ pointwiseRelError = [];
 pointwiseFluxRelError = [];
 
 for modes=1:3
-    formatSpec = 'XIGAResults/Temperature/myXIGAMultiPhaseResultsFile_%d.txt';
+    formatSpec = 'XMultiscaleIGAProblem/Temperature/myXMultiscaleResultsFile_%d.txt';
     XIGAFileID = sprintf(formatSpec,modes);
     XIGAFile = fopen(XIGAFileID, 'r');
     XIGATemperatureSolution = dlmread(XIGAFileID);
     
-    formatSpec = 'XIGAResults/Fluxes/myXIGAMultiPhaseFluxesFile_%d.txt';
+    formatSpec = 'XMultiscaleIGAProblem/Fluxes/myXMultiscaleFluxesFile_%d.txt';
     XIGAFileID = sprintf(formatSpec,modes);
     XIGAFile = fopen(XIGAFileID, 'r');
     XIGAFluxSolution = dlmread(XIGAFileID);
@@ -125,7 +130,9 @@ for modes=1:3
         for j= 1:size(XIGATemperatureSolution,2)-1
             pointError = sqrt(( referenceTemperatureSolution(i,j) - XIGATemperatureSolution(i,j))^2 ...
                 / referenceTemperatureSolution(i,j)^2 );
+            
             timeStepErrorAtPoint = timeStepErrorAtPoint + pointError;
+            
             pointFluxError = sqrt(( referenceFluxSolution(i,j) - XIGAFluxSolution(i,j))^2 ...
                 / referenceFluxSolution(i,j)^2 );            
             timeStepFluxErrorAtPoint = timeStepFluxErrorAtPoint + pointFluxError;
@@ -138,15 +145,15 @@ for modes=1:3
         fluxErr = fluxErr + timeStepFluxErrorAtPoint * 100;
     end
     
-    relErrorPOD = [relErrorPOD err/(size(XIGATemperatureSolution, 1)-1)/(size(XIGATemperatureSolution,2)-1)];
+    relErrorPOD = [relErrorPOD err/(size(XIGATemperatureSolution, 1))/(size(XIGATemperatureSolution,2)-1)];
     relFluxErrorPOD = [relFluxErrorPOD fluxErr/(size(XIGATemperatureSolution, 1)-1)/(size(XIGATemperatureSolution,2)-1)];
 end
 
 % Create multiple lines using matrix input to plot
-% loglog(dofsVectorPOD(1:4),relErrorPOD, '--b*');
-% hold on
-loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.r+');
+loglog(dofsVectorPOD(1:3),relErrorPOD, '--b*');
 hold on
+% loglog(dofsVectorPOD(1:3),relFluxErrorPOD, '-.r+');
+% hold on
 grid on
 
 % %% X-PODFEM plot

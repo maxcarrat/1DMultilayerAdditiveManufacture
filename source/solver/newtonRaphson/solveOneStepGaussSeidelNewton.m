@@ -1,6 +1,6 @@
-function [ baseSolution, overlaySolution, convergenceFlag ] = solveOneStepGaussSeidelNewton( baseProblem,...
-    overlayProblem, time, timeStepSize, integrationOrder, overlayIntegrationOrder, tolerance,...
-    maxNumberOfIterations, oldBaseSolution, oldOverlaySolution, eXtendedFlag)
+function [ baseSolution, overlaySolution, convergenceFlag ] = solveOneStepGaussSeidelNewton( initialOverlayProblem,...
+    overlayProblem, baseProblem, time, timeStepSize, integrationOrder, overlayIntegrationOrder, tolerance,...
+    maxNumberOfIterations, oldBaseSolution, oldOverlaySolution, initialTemperature, eXtendedFlag)
 %SOLVEONESTEPGAUSSSEIDELNEWTON returns the temperature solution of the base
 %and the overlay mesh. The nonlinear system is solved using the one-step
 %Gauss-Seidel-Newton scheme, which allows to solve a multiscale hp-d
@@ -12,7 +12,7 @@ function [ baseSolution, overlaySolution, convergenceFlag ] = solveOneStepGaussS
 %timeStepSize = size of the temporal discretization
 %integrationOrder = number of quadrature point in the base mesh
 %overlayIntegrationOrder = number of qudrature points in the overlay mesh
-%tolerance = convergence tolerance 
+%tolerance = convergence tolerance
 %maxNumberOfIterations = max number of Gauss-Seidel iterations
 %oldBaseSolution = last converged solution of the base mesh
 %oldOverlaySolution = last converged solution of the overlay mesh
@@ -24,110 +24,164 @@ function [ baseSolution, overlaySolution, convergenceFlag ] = solveOneStepGaussS
 
 %base mesh
 baseSolution = oldBaseSolution;
-lastConvergedBaseSolution = oldBaseSolution;
+lastConvergentBaseSolution = oldBaseSolution;
 
 %overlay mesh
+% overlaySolution = zeros(size(oldOverlaySolution,1),size(oldOverlaySolution,2));
+% lastConvergentOverlaySolution = zeros(size(oldOverlaySolution,1),size(oldOverlaySolution,2));
+
 overlaySolution = oldOverlaySolution;
-lastConvergedOverlaySolution = oldOverlaySolution;
+lastConvergentOverlaySolution = oldOverlaySolution;
 
 convergenceFlag = 1;
 
 %Gauss-Seidel loop
 for i=1:maxNumberOfIterations
     
-   %% Compute base mesh solution increment --------------------------------
-   %assembly base mesh ...
-   [M_bb, Mprime_bb, K_bb, Kprime_bb, f_b] = assemblyMultiscaleBaseIGA(baseProblem, overlayProblem, time, integrationOrder,...
-       baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-   
-   if strcmp(eXtendedFlag, 'false')
-       %... assembly coupling terms...
-       [M_ob, K_ob] = assemblyMultiscaleCouplingFEM(baseProblem, overlayProblem, time, intrgationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-   else
-       %... assembly coupling terms...
-       [M_ob, K_ob] = assemblyMultiscaleCouplingPODXFEM(baseProblem, overlayProblem, time, intrgationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-   end
-   %... and apply boundary comditions.
-   [K_bb, Kprime_bb, f_b] = applyGlobalBCs(baseProblem, K_bb, Kprime_bb, f_b);
-   
-   %residuum
-   r = f_b * timeStepSize - (K_bb * (baseSolution) * timeStepSize +...
-       K_ob' * (overlaySolution) * timeStepSize ) +...
-       M_bb * (lastConvergedBaseSolution) - M_bb * (baseSolution) -...
-       M_ob' * (lastConvergedOverlaySolution) - M_ob' * (overlaySolution);
-   
-   %jacobian of the residuum
-   J = ( K_bb + Kprime_bb ) * timeStepSize +...
-       (M_bb + Mprime_bb );
-   
-   %solve
-   baseSolutionIncrement = J\r;
-   
-   %update base solution
-   baseSolution = baseSolution + baseSolutionIncrement;
-   
-   %% Compute overlay mesh solution increment --------------------------------
-  %if the mesh is enriched:
-   if strcmp(eXtendedFlag, 'false')
-       %assembly overlay mesh ...
-       [M_oo, Mprime_oo, K_oo, Kprime_oo, f_o] = assemblyMultiscaleOverlayFEM(baseProblem, overlayProblem, time, overlayIntegrationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-       
-       %... assembly coupling terms ...
-       [M_ob, K_ob] = assemblyMultiscaleCouplingFEM(baseProblem, overlayProblem, time, overlayIntegrationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-   else
-   % ... otherwise:
-       %assembly overlay mesh ...
-       [M_oo, Mprime_oo, K_oo, Kprime_oo, f_o] = assemblyMultiscaleOverlayPODXFEM(baseProblem, overlayProblem, time, overlayIntegrationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-       
-       %... assembly coupling terms...
-       [M_ob, K_ob] = assemblyMultiscaleCouplingPODXFEM(baseProblem, overlayProblem, time, overlayIntegrationOrder,...
-           baseSolution, overlaySolution, lastConvergedBaseSolution, lastConvergentOverlaySolution);
-   end
-   %... and apply boundary comditions.
-   [K_oo, Kprime_oo, f_o] = applyGlobalBCs(baseProblem, K_oo, Kprime_oo, f_o);
-   
-   %residuum
-   r = f_o * timeStepSize - (K_oo * (baseSolution) * timeStepSize +...
-       K_ob' * (overlaySolution) * timeStepSize ) +...
-       M_oo * (lastConvergedBaseSolution) - M_oo * (baseSolution) -...
-       M_ob' * (lastConvergedOverlaySolution) - M_ob' * (overlaySolution);
-   
-   %jacobian of the residuum
-   J = ( K_oo + Kprime_oo ) * timeStepSize +...
-       (M_oo + Mprime_oo );
-   
-   %solve
-   overlaySolutionIncrement = J\r;
+    %% Compute base mesh solution increment --------------------------------
+    %assembly base mesh ...
+    
+    if strcmp(eXtendedFlag, 'false')
+        %... assembly linear system...
+        [M_bb, Mprime_bb, K_bb, Kprime_bb, f_b] = assemblyMultiscaleBaseIGA( overlayProblem, baseProblem, time, integrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        [M_bo, K_bo] = assemblyMultiscaleCouplingBaseFEM( overlayProblem, baseProblem, time, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+    else
+        %... assembly linear system...
+        %         [M_bb, Mprime_bb, K_bb, Kprime_bb, f_b] = assemblyMultiscaleBaseXIGA( overlayProblem, baseProblem, time, integrationOrder,...
+        %             overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution, initialTemperature);
+        [M_bb, Mprime_bb, K_bb, Kprime_bb, f_b] = assemblyMultiscaleBaseIGA( overlayProblem, baseProblem, time, integrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        [M_bo, K_bo] = assemblyMultiscaleCouplingPODXFEM( initialOverlayProblem, overlayProblem, baseProblem, time, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        K_bo = K_bo';
+        M_bo = M_bo';
+    end
+    %... and apply boundary comditions.
+    [K_bb, Kprime_bb, K_bo, M_bo, f_b] = applyBaseMultiscaleBCs(baseProblem, K_bo, K_bb, Kprime_bb, M_bo, f_b);
+    
+    %residuum
+    deltaBaseSolution = (lastConvergentBaseSolution - baseSolution);
+    deltaOverlaySolution =  -(lastConvergentOverlaySolution - overlaySolution);
+    
+    r = f_b * timeStepSize - K_bb * (baseSolution) * timeStepSize -...
+        - M_bb * (deltaBaseSolution) - K_bo * (overlaySolution) * timeStepSize...
+        - M_bo * (deltaOverlaySolution);
+    
+    %jacobian of the residuum
+    J = ( K_bb + Kprime_bb ) * timeStepSize +...
+        ( M_bb + Mprime_bb );
+    
+    %solve
+    baseSolutionIncrement = J\r;
+    
+    %update base solution
+    baseSolution = baseSolution + baseSolutionIncrement;
+    
+    %% Compute overlay mesh solution increment --------------------------------
+    %if the mesh is enriched:
+    if strcmp(eXtendedFlag, 'false')
+        %assembly overlay mesh ...
+        [M_oo, Mprime_oo, K_oo, Kprime_oo, f_o] = assemblyMultiscaleOverlayFEM( overlayProblem, baseProblem, time, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        
+        %... assembly coupling terms ...
+        [M_ob, K_ob] = assemblyMultiscaleCouplingOverlayFEM( overlayProblem, baseProblem, time, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        
+        %... and apply boundary comditions.
+        [K_oo, Kprime_oo, K_ob, M_oo, M_ob, Mprime_oo, f_o] = applyOverlayMultiscaleBCs(overlayProblem, K_oo, Kprime_oo, K_ob, M_oo, M_ob, Mprime_oo, f_o);
+        
+        %residuum
+        deltaBaseSolution = -(lastConvergentBaseSolution - baseSolution);
+        deltaOverlaySolution = (lastConvergentOverlaySolution - overlaySolution);
+        
+        r = f_o * timeStepSize - K_oo * (overlaySolution) * timeStepSize -...
+            K_ob * (baseSolution) * timeStepSize -...
+            M_oo * (deltaOverlaySolution) - M_ob * (deltaBaseSolution);
+        
+        %jacobian of the residuum
+        J = ( K_oo + Kprime_oo ) * timeStepSize +...
+            ( M_oo + Mprime_oo );
+        
+        %solve
+%         J(1,:) = [];
+%         J(end,:) = [];
+%         J(:,1) = [];
+%         J(:,end) = [];
+%         r(1) = [];
+%         r(end) = [];
+        overlaySolutionIncrement = J\r;
+        
+        %apply Dirichlet Boundaries strongly on the solution
+%         overlaySolutionIncrement = [0.0;overlaySolutionIncrement;0.0];
 
-   %update base solution
-   overlaySolution = overlaySolution + overlaySolutionIncrement;
-   
-   %% Check convergence in L2-norm ----------------------------------------
-   %total solution
-   solution = baseSolution + overlaySolution;
-   resNorm = sqrt(solution'*solution);
-   
-   %check convergence
-   if resNorm <= tolerance
-       formatSpec = '\t\t Solution converge after %1.0f iterations\n';
-       fprintf(formatSpec, i);
-       convergenceFlag = 0;
-       return
-   end
-   
-   formatSpec = '\t\t Residuum Norm %1.5f \n';
-   fprintf(formatSpec, resNorm);
-       
+%         overlaySolutionIncrement(1) = 0.0;
+%         overlaySolutionIncrement(end) = 0.0;
+    else
+        % ... otherwise:
+        %assembly overlay mesh ...
+        [M_oo, Mprime_oo, K_oo, Kprime_oo, f_o] = assemblyMultiscaleOverlayPODXFEM( initialOverlayProblem, overlayProblem, baseProblem, time,...
+            integrationOrder, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        
+        %... assembly coupling terms...
+        [M_ob, K_ob] = assemblyMultiscaleCouplingPODXFEM( initialOverlayProblem, overlayProblem, baseProblem,  time, overlayIntegrationOrder,...
+            overlaySolution, baseSolution, lastConvergentBaseSolution, lastConvergentOverlaySolution);
+        
+        %... and apply boundary comditions.
+        [K_oo, Kprime_oo, K_ob, M_oo, M_ob, Mprime_oo, f_o] = applyOverlayXtendedMultiscaleBCs(overlayProblem, K_oo, Kprime_oo, K_ob, M_oo, M_ob, Mprime_oo, f_o);
+        
+        %residuum
+        deltaBaseSolution = -(lastConvergentBaseSolution - baseSolution);
+        deltaOverlaySolution = (lastConvergentOverlaySolution - overlaySolution);
+        r = f_o * timeStepSize - K_oo * (overlaySolution) * timeStepSize -...
+            K_ob * (baseSolution) * timeStepSize -...
+            M_oo * (deltaOverlaySolution) - M_ob * (deltaBaseSolution);
+        
+        %jacobian of the residuum
+        J = ( K_oo + Kprime_oo ) * timeStepSize +...
+            ( M_oo + Mprime_oo );
+        
+        %solve
+%         J(1:2,:) = [];
+%         J(:,1:2) = [];
+%         r(1:2) = [];
+        overlaySolutionIncrement = J\r;
+        
+        
+        %apply Dirichlet Boundaries strongly on the solution
+%         overlaySolutionIncrement = [0.0;0.0;overlaySolutionIncrement];
+
+%         overlaySolutionIncrement(1) = 0.0;
+%         overlaySolutionIncrement(2) = 0.0;
+    end
+
+    %update base solution
+    overlaySolution = overlaySolution + overlaySolutionIncrement;
+    
+    %% Check convergence in L2-norm ----------------------------------------
+    %total solution
+    solutionIncrement = [baseSolutionIncrement; overlaySolutionIncrement];
+    resNorm = sqrt(solutionIncrement'*solutionIncrement);
+    
+    %check convergence
+    if resNorm <= tolerance
+        formatSpec = '\t\t Solution converge after %1.0f iterations\n';
+        fprintf(formatSpec, i);
+        convergenceFlag = 0;
+        return
+    end
+    
+    formatSpec = '\t\t Residuum Norm %1.5f \n';
+    fprintf(formatSpec, resNorm);
+    
 end
 
 formatSpec = '\t\t Warning: Solution did not converge after %1.0f iterations!!!\n';
 fprintf(formatSpec, maxNumberOfIterations);
-   
+
 end
 
 

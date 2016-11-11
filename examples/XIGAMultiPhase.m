@@ -29,7 +29,7 @@ c = 600.0;                                                  % specific heat [J/(
 T0 = 20.0;                                                  % Initial temperature [°C]
 entalphyJump = 261e+03;                                     % entalphy [J/Kg]
 Tsource = 1500.0;                                           % source temperature [°C]
-Tmelt = 1450.0;                                             % melting temperature [°C]
+Tmelt = 1475.0;                                             % melting temperature [°C]
 
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar 0.001 [m]
@@ -42,7 +42,7 @@ bodySource = 0.0e+00;
 
 %% Non-linear parameters
 tolerance = 1.0e-03;                                           % N-R convergence tolerance
-maxIteration = 20;                                             % max number of N-R iterations
+maxIteration = 80;                                             % max number of N-R iterations
 pMax = 2;                                                      % polynomial degree
 modesMax = 3;                                                  % max number of POD-modes
 depth = 8;                                                     % max refinement depth
@@ -55,7 +55,7 @@ modes = 0;
 %modes or differents refinement depths
 
 % for modes = 1:modesMax
-for refinementDepth = 1:depth
+for refinementDepth = 8:depth
     
     %% Bar specifics
     numberOfLayers = 20;
@@ -94,9 +94,9 @@ for refinementDepth = 1:depth
 %         k = @(x, t, T) 27.0;
     
     % heat capacity function                                                    % heat capacity [kJ / kg °C]
-    heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
-        entalphyJump, Tsource, Tmelt);
-%         heatCapacity = @(x, T, T_last) rho * c;
+%     heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
+%         entalphyJump, Tsource, Tmelt);
+        heatCapacity = @(x, T, T_last) rho * c;
     
     %% Discretization
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
@@ -187,7 +187,7 @@ for refinementDepth = 1:depth
     % Write results to a file
    
     
-    formatSpec = 'XIGAResults/Temperature/myIGAMultiPhaseResultsFile_%d.txt';
+    formatSpec = 'XIGAResults/Temperature/myIGANonLinearResultsFile_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -200,7 +200,7 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XIGAResults/Fluxes/myIGAMultiPhaseFluxesFile_%d.txt';
+    formatSpec = 'XIGAResults/Fluxes/myIGANonLinearluxesFile_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
@@ -213,7 +213,7 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XIGAResults/Time/myIGAMultiPhaseTime_%d.txt';
+    formatSpec = 'XIGAResults/Time/myIGANonLinearTime_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
@@ -224,7 +224,7 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XIGAResults/Dofs/myIGAMultiPhaseDOFsFile_p%d.txt';
+    formatSpec = 'XIGAResults/Dofs/myIGANonLinearDOFsFile_p%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)

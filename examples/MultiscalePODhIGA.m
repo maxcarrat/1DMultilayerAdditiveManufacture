@@ -5,10 +5,10 @@
 clear all;
 clc;
 
-mkdir('XMultiscaleProblem/Temperature');
-mkdir('XMultiscaleProblem/Fluxes');
-mkdir('XMultiscaleProblem/Time');
-mkdir('XMultiscaleProblem/Dofs');
+mkdir('XMultiscaleIGAProblem/Temperature');
+mkdir('XMultiscaleIGAProblem/Fluxes');
+mkdir('XMultiscaleIGAProblem/Time');
+mkdir('XMultiscaleIGAProblem/Dofs');
 
 %% Problem SetUp
 % Define the problem parameter, the boundary conditions
@@ -28,43 +28,43 @@ xEnd = 0.001;                                               % length of the bar 
 %% Boundary conditions
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue = T0 + Tsource;
-nuemannRightBC = 0.0e+04;
+nuemannRightBC = 0.0e+08;
 bodySource = 0.0e+00;
 
 %% Non-linear parameters
-tolerance = 1.0e-03;                                           % N-R convergence tolerance
-maxIteration = 20;                                             % max number of N-R iterations
+tolerance = 1.0e-05;                                           % N-R convergence tolerance
+maxIteration = 50;                                             % max number of N-R iterations
 pMax = 2;                                                      % polynomial degree
 modesMax = 3;                                                  % max number of POD-modes
-depth = 8;                                                     % max refinement depth
+depth = 3;                                                     % max refinement depth
 DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-modes = 0;
+modes = 3;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %for loop to generate the convergence study for either different number of
 %modes or differents refinement depths
 
-% for modes = 1:modesMax
-for refinementDepth = 1:depth
+for modes = 1:modesMax
+% for refinementDepth = 1:depth
     
     %% Bar specifics
     numberOfLayers = 20;
-%     trainingTimeSteps = 5;
-    trainingTimeSteps = 20;
-    numberOfTimeStepsPerLayer = 10;                             % total time per layer 0.225 sec
-    numberOfHeatingTimeSteps = 4;                               % heating laser time per layer 0.090 sec
+    trainingTimeSteps = 5;
+%     trainingTimeSteps = 20;
+    numberOfTimeStepsPerLayer = 4;                             % total time per layer 0.225 sec
+    numberOfHeatingTimeSteps = 2;                               % heating laser time per layer 0.090 sec
     
     numberOfElementsInX = numberOfLayers;                       % one element per layer
     timeSteps = numberOfLayers;
     
     p = pMax;
-    numberOfEnrichedControlPoints = 1;
+    numberOfEnrichedRefinementDepth = 2;
     numberOfPODModes = modes;
     
-%     refinementDepth = depth;
-    integrationOrder = p+1;                                     % integration order
-    integrationModesOrder = modes + 15;                         %(modes - 1) ^ 2  + 1 + modes;
+    refinementDepth = depth;
+    integrationOrder = p + 1;                                     % integration order
+    integrationModesOrder = modes + 1;                           %(modes - 1) ^ 2  + 1 + modes;
     
 
     numberOfRefinedElementsToBeKept = 1;
@@ -72,22 +72,32 @@ for refinementDepth = 1:depth
     % Dirichlet condition on the bar tip
     dirichletRightBC = @(t) heatingCoolingBoundary(t, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, numberOfHeatingTimeSteps, dirichletRightBCValue);
-    %     dirichletRightBC = @(t) dirichletRightBCValue;
+%         dirichletRightBC = @(t) [];
     
     % body heat source in the bar
-    bodyLoad = @(x, t) externalSource(x, t, xEnd, numberOfLayers, tEnd,...
-        numberOfTimeStepsPerLayer, refinementDepth, bodySource);
-    %     bodyLoad = @(x, t) bodySource;
+%     bodyLoad = @(x, t) externalSource(x, t, xEnd, numberOfLayers, tEnd,...
+%         numberOfTimeStepsPerLayer, numberOfHeatingTimeSteps, nuemannRightBC);
+        bodyLoad = @(x, t) bodySource;
     
     % conductivity function                                                     % thermal conductivity [W/(m K)]
     k = @(x, t, T) steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, T);
 %         k = @(x, t, T) 27.0;
+
+    % conductivity function  derivative                                          % thermal conductivity [W/(m K ^2)]
+%     kDerivative = @(x, t, T) steelThermalConductivityDerivative(x, t, xEnd, numberOfLayers, tEnd,...
+%         numberOfTimeStepsPerLayer, T);
+    kDerivative = @(x, t, T) 0.0;
     
     % heat capacity function                                                    % heat capacity [kJ / kg °C]
     heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
         entalphyJump, Tsource, Tmelt);
 %         heatCapacity = @(x, T, T_last) rho * c;
+
+    % heat capacity function                                                    % heat capacity [kJ / kg °C ^2]
+%     heatCapacityDerivative= @(x, T, T_last)  capacityPhaseTransitionDerivative(x, T, T_last, c, rho,...
+%         entalphyJump, Tsource, Tmelt);
+    heatCapacityDerivative= @(x, T, T_last) 0.0;
     
     %% Discretization
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % time discretization
@@ -104,12 +114,13 @@ for refinementDepth = 1:depth
     [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(depth)] = ...
         multiscalePODhIGASolver(p, x_PostProcess, bodyLoad, T0,...
         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance,...
-        maxIteration, totalNumberOfControlPoints,refinementDepth, numberOfEnrichedControlPoints,...
+        maxIteration, totalNumberOfControlPoints, refinementDepth, numberOfEnrichedRefinementDepth,...
         trainingTimeSteps, numberOfTimeStepsPerLayer,...
-        numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder, layerThickness);
+        numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder, layerThickness,...
+        kDerivative, heatCapacityDerivative);
     
     %% Post-Process
-    figure(refinementDepth+20)
+    figure(modes+20)
     
     % Create axes
     axes1 = axes;
@@ -143,7 +154,7 @@ for refinementDepth = 1:depth
     
     hold off
     
-    figure(refinementDepth+2000)
+    figure(modes+2000)
     % Create axes
     axes2 = axes;
     
@@ -178,8 +189,8 @@ for refinementDepth = 1:depth
     % Write results to a file
    
     
-    formatSpec = 'XMultiscaleProblem/Temperature/myIGAMultiPhaseResultsFile_%d.txt';
-    filename = sprintf(formatSpec,refinementDepth);
+    formatSpec = 'XMultiscaleIGAProblem/Temperature/myXMultiscaleResultsFile_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -191,8 +202,8 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XMultiscaleProblem/Fluxes/myIGAMultiPhaseFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,refinementDepth);
+    formatSpec = 'XMultiscaleIGAProblem/Fluxes/myXMultiscaleFluxesFile_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -204,8 +215,8 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XMultiscaleProblem/Time/myIGAMultiPhaseTime_%d.txt';
-    filename = sprintf(formatSpec,refinementDepth);
+    formatSpec = 'XMultiscaleIGAProblem/Time/myXMultiscaleTime_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
         fprintf(resultFile, '%d, %\t', i);
@@ -215,8 +226,8 @@ for refinementDepth = 1:depth
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XMultiscaleProblem/Dofs/myIGAMultiPhaseDOFsFile_p%d.txt';
-    filename = sprintf(formatSpec,refinementDepth);
+    formatSpec = 'XMultiscaleIGAProblem/Dofs/myXMultiscaleDOFsFile_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));

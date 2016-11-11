@@ -1,4 +1,4 @@
-function [ K_oo, Kprime_oo, M_oo, Mprime_oo, f_o ] = assemblyMultiscaleOverlayFEM(overlayProblem, baseProblem, time,...
+function [ M_oo, Mprime_oo, K_oo, Kprime_oo, f_o ] = assemblyMultiscaleOverlayFEM(overlayProblem, baseProblem, time,...
     integrationOrder, overlaySolutionCoefficients, baseSolutionCoefficients, lastConvergedBaseSolution, lastConvergentOverlaySolution)
 %ASSEMBLYMULTISCALEOVERLAYFEM  assembles the mass, the conductivity matrix
 %and load vector
@@ -34,7 +34,7 @@ numberOfIntegrationPoints = length(rGP);
 
 for e=1:overlayProblem.N
     
-    ldof = 2;
+    ldof_b = baseProblem.p + 1;
     
     X1 = overlayProblem.coords(e);
     X2 = overlayProblem.coords(e+1);
@@ -44,44 +44,50 @@ for e=1:overlayProblem.N
         
         [N, B] = shapeFunctionsAndDerivatives(rGP(iGP));
         globalGPCoord = mapLocalToGlobal(rGP(iGP),X1, X2);
+        
 
-        [Nsplines, Bspline] = BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric(...
-            globalGPCoord, overlayProblem.coords(1), overlayProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+        [Nsplines, Bsplines] = BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric(...
+            globalGPCoord, baseProblem.coords(1), baseProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+
+        detJacobianX_Xi = baseProblem.coords(end) - baseProblem.coords(1);
+        inverseJacobianX_Xi = 1 / detJacobianX_Xi;
+
         
         %% Integrate FEM block
-        %extrnal heat source
-        f_o(overlayProblem.LM(e,1:ldof)) = f_o(overlayProblem.LM(e,1:ldof)) + N' * overlayProblem.rhs(mapLocalToGlobal(rGP(iGP), X1, X2),...
+        %external heat source
+        f_o(overlayProblem.LM(e,:)) = f_o(overlayProblem.LM(e,:)) + N' * overlayProblem.rhs(globalGPCoord,...
             time) * wGP(iGP) * overlayProblem.F_map(X1,X2);
         
         %Capacity matrix
-        M_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) = M_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) +...
-            overlayProblem.heatCapacity( rGP(iGP), evaluateTemperature(e, rGP(iGP), overlayProblem, overlaySolutionCoefficients, baseSolutionCoefficients), ...
-            evaluateTemperature(e, rGP(iGP), lastConvergentOverlaySolution, lastConvergedBaseSolution))...
+        M_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) = M_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) +...
+            overlayProblem.heatCapacity( globalGPCoord, evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem, overlaySolutionCoefficients, baseSolutionCoefficients), ...
+            evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem, lastConvergentOverlaySolution, lastConvergedBaseSolution))...
             * (N' * N) * wGP(iGP) * overlayProblem.F_map(X1,X2);
         
         %Capacity matrix derivative
-        deltaBaseSolution = lastConvergedBaseSolution - baseSolutionCoefficients;
-        deltaOverlaySolution = lastConvergentOverlaySolution - overlaySolutionCoefficients;
+        deltaBaseSolution = -(lastConvergedBaseSolution - baseSolutionCoefficients);
+        deltaOverlaySolution = (lastConvergentOverlaySolution - overlaySolutionCoefficients);
         
-        Mprime_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) = Mprime_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) +...
-            overlayProblem.heatCapacityDerivative( rGP(iGP), evaluateTemperature(e, rGP(iGP), overlayProblem, overlaySolutionCoefficients, baseSolutionCoefficients), ...
-            evaluateTemperature(e, rGP(iGP), overlayProblem, lastConvergentOverlaySolution, lastConvergedBaseSolution))...
-            * (N' * N) * (Nsplines * deltaBaseSolution + N * deltaOverlaySolution) * wGP(iGP) * overlayProblem.F_map(X1,X2);
+        Mprime_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) = Mprime_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) +...
+            overlayProblem.heatCapacityDerivative( globalGPCoord, evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem,overlaySolutionCoefficients, baseSolutionCoefficients), ...
+            evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem,lastConvergentOverlaySolution, lastConvergedBaseSolution))...
+            * (N' * N) * (Nsplines(baseProblem.LM(end, 1:ldof_b)) * deltaBaseSolution(baseProblem.LM(end, 1:ldof_b))...
+            + N * deltaOverlaySolution(overlayProblem.LM(e,:))) * wGP(iGP) * overlayProblem.F_map(X1,X2);
         
-        %Diffusion matrix
-        K_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) = K_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) +...
-            overlayProblem.k(mapLocalToGlobal(rGP(iGP), X1, X2),...
-            time, evaluateTemperature(e, rGP(iGP), overlayProblem, overlaySolutionCoefficients, baseSolutionCoefficients))...
+        %Conductivity matrix
+        K_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) = K_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) +...
+            overlayProblem.k(globalGPCoord,...
+            time, evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem, overlaySolutionCoefficients, baseSolutionCoefficients))...
             * (B' * B) * wGP(iGP) * overlayProblem.B_map(X1,X2);
         
-        %Diffusion matrix derivative
-        Kprime_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) = Kprime_oo(overlayProblem.LM(e, 1:ldof), overlayProblem.LM(e, 1:ldof)) +...
-            overlayProblem.kderivative(mapLocalToGlobal(rGP(iGP), X1, X2),...
-            time, evaluateTemperature(e, rGP(iGP), overlayProblem, overlaySolutionCoefficients, baseSolutionCoefficients))...
-            * (B' * N) * (Bspline * baseSolutionCoefficients + B * overlaySolutionCoefficients) * wGP(iGP) * overlayProblem.B_map(X1,X2);
+        %Conductivity matrix derivative
+        Kprime_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) = Kprime_oo(overlayProblem.LM(e,:), overlayProblem.LM(e,:)) +...
+            overlayProblem.kDerivative(globalGPCoord,...
+            time, evaluateTemperature(e, rGP(iGP), overlayProblem, baseProblem, overlaySolutionCoefficients, baseSolutionCoefficients))...
+            * (B' * N) * (Bsplines(baseProblem.LM(end, 1:ldof_b)) * baseSolutionCoefficients(baseProblem.LM(end, 1:ldof_b)) * inverseJacobianX_Xi...
+            + B * overlaySolutionCoefficients(overlayProblem.LM(e,:)) * overlayProblem.B_map(X1,X2)) * wGP(iGP);
         
     end
-    
 end
 
 end
@@ -90,7 +96,7 @@ function [ projectedCoefficients ] = evaluateTemperature(e, x, overlayProblem,..
     baseProblem, solutionOverlayCoefficients, solutionBaseCoefficients)
 % EVALUATETEMPERATURE project the previous solution onto the element.
 %   e = element index
-%   x = post-processing mesh
+%   x = evaluation local coordinates
 %   overlayProblem = problem struct of the overlay mesh
 %   baseProblem = problem struct of the base mesh
 %   solutionOverlayCoefficients = temeprature distribution of the previous overlay mesh
@@ -102,28 +108,29 @@ projectionOperator = zeros(numberOfProjectionPoints, size(overlayProblem.LM, 2))
 projectionOperatorSpline = zeros(numberOfProjectionPoints, size(baseProblem.LM, 2));
 
 N = zeros(length(x), 2);
-Nspline = zeros(length(x), 2);
 
 localCoords = x;
-globalCoord = mapLocalToGlobal(x,overlayProblem.coords(e), overlayProblem.coords(e+1));
+
+X1 = overlayProblem.coords(e);
+X2 = overlayProblem.coords(e+1);
 
 for k=1:length(x)
-    [N(k,:), ~] = shapeFunctionsAndDerivatives(localCoords(k));
-    [Nspline(k,:), ~] = BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric...
-        (globalCoord, overlayProblem.coords(1), overlayProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
+    [projectionOperator(k,1:size(N,2)), ~] = shapeFunctionsAndDerivatives(localCoords(k));
+    
+    globalGPCoord = mapLocalToGlobal(localCoords(k),X1, X2);
+    
+    parametricGPCoord = mapGlobalToParametric(...
+        globalGPCoord, baseProblem.coords(1), baseProblem.coords(end));
+
+    [NIga, ~] =  BsplinesShapeFunctionsAndDerivatives(parametricGPCoord, baseProblem.p, baseProblem.knotVector);
+    projectionOperatorSpline(k,1:size(NIga,2)) = NIga(:);
 end
 
 %evaluate the overlay solution
-for i=1:length(x)
-    projectionOperator(i,1:size(N,2)) = N(i,:);
-end
-projectedOverlayCoefficients = projectionOperator * solutionOverlayCoefficients(overlayProblem.LM(e,:));
+projectedOverlayCoefficients = projectionOperator(:,:) * solutionOverlayCoefficients(overlayProblem.LM(e,:));
 
 %evaluate the base solution
-for i=1:length(x)
-    projectionOperatorSpline(i,1:size(N,2)) = N(i,:);
-end
-projectedBaseCoefficients = projectionOperatorSpline * solutionBaseCoefficients(baseProblem.LM(e,:));
+projectedBaseCoefficients = projectionOperatorSpline(:,:) * solutionBaseCoefficients(:);
 
 projectedCoefficients = projectedOverlayCoefficients + projectedBaseCoefficients;
 

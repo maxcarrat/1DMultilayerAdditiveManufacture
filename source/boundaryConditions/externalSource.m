@@ -1,5 +1,5 @@
 function [ rhs ] = externalSource( x, t, xEnd, numberOfLayers,...
-    tEnd, numberOfTimeStepsPerLayer, refinementDepth, sourceValue )
+    tEnd, numberOfTimeStepsPerLayer, numberOfHeatingTimeSteps, sourceValue )
 %EXTERNALSOURCE returns the extrnal heat source on the doamin
 % for a given set of cordinates x at the
 % given time t, the heat sorce is applied only at the first time step for
@@ -17,11 +17,12 @@ rhs = zeros(numel(x), 1);
 
 % deltaRefined = deltaX / 2^(refinementDepth);
 
-timeToApplyTheSource = (timeStep_layer-1)*deltaT_layer + deltaT;
+heatingTime = (timeStep_layer-1)*deltaT_layer +...
+    deltaT * numberOfHeatingTimeSteps;
 
 for i=1:numel(x)
-   if (x <=  boundaryConditionPoint && x >= (boundaryConditionPoint-deltaX)) ...
-           && t <= timeToApplyTheSource
+   if (x ==  boundaryConditionPoint) ...
+           && t <= heatingTime
        rhs(i) = sourceValue;
    else
        rhs(i) = 0.0;

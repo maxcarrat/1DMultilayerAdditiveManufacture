@@ -31,11 +31,11 @@
    \addlegendentry{Reference solution};
 	
 \addplot  [color = brown] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/XFEMDepth0FluxesData/myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_1_ref0.txt};
-   \addlegendentry{X-PODFEM 1 $enr. node$};
+   \addlegendentry{POD X-FEM 1 $enr. node$};
 
-\addplot [color = orange] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/XFEMDepth1FluxesData/myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_1_ref1.txt};   \addlegendentry{X-PODFEM 2 $enr. node$};
+\addplot [color = orange] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/XFEMDepth1FluxesData/myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_1_ref1.txt};   \addlegendentry{POD X-FEM  2 $enr. node$};
 
-\addplot [color = blue] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/XFEMDepth2FluxesData/myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_1_ref2.txt};   \addlegendentry{X-PODFEM 4 $enr. node$};
+\addplot [color = blue] table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/RESULTS/pgfplots/XFEMMultiPhaseConvergenceStudy/XFEMDepth2FluxesData/myMultiPhaseXFEMFluxesFileShort_IntegrationM+1_1_ref2.txt};   \addlegendentry{POD X-FEM  4 $enr. node$};
 \end{axis} 
 
  \spy on (8.25,4.75) in node at (6,2);
