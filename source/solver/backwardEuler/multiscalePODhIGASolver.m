@@ -184,7 +184,9 @@ end
 % POD on the local/layer solution snapshots, omitt the first zero-solution
 % vector
 [solutionReductionOperator, ~] = properOrthogonalDecomposition...
-    (localRefinedTemperatureSolutions(:,3*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
+    (localRefinedTemperatureSolutions(:,5*numberOfLayersTimeSteps+2:numberOfTrainingLayers*numberOfLayersTimeSteps+1), numberOfPODModes);
+
+% solutionReductionOperator = -solutionReductionOperator;
 
 % Project refined solution onto enriched mesh
 
@@ -285,18 +287,6 @@ for layer = (numberOfTrainingLayers+1):numberOfLayers
         
 %         temperatureSolutions = L2projectionIGA( temperatureSolutions, problemXtended, integrationSplinesOrder,...
 %             integrationModesOrder, layerThickness, initialTemperature, 'true', previousXtendedProblem );
-        
-        
-        %         %% TEST
-        %         %Post-Processing temperatures and heat fluxes
-        %         temperaturePostProcessing(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords,...
-        %             currentTime, baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions,...
-        %             overlayTemperatureSolutions, layer, numberOfLayers, 0) ;
-        %         heatFluxes(:, t+1) = evaluateNumericalResultsXtendedMultiscale(postProcessingCoords, currentTime,...
-        %             baseProblem, overlayProblem, overlayXProblem, baseTemperatureSolutions, overlayTemperatureSolutions,...
-        %             layer, numberOfLayers, 1);
-        %         %% END TEST
-
     end
     
     

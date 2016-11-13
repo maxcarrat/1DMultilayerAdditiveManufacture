@@ -299,7 +299,7 @@ hold on
 % hold on
 
 % Title
-title({'\centering{\quad \quad \quad Non-linear X-PODFEM}'; '\centering{using refined hFEM (depth 8) as reference}'}...
+title({'\centering{\quad \quad \quad Non-linear X-PODFEM}'; '\centering{using refined hFEM as reference}'}...
     , 'Interpreter','latex');
 
 % Legend

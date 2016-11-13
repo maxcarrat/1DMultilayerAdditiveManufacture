@@ -160,7 +160,7 @@ integrationDomain = linspace(-1, +1, ceil(refinedDofs/overlayProblem.XN));
 %overlay mesh element boundaries
 X1 = overlayProblem.coords(element);
 X2 = overlayProblem.coords(element +1);
-elementGloabalCoords = [X1, X2];
+elementGlobalCoords = [X1, X2];
 
 inverseJacobianLocalToGlobal = overlayProblem.B_map(X1,X2);
     
@@ -177,6 +177,8 @@ modalDofs = length(indexLocalEnrichedNodes)*overlayProblem.modes;
 projectionOperator = zeros(numberOfProjectionPoints, size(overlayProblem.LM, 2) + modalDofs);
 
 r = zeros(1, numberOfProjectionPoints);
+r_base = zeros(1, numberOfProjectionPoints);
+r_over = zeros(1, numberOfProjectionPoints);
 
 enrichedSubElements = refinedDofs/overlayProblem.XN;
 
@@ -200,16 +202,16 @@ for i=1:numberOfProjectionPoints
                     baseProblem.p, baseProblem.knotVector);
                 projectionOperatorSplines(i,1:length(NIga)) = NIga(:);
                 [N, ~] =  shapeFunctionsAndDerivatives(localCoords(i));
-                [F, ~] = PODModesAndDerivativesMultiscale(localCoords(i), elementGloabalCoords, overlayProblem.modes,...
+                [F, ~] = PODModesAndDerivativesMultiscale(localCoords(i), elementGlobalCoords, overlayProblem.modes,...
                     PODCoefficients, integrationDomain, integrationSubDomainIndex, indexLocalEnrichedNodes);
                 projectionOperator(i,1:size(N,2)+size(F,2)) = [N, F];
                 
                 
-                r_base = projectionOperatorSplines(i,:) * baseCoefficients(:) ;
-                r_over = projectionOperator(i,:) * overlayCoefficients(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2));
+                r_base(i) = projectionOperatorSplines(i,:) * baseCoefficients(:) ;
+                r_over(i) = projectionOperator(i,:) * overlayCoefficients(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2));
 
                 %the final solution is the sum of the base and overlay mesh solutions
-                r(i) = r_base + r_over;
+                r(i) = r_base(i) + r_over(i);
 
                 %evaluate heat fluxes
             else
@@ -219,6 +221,7 @@ for i=1:numberOfProjectionPoints
                 
                 [NIga, BIga] =  BsplinesShapeFunctionsAndDerivatives(parametricCoords(i),...
                     baseProblem.p, baseProblem.knotVector);
+                
                 projectionOperatorSplines(i,1:length(NIga)) = NIga(:);
                 projectionOperatorSplines_der(i,1:length(BIga)) = BIga(:) .* inverseJacobianX_Xi;
                 
@@ -226,7 +229,7 @@ for i=1:numberOfProjectionPoints
                 [N, B] =  shapeFunctionsAndDerivatives(localCoords(i));
                 B = B * inverseJacobianLocalToGlobal;
                 
-                [F, G] = PODModesAndDerivativesMultiscale(localCoords(i), elementGloabalCoords, overlayProblem.modes,...
+                [F, G] = PODModesAndDerivativesMultiscale(localCoords(i), elementGlobalCoords, overlayProblem.modes,...
                     PODCoefficients, integrationDomain, integrationSubDomainIndex, indexLocalEnrichedNodes);
                 
                 projectionOperator(i,1:size(N,2)+size(F,2)) = [N, F];
@@ -236,14 +239,14 @@ for i=1:numberOfProjectionPoints
                     overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2)) + projectionOperatorSplines(i,:) *...
                     baseCoefficients(:);
                 
-                r_base = (projectionOperatorSplines_der(i,:) * baseCoefficients(:)) .* ...
+                r_base(i) = (projectionOperatorSplines_der(i,:) * baseCoefficients(:)) .* ...
                     baseProblem.k(x(i), t, temperature);
                 
-                r_over = (projectionOperator_der(i,:) * overlayCoefficients(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2))) .*...
+                r_over(i) = (projectionOperator_der(i,:) * overlayCoefficients(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2))) .*...
                     baseProblem.k(x(i), t, temperature);
                
                 %the final solution is the sum of the base and overlay mesh solutions
-                r(i) = r_base + r_over;
+                r(i) = r_base(i) + r_over(i);
             end
             break;
         end

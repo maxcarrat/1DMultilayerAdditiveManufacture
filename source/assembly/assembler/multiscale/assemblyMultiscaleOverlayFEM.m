@@ -108,19 +108,18 @@ projectionOperator = zeros(numberOfProjectionPoints, size(overlayProblem.LM, 2))
 projectionOperatorSpline = zeros(numberOfProjectionPoints, size(baseProblem.LM, 2));
 
 N = zeros(length(x), 2);
-
-localCoords = x;
-
 X1 = overlayProblem.coords(e);
 X2 = overlayProblem.coords(e+1);
+
+localCoords = x;
+globalGPCoord = mapLocalToGlobal(localCoords,X1, X2);
+
+parametricGPCoord = mapGlobalToParametric(...
+    globalGPCoord, baseProblem.coords(1), baseProblem.coords(end));
 
 for k=1:length(x)
     [projectionOperator(k,1:size(N,2)), ~] = shapeFunctionsAndDerivatives(localCoords(k));
     
-    globalGPCoord = mapLocalToGlobal(localCoords(k),X1, X2);
-    
-    parametricGPCoord = mapGlobalToParametric(...
-        globalGPCoord, baseProblem.coords(1), baseProblem.coords(end));
 
     [NIga, ~] =  BsplinesShapeFunctionsAndDerivatives(parametricGPCoord, baseProblem.p, baseProblem.knotVector);
     projectionOperatorSpline(k,1:size(NIga,2)) = NIga(:);

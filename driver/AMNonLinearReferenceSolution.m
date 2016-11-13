@@ -20,8 +20,8 @@ T0 = 20.0;                                                  % Initial temperatur
 heatCapacity= rho*c;                                        % heat capacity [kJ / kg °C]
 Tsource = 2000.0;                                           % source temperature [°C]
 
-tEnd = 45;                                                 % total time [sec]
-xEnd = 0.01;                                                % length of the bar [m]
+tEnd = 4.5;                                                 % total time [sec]
+xEnd = 0.001;                                                % length of the bar [m]
 
 dirichletLeftBC = @(t) T0;
 dirichletRightBCValue = T0 + Tsource;
@@ -36,7 +36,7 @@ maxIterations = 20;
 % modes = zeros(maxTrainingTimeSteps-3,1);
 % tainingVector = linspace(3,maxTrainingTimeSteps, maxTrainingTimeSteps-2);
 
-numberOfLayers = 200;
+numberOfLayers = 20;
 trainingTimeSteps = numberOfLayers;
 numberOfTimeStepsPerLayer = 10;
 
@@ -62,15 +62,13 @@ t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);        % ti
 x = linspace(0.0, xEnd, numberOfElementsInX + 1);                           % spatial discretization X
 layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                 % layer spatial discretization X
 
-x_ref = linspace(0.0, 1.0, 2^refinementDepth + 1);                          % refinement discretization X_ref
 x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2.^8);          % post-processing coordinates
 
 [X, T] = meshgrid(x_PostProcess, t);
-[X_ref, T_ref] = meshgrid(x_ref, t);
 
 
 %% Analysis
-[temperatureSolution, heatFlux, internalEnergy] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
+[temperatureSolution, heatFlux, internalEnergy, CPUTime] = nonLinearBackwardEulerNoCoarseningGaussIntegrationSolver(x, x_PostProcess, bodyLoad, T0,...
     dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIterations, ...
     refinementDepth, numberOfTimeStepsPerLayer, numberOfLayers, integrationOrder);
 

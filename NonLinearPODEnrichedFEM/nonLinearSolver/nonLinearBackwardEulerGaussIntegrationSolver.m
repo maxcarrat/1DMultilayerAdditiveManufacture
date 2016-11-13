@@ -221,9 +221,6 @@ function [ projectedCoefficients ] = eXtendedProjectionNoCoarse(problem, previou
 %   modes = number of enrichment modes
 %   initialTemperature = initial temperature of the powder
 
-projectedCoefficients = zeros(problem.N + 1 +...
-    modes * (2*problem.XN - 1), 1);
-
 % projectedCoefficients(1:problem.N+1) = L2projectionLinearDistribution(problem, previousTemperature, updatedMesh,...
 %     previousMesh, initialTemperature, 0);
 

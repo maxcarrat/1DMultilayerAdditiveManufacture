@@ -34,23 +34,23 @@ bodySource = 0.0e+00;
 %% Non-linear parameters
 tolerance = 1.0e-05;                                           % N-R convergence tolerance
 maxIteration = 50;                                             % max number of N-R iterations
-pMax = 2;                                                      % polynomial degree
+pMax = 1;                                                      % polynomial degree
 modesMax = 3;                                                  % max number of POD-modes
-depth = 3;                                                     % max refinement depth
+depth = 8;                                                     % max refinement depth
 DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-modes = 3;
+modes = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %for loop to generate the convergence study for either different number of
 %modes or differents refinement depths
 
-for modes = 1:modesMax
+for modes = 3:modesMax
 % for refinementDepth = 1:depth
     
     %% Bar specifics
     numberOfLayers = 20;
-    trainingTimeSteps = 5;
+    trainingTimeSteps = 8;
 %     trainingTimeSteps = 20;
     numberOfTimeStepsPerLayer = 4;                             % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 2;                               % heating laser time per layer 0.090 sec
@@ -59,12 +59,12 @@ for modes = 1:modesMax
     timeSteps = numberOfLayers;
     
     p = pMax;
-    numberOfEnrichedRefinementDepth = 2;
-    numberOfPODModes = modes;
+    numberOfEnrichedRefinementDepth = 0;
+    numberOfPODModes = 0; %modes;
     
     refinementDepth = depth;
     integrationOrder = p + 1;                                     % integration order
-    integrationModesOrder = modes + 1;                           %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 50;                           %(modes - 1) ^ 2  + 1 + modes;
     
 
     numberOfRefinedElementsToBeKept = 1;

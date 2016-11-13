@@ -6,7 +6,7 @@ function [ K, Kprime, KCoupling, M, MCoupling, Mprime, f ] = applyOverlayMultisc
 for i=1:size(problem.dirichlet_bc,1)
     K(problem.dirichlet_bc(i, 1), problem.dirichlet_bc(i, 1)) = K(problem.dirichlet_bc(i, 1), problem.dirichlet_bc(i, 1)) + problem.penalty;
     Kprime(problem.dirichlet_bc(i, 1), problem.dirichlet_bc(i, 1)) = Kprime(problem.dirichlet_bc(i, 1), problem.dirichlet_bc(i, 1)) + problem.penalty;
-%     KCoupling(problem.dirichlet_bc(i, 1), :) = zeros( 1, size(KCoupling, 2));
+    KCoupling(problem.dirichlet_bc(i, 1), :) = zeros( 1, size(KCoupling, 2));
     
 %     MCoupling(problem.dirichlet_bc(i, 1), :) = zeros( 1, size(MCoupling, 2));
     

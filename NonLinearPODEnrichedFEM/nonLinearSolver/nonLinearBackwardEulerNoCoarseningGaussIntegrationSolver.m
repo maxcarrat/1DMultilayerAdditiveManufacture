@@ -83,10 +83,11 @@ for layer = 1:numberOfLayers
     
     computationalTime = [computationalTime, timeToGenerateAndSolveTheSystem];
     
-    if convergence <= 1
-        disp('The analysis always converged')
-    else
-        disp('The analysis did not always converged !!!')
-    end
+end
+
+if convergence <= 1
+    disp('The analysis always converged')
+else
+    disp('The analysis did not always converged !!!')
 end
 

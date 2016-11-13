@@ -63,7 +63,7 @@ for modes = 3:3
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                                           % spatial discretization X
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                                 % layer spatial discretization X
     
-    x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2.^8);                       % post-processing coordinates
+    x_PostProcess = linspace(0.0, xEnd, (numberOfElementsInX +1) * 2^8);          % post-processing coordinates
     
     [X, T] = meshgrid(x_PostProcess, t);
     
