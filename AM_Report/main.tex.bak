@@ -12,23 +12,21 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{tabto}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,      
+    urlcolor=blue,
+    citecolor=blue,
+}
 
 \begin{document}
 
-\title { Relazione finale per borsa di studio "Simulazioni di stampa 3D per applicazioni biomediche"}
-%\author{Massimo Carraturo}
+\title { POD-XIgA: A 1D Numerical Example}
+\author{Massimo Carraturo}
 
 \maketitle
-\begin{tabbing}
-\hspace*{3cm}\=\hspace*{4cm}\= \kill 
-Author:     \> Massimo Carraturo, M.Sc.\\
-\\
-\> __________________________________________________________
-\\
-Supervisor:     \> Prof. Ing. Alessandro Reali\\
-\\
-\> __________________________________________________________
-\end{tabbing}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % INTRODUCTION
@@ -50,22 +48,22 @@ In the literature the ROM was already applied to heat transfer problems by means
 \begin{enumerate}
 \item Classical Model Reduction: The full order model (FOM) is first solved for a small number of different parameter values (training-phase). From the set of FOM solutions (\textit{snapshots}) a reduction operator is constructed using the proper orthogonal decomposition (POD). The analysis is then performed on the ROM, which is obtained simply projecting the discrete system onto the reduced space by means of the reduction operator (ROM-phase) \cite{Michopoulos2014a}.
 The main drawback of this method is that computational speed-up affect only the time required to solve the system, while the integration still has to be performed on the full model.
-\item {POD-GFEM} \cite{Aquino2008}: In this method the POD modes extracted from the set of snapshots are used to enriched the FEM basis via partition of unity \cite{Babuska1997} approach (GFEM/XFEM). The POD-GFEM allows to integrate and solve the problem on a coarse mesh enriched using POD modes. With this method high accuracy can be achived with a relatively small number of degrees of freedom (DOFs).
-\item {V-GFEM}: The \textit{Vademecum}-GFEM \cite{Canales2016a} uses a different decomposition method: the so called proper generalized decomposition (PGD). This method allows to generate the solution snapshots on a local domain with an eulerian reference frame. The PGD modes are again used to enrich the FEM basis following the GFEM approach. The two main advantages of this method are the reduced number of additional DOFs and the local/global feature of the method itself. In fact, the \textit{Vademecum} is generated separately on a local domain and allows to enrich only the nodes around the region of interest (where is paced the laser beam).
+\item {POD-GFEM} \cite{Aquino2008}: In this method the POD modes extracted from the set of snapshots are used to enriched the FEM basis via partition of unity \cite{Babuska1997} approach (GFEM/XFEM). The POD-GFEM allows to integrate and solve the problem on a coarse mesh enriched using POD modes. With this method high accuracy can be achived with a relatively small number of DOFs.
+\item {V-GFEM}: The \textit{Vademecum}-GFEM \cite{Canales2016a} uses a different decomposition method: the so called proper generalized decomposition (PGD). This method allows to generate the solution snapshots on a local domain with an eulerian reference frame. The PGD results are again used to enrich the FEM basis following the GFEM approach. The two main advantages of this method are the reduced number of additional DOFs and the local/global feature of the method itself, since the \textit{Vademecum} is generated separately on a local domain and allows to enrich only the nodes around the heat affected zone (HAZ).
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % X-PODFEM
 
-\section*{X-PODFEM}
+\section*{POD-XIgA}
 
-In the present work we seek for a method which first allows to capture with a relatively low number of DOFs the non-linear behaviour of an AM process and secondly leads to a considerable computational speed-up. Another objective is to avoid the separation of the training and the ROM-phase. The X-PODFEM method exploit the local/global feature of the \textit{Vademecum}-GFEM, but at the same time has no need to train the solution onto a separate domain with a different reference frame.
+In the present work we seek for a method which first allows to capture with a relatively low number of DOFs the non-linear behaviour of an AM process and secondly leads to a considerable computational speed-up. Another objective is to avoid the separation of the training and the ROM-phase. POD-XIgA approach exploits the local/global feature required in AM applications and allows to take advantage from the higher approximation property of Isogeometric analysis (IgA) \cite{cottrell_isogeometric_2009}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % POD
 
 \subsection*{POD}
-There are many different techniques which allow to generate reduced basis functions. One of the most popular one is the \textit{Proper Orthogonal Decomposition} also called \textit{Karhunen-Lo{\'e}ve decomposition} or \textit{Galerkin projection}, an explore-and-compress method. The parameter space is investigated generating some randomly-distributed sample points (or \textit{snapshots}), i.e. the true solution at a given parameter value. Then the method compress the continuous parameter space into a reduced one, filtering only the information which are essential to approximate the true solution space, i.e. the modes corresponding to the higher energetic eigenvalues. This randomness in the snapshots generation makes the POD particularly suitable to capture the casualty associated with the time evolution of the process. The POD can be also defined as a method for constructing lower-dimensional approximation of a subspace in Hilbert space, as the \textit{Single Value Decomposition} (SVD) does in a finite-dimensional space or Euclidean space.\\Given a set of \textit{M-snapshots} 
+There are many different techniques which allow to generate reduced basis functions. One of the most popular is the \textit{Proper Orthogonal Decomposition} also called \textit{Karhunen-Lo{\'e}ve decomposition} or \textit{Galerkin projection}, an explore-and-compress method. The parameter space is investIgAted generating some randomly-distributed sample points (or \textit{snapshots}), i.e. the true solution at a given parameter value. Then the method compress the continuous parameter space into a reduced one, filtering only the information which are essential to approximate the true solution space, i.e. the modes corresponding to the higher energetic eigenvalues. This randomness in the snapshots generation makes the POD particularly suitable to capture the casualty associated with the time evolution of the process. The POD can be also defined as a method for constructing lower-dimensional approximation of a subspace in Hilbert space, as the \textit{Single Value Decomposition} (SVD) does in a finite-dimensional space or Euclidean space.\\Given a set of \textit{M-snapshots} 
 \begin{equation}
 \mathcal{M}(\mathbb{P}_{h}) = \lbrace\theta(\mu)\vert\mu \in \mathbb{P}_{h}\rbrace
 \end{equation}
@@ -81,7 +79,7 @@ The $N_{RB}$-dimensional ( where $N_{RB} < M$ is the number of eigenvalues of $\
 \| \mathbold{\theta}_{j}(\mu) - \sum_{i=1}^{N_{RB}}(\mathbold{\theta}_{j}^{T}(\mu)\zeta_{i})\zeta_i\|_{\mathbb{V}}^{2}
 \label{eq:minPOD}
 \end{equation}
-where $\Vert\cdot\Vert_{\mathbb{V}}$ is the norm induced by the parametrized bilinear form (see \cite{Rozza2009} for further details) for a given $\mu$
+where $\Vert\cdot\Vert_{\mathbb{V}}$ is the norm induced by the parametrized bilinear form (we refer to \cite{Rozza2009} for further details) for a given $\mu$
 \begin{equation}
 \Vert\cdot\Vert_{\mathbb{V}} = \sqrt{\mathcal{B}(\cdot, \cdot; \mu)}
 \end{equation}
@@ -116,22 +114,74 @@ and with
 % PARTITION OF UNITY
 
 \subsection*{Partition of Unity (PU) expansion}
-The set of reduced basis $\zeta_{i}$ obtained from POD (\textit{aka} POD-modes) can be used to enrich the initial set of shape functions $\phi_{k}$ via the partion of unity expansion \cite{Babuska1997}
+The set of reduced basis $\zeta_{i}$ obtained from POD (\textit{aka} POD-modes) can be used to enrich the initial set of shape functions $\phi_{k}$ via the partition of unity expansion \cite{Babuska1997}
 \begin{equation}
 \theta_{h}(x) = \sum_{i\in I} \phi_{i}(x)\theta_{i} + \sum_{\alpha}\sum_{j\in I_{enr}} \phi_{j}(x)\zeta_{\alpha}a_{j\alpha}
+\label{PartitionOfUnity}
 \end{equation}
-where $I$ is the set of all nodes of the initial (coarse) discretization, $\alpha$ is the number of considered POD-modes and $I_{enr}$ is the set of nodes enriched by means of POD-modes. This enrichment of standard basis functions allows to capture the main feature of the solution, which are stored in the POD-modes, employing a coarse mesh and thus a relatively small number of degrees of freedom. It is clear that the construction of the POD-modes, i.e. the training-phase, plays a vital role in this methodology. As aforementioned, one objective of the present method is to integrate in the same simulation process the training and the ROM-phase and at the same time, enrich only the DOFs within the region of interest. To achieve such a goal the training-phase is made "\textit{on-fly}":
+where $I$ is the set of all nodes of the initial (coarse) discretization, $\alpha$ is the number of considered POD-modes and $I_{enr}$ is the set of nodes enriched by means of POD-modes. This enrichment of standard basis can be performed only if the shape functions $\phi_{k}$ satisfies the partition of unity, i.e. $\sum_{k=1}^{n}\phi_{k}(x)=1$. The POD-modes represents the general behaviour of the solution, thus, if they are used as enrichment functions, allow to capture the main solution features using a relatively relatively small number of DOFs. It is clear that the construction of the POD-modes, i.e. the training-phase, plays a vital role in this methodology. As aforementioned, one objective of the present method is to integrate in the same simulation process the training and the ROM-phase and at the same time, enrich only the DOFs within the region of interest. To achieve such a goal the training-phase is made "\textit{on-fly}":
 \begin{enumerate}
-\item The FOM simulation starts from an initial, coarse mesh which is locally refined around the laser beam region,
-\item POD is performed on the temperature solutions coefficients of the nodes in the refined region,
-\item In the ROM phase the same domain and the same initial mesh of the FOM are used, but the nodes of the coarse mesh within the laser beam region are now enriched via PU expansion using the POD-modes as enrichment functions.
+\item The FOM simulation employs a fine mesh to solve the partial differential equations (PDE), which describe the problem.
+\item POD is performed on the temperature solutions around the HAZ cached during the training phase.
+\item In the ROM phase a coarse mesh is used to solve the global problem, such a mesh is locally enriched around the HAZ.
 \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IgA
+
+\subsection*{Isogeometric analysis}
+Isogeometric analysis represents a novel technique which aims to integrate Computer Aided Design(CAD) and numerical analysis. This goal is achieved employing the CAD-standard technology of Non-Uniform Rational B-spline (NURBS) as set of function for the analysis. The first consequence of this approach is that complex geometries can be represented exactly. NURBS also allow to arbitrary increase the inter-element continuity, leading to a more precise representation of derivatives of the field variables. Finally, higher order Ansatz spaces generated using NURBS capture complex solution with a lower number of DOFs than standard FEM techniques.
+In the present work B-splines are used as basis for the analysis. In fact, these curves are easier to deal with in numerical analysis and at the same time carry over all the key features of NURBS.
+\subsubsection*{B-spline basis functions}
+B-splines are curves based on parametric functions, i.e. they represent a given geometry by means of parameters. The physical (geometric) space has to be mapped onto a parametric space where the parametric function is defined. In particular, to construct a B-spline a \textit{knot vector} $\Xi=\left\lbrace\xi_{1},\xi_{2},...,\xi_{n+p+1}\right\rbrace$, where $\xi_{i} \in \mathbb{R}$ is the $i^{th} knot$, $i$ is the knot index, $p$ is the polynomial order and $n$ is the number of basis functions used to constructed the curve, must be specified. The knot vector in one-dimension is a non-decreasing set of coordinates in the parameter space. The knots partition the parameter space into elements, the so-called \textit{knot-span}. Geometric boundaries in the physical space are the projection of knot lines via the B-spline mapping.
+The B-spline mapping can be constructed using the \textbf{Cox-de Boor recursion formula}, where B-spline basis are defined starting with piecewise constants ($p=0$):
+\begin{equation}
+N_{i,0}(\xi)= 
+\begin{cases}
+      1, & \text{if}\ \xi_{i} \leqslant \xi < \xi_{i+1} \\
+      0, & \text{otherwise}.
+\end{cases}
+\end{equation}
+For $p=1,2,3,...,$ they are defined by
+\begin{equation}
+N_{i,p}(\xi) = \dfrac{\xi-\xi_{i}}{\xi_{i+p}-\xi_{i}}N_{i,p-1}(\xi)+\dfrac{\xi_{i+p+1}-\xi}{\xi_{i+p+1}-\xi_{i+1}}N_{i+1,p-1}(\xi).
+\end{equation}
+The second key ingredient for constructing a B-spline curve are \textbf{\textit{control points}}, the vector-valued coefficients of the B-spline basis. Thus, given $n$ basis $N_{i,p}$ and corresponding control points $\mathbf{B_{i}}\in\mathbb{R}$ a B-spline curve is defined by:
+\begin{equation}
+\mathbf{C}(\xi) = \sum_{i=1}^{n}N_{i,p}(\xi)\mathbf{B}_{i}.
+\end{equation}
+\subsubsection*{eXtended Isogeometric analysis (XIgA)}
+Using B-spline as basis for the analysis do not affect the possibility to enrich the Ansatz space via PU techniques. In fact, one property of the B-spline is that the fulfil the partition of unity, then they can be enriched using the POD-modes extracted from the training phase. The only difference with respect to the classical XFEM enrichment is that using IgA we have to enrich the DOF associated with a control point, which is in general non-interpolatory. Eq. \ref{PartitionOfUnity} reads now:
+\begin{equation}
+\theta_{h}(x) = \sum_{i\in I} N_{i,p}(x)\theta_{i} + \sum_{\alpha}\sum_{j\in I_{enr}} N_{j,p}(x)\zeta_{\alpha}a_{j\alpha},
+\label{IgAPartitionOfUnity}
+\end{equation}
+which is the numerical approximation of the so-called eXtended Isogeometric analysis (XIgA) using POD-modes as enrichment functions.\\
+\\
+\indent 
+The use of XIgA enriched by means of POD-modes requires additional mapping for the integration of the extended term in Eq. \ref{IgAPartitionOfUnity}. In fact, from Algorithm \ref{PODAlg} we obtain a set of vectors $\zeta_{i}$ of $n$ coefficients. To generate a POD basis which can be integrated using gaussian quadrature the coefficients have to be interpolated using linear functions, such that
+\begin{equation}
+\zeta_{\alpha}^{h}(x) = \sum_{i}\phi(x)\hat{\zeta}_{i\alpha}.
+\end{equation} 
+The interpolation functions $\phi(x)$ are defined on a sub-domain $\bar{\Omega}$ of the integration space $\tilde{\Omega}$, therefore an additional affine mapping $\bar{\sigma}:\bar{\Omega}^{el}\rightarrow\tilde{\Omega}^{sel}$ as shown in Figure \ref{fig:IntegrationMappingPODXIgA}.
+\begin{figure}
+\includegraphics[width=1\linewidth]{Pictures/IntegrationXPOD.pdf}
+\caption{Integration is performed by Gaussian quadrature on the parent space. The value of the POD-modes at each Gauss point is obtained by linear approximation of POD-mode coefficients. The set of POD-mode coefficients define a grid called sub-domain enrichment space and the interpolation linear basis are defined on such a space.}
+\label{fig:IntegrationMappingPODXIgA}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NUMERICAL RESULTS
 
-\section*{Numerical results}
-\subsection*{Problem definition}
+\section*{1D Numerical Example}
+As benchmark to test the method presented so far, we use an AM process where a bar having length $0.5$ mm, width $0.5$ mm and height $10$ mm (see Figure \ref{fig:AMBar1D}) is constructed. The process parameter values and the laser characteristics are reported in Table \ref{table::processParameters} and \ref{table::laserParameters}, respectively. The process is modelled using a 1D bar and discretized with an initial coarse mesh, where each element corresponds to a layer of the bar. In the present work the collections of \textit{snapshots} solutions is obtained computing the last layer of the FOM with a mesh refined using a standard $h$-refinement (see Figure \ref{fig:XPODFEMProcess}). In such a way, at each time step of the training-phase the number of snapshot solution coefficients is constant (as required by POD). From these set of snapshots the POD modal basis are generated and later used as enrichment functions to enrich the last node of the coarse mesh in the ROM-phase. 
+\\ \indent Figure \ref{fig:1DProcessLayer} shows the evolution of the 1D bar over an interval corresponding to a single layer construction time. In this picture we can observe that the temperature at the lower end of the bar is kept constant. In contrast, the Dirichlet boundary condition at the upper end of the bar is applied only in the melting interval ($\Delta T_{laser}$), while no boundaries are applied during the cooling time ($\Delta T_{cooling}$). With respect to time, each layer time interval is discretized using 10 time steps: 4 for $\Delta T_{laser}$ and 6 for $\Delta T_{cooling}$. \\ In the following we consider three different problems:
+\begin{itemize}
+\item linear transient heat problem
+\item non-linear transient heat problem
+\item non-linear transient heat problem with phase change
+\end{itemize}
 
 \begin{figure}[!h]
 \centering
@@ -145,7 +195,7 @@ where $I$ is the set of all nodes of the initial (coarse) discretization, $\alph
 
   \includegraphics[width=\linewidth]{Pictures/OneDimensionalModelProcess.pdf}
   
-  \caption{X-PODFEM learning process: The solution snapshots are generated in the training-phase, which corresponds to the $k$ first layers. In the ROM-phase the last node of the original (coarse) mesh is enriched using POD modes via PU expansion. $\Delta T_{layer}$ is time required to build a single layer of the bar.}
+ \caption{X-PODFEM learning process: The solution snapshots are generated in the training-phase, which corresponds to the $k$ first layers. In the ROM-phase the last node of the original (coarse) mesh is enriched using POD modes via PU expansion. $\Delta T_{layer}$ is time required to build a single layer of the bar.}
   
   \label{fig:XPODFEMProcess}
   
@@ -155,12 +205,12 @@ where $I$ is the set of all nodes of the initial (coarse) discretization, $\alph
 \centering
     \begin{tabular}{ | l | l | l | p{5cm} |}
     \hline
-    number of layers & $200$\\ \hline
-    total construction time & $45$ $sec$\\ \hline
+    number of layers & $10$\\ \hline
+    total construction time & $4.5$ $sec$\\ \hline
     laser path length & $0.5$ $mm$\\  \hline
-    laser time ($\Delta T_{laser}$) & $0.09$ $sec$\\  \hline
-    cooling time ($\Delta T_{cooling}$) & $0.135$ $sec$\\  \hline
-    total time per layer ($\Delta T_{layer}$) & $0.225$ $sec$\\  
+    laser time ($\Delta T_{laser}$) & $0.18$ $sec$\\  \hline
+    cooling time ($\Delta T_{cooling}$) & $0.27$ $sec$\\  \hline
+    total time per layer ($\Delta T_{layer}$) & $0.45$ $sec$\\  
     \hline
     \end{tabular}
 \caption{Bar parameters}
@@ -171,22 +221,16 @@ where $I$ is the set of all nodes of the initial (coarse) discretization, $\alph
 \centering
     \begin{tabular}{ | l | l | l | p{5cm} |}
     \hline
-    laser speed & $60$ ${mm}/{sec}$\\ \hline
+    laser speed & $2.78$ ${mm}/{sec}$\\ \hline
     initial temperature & $20^{\circ}C$\\ \hline
-    laser temperature & $2000^{\circ}C$\\ 
+    laser temperature & $1520^{\circ}C$\\ 
     \hline
     \end{tabular}
 \caption{Laser parameters}
 \label{table::laserParameters}
 \end{table}
 
-As benchmark to test the method presented so far, we use an AM process where a bar having length $0.5$ mm, width $0.5$ mm and height $10$ mm (see Figure \ref{fig:AMBar1D}) is constructed. The process parameter values and the laser characteristics are reported in Table \ref{table::processParameters} and \ref{table::laserParameters}, respectively. The process is modelled using a 1D bar and discretized with an initial coarse mesh, where each element corresponds to a layer of the bar. In the present work the collections of \textit{snapshots} solutions is obtained computing the last layer of the FOM with a mesh refined using a standard $h$-refinement (see Figure \ref{fig:XPODFEMProcess}). In such a way, at each time step of the training-phase the number of snapshot solution coefficients is constant (as required by POD). From these set of snapshots the POD modal basis are generated and later used as enrichment functions to enrich the last node of the coarse mesh in the ROM-phase. 
-\\ \indent Figure \ref{fig:1DProcessLayer} shows the evolution of the 1D bar over an interval corresponding to a single layer construction time. In this picture we can observe that the temperature at the lower end of the bar is kept constant. In contrast, the Dirichlet boundary condition at the upper end of the bar is applied only in the melting interval ($\Delta T_{laser}$), while no boundaries are applied during the cooling time ($\Delta T_{cooling}$). With respect to time, each layer time interval is discretized using 10 time steps: 4 for $\Delta T_{laser}$ and 6 for $\Delta T_{cooling}$. \\ In the following we consider three different problems:
-\begin{itemize}
-\item linear transient heat problem
-\item non-linear transient heat problem
-\item non-linear transient heat problem with phase change
-\end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LINEAR
@@ -234,6 +278,8 @@ Figure \ref{fig:LinearConvergenceStudy} shows the relative error in the energy n
 % NON-LINEAR
 
 \subsection*{Non-linear transient heat problem}
+Isogemetric analysis (IgA)\cite{cottrell_isogeometric_2009}
+
 
 \begin{figure}[!h]
 \centering
@@ -254,7 +300,7 @@ The PDE of the previous case is modified such that the thermal conductivity $\ka
   \label{fig:Conductivity}
   
 \end{figure}
-Figure \ref{fig:NonLinearConvergenceStudy} shows that the same level of accuracy of FEM can be reached using X-PODFEM, but the latter requires much less degrees of freedom. In the non-linear case the computational speed-up factor is approximatively 11.1 for the first layers of the ROM-phase, as shown in Figure \ref{fig:TimeNonLinearComparison}. Later, when the computational cost of the coarse mesh dominates, this speed-up will necessarily decrease.
+Figure \ref{fig:NonLinearConvergenceStudy} shows that the same level of accuracy of FEM can be reached using X-PODFEM, but the latter requires much less degrees of freedom (DOFs). In the non-linear case the computational speed-up factor is approximatively 11.1 for the first layers of the ROM-phase, as shown in Figure \ref{fig:TimeNonLinearComparison}. Later, when the computational cost of the coarse mesh dominates, this speed-up will necessarily decrease.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MULTI-PHASE
@@ -302,7 +348,7 @@ A computational speed-up factor 11.2 is achieved at the beginning of the ROM-pha
 \section*{Conclusion and further outlooks}
 From the results discussed so far we can conclude that the X-PODFEM method, even if applied only to a one-dimensional model, leads to a high accuracy also in case of strongly non-linear problems. Moreover, the method take advantage from the local nature of the AM process in the training-phase, avoiding thus the construction of an artificial \textit{Vademecum}-domain with an eulerian reference frame. In X-PODFEM the construction of the POD-modes is made \textit{on fly} giving higher flexibility in the choice of the training phase and also giving the user the possibility to easily switch, during the same simulation process, from ROM to training-phase.
 The computational time required employing X-PODFEM is more than one order of magnitude faster than using FEM with $h$-refinements, we expect that this speed-up will increase even more moving to higher dimensional problems.
- We believe that this results could be also improved employing more sophisticated simulation technologies, e.g. \textit{Isogeometric Analysis} (IGA). The use of IGA would lead to a higher accuracy in the results of both the training and the ROM-phase requiring, at the same time, a lower computational effort. The implementation of the method presented in this work together with IGA (X-PODIGA) presents many challenges and it leaves the door open for further outlooks in this direction.   
+ We believe that this results could be also improved employing more sophisticated simulation technologies, e.g. \textit{Isogeometric analysis} (IgA). The use of IgA would lead to a higher accuracy in the results of both the training and the ROM-phase requiring, at the same time, a lower computational effort. The implementation of the method presented in this work together with IgA (X-PODIgA) presents many challenges and it leaves the door open for further outlooks in this direction.   
 
 \bibliographystyle{abbrv}
 \bibliography{bibliography.bib}

@@ -16,31 +16,40 @@ function [ numericalSolutions ] = evaluateNumericalResultsIGA( x, t, problem,...
 
 %% Initialize variables
 numericalSolutions=zeros(size(x));
+numberOfElements = problem.N;
+
 Xi1 = problem.knotVector( 1 + problem.p );
 Xi2 = problem.knotVector( 2 + problem.p );
 
-x = linspace(0, 1, length(x) / numberOfLayers * layer );
-numericalSolutions(x>=Xi1 & x<=Xi2) = element_num_sol( x(x>=Xi1 & x<=Xi2), t, problem, 1, coefficients, derivative);
+X1 = mapParametricToGlobal(Xi1, problem);
+X2 = mapParametricToGlobal(Xi2, problem);
+
+numericalSolutions(x>=X1 & x<=X2) = element_num_sol( x(x>=X1 & x<=X2), t, problem, 1,...
+    coefficients, derivative, X1, X2 );
 
 %loop over non-enriched elements
-for e=2:layer-1
+for e=2:numberOfElements
     Xi1 = problem.knotVector( e + problem.p );
     Xi2 = problem.knotVector( e + 1 + problem.p );
-      
-numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, problem, e, coefficients, derivative);
+    
+    X1 = mapParametricToGlobal(Xi1, problem);
+    X2 = mapParametricToGlobal(Xi2, problem);
+    
+    numericalSolutions(x>X1 & x<=X2) = element_num_sol( x(x>X1 & x<=X2), t, problem, e,...
+        coefficients, derivative, X1, X2 );
 end
 
-%loop over enriched elements
-for e=layer+(problem.p-1):size(problem.LM, 1)
-    Xi1 = problem.knotVector( e + problem.p );
-    Xi2 = problem.knotVector( e + 1 + problem.p );
-      
-numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, problem, e, coefficients, derivative);
-end
+% %loop over enriched elements
+% for e=layer+(problem.p-1):size(problem.LM, 1)
+%     Xi1 = problem.knotVector( e + problem.p );
+%     Xi2 = problem.knotVector( e + 1 + problem.p );
+%       
+% numericalSolutions(x>Xi1 & x<=Xi2) = element_num_sol( x(x>Xi1 & x<=Xi2), t, problem, e, coefficients, derivative);
+% end
 
 end
 
-function r = element_num_sol(x, t, problem, element, coefficients, derivative)
+function r = element_num_sol(x, t, problem, element, coefficients, derivative, X1, X2 )
 %ELEMENT_NUM_SOL evaluates the numerical solution associated with a single specific element
 %Input:
 % x = points where the element numerical solution has to be evaluated
@@ -54,7 +63,6 @@ function r = element_num_sol(x, t, problem, element, coefficients, derivative)
 %be evaluated
 
 %% Initialize variables
-
 numberOfProjectionPoints = length(x);
 m = length(problem.knotVector);
 
@@ -63,15 +71,18 @@ projectionOperator_der = zeros(numberOfProjectionPoints, size(problem.LM, 2));
 
 N = zeros(length(x), m - 1 - problem.p);
 B = zeros(length(x), m - 1 - problem.p);
+
 JacobianX_Xi = zeros(length(x), 1);
 inverseJacobianX_Xi = zeros(length(x), 1);
+
+parametricCoords = mapGlobalToParametric(x, problem.coords(1), problem.coords(end));
 
 %% Interpolate solution coefficients by means of BSplines and derivatives
 
 %evaluate temperature
 if derivative == 0
     for i=1:length(x)
-        [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
+        [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(parametricCoords(i), problem.p, problem.knotVector);
         projectionOperator(i,1:size(N,2)) = N(i,:);
     end
     
@@ -80,18 +91,22 @@ if derivative == 0
 %evaluate heat fluxes
 else
     for i=1:length(x)
-        [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
+        [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(parametricCoords(i), problem.p, problem.knotVector);
         projectionOperator(i,1:size(N,2)) = N(i,:);
         projectionOperator_der(i,1:size(B,2)) = B(i,:);
         
         JacobianX_Xi(i) = B(i,problem.LM(element, :)) *...
             problem.coords(problem.LM(element, :))';
-        inverseJacobianX_Xi(i) = 1 / JacobianX_Xi(i);
+        
+        %         detJacobianX_Xi = norm(JacobianX_Xi);
+        detJacobianX_Xi = problem.coords(end) - problem.coords(1);
+        
+        inverseJacobianX_Xi(i) = 1 / detJacobianX_Xi;
     end
     
     r = (projectionOperator_der(:,problem.LM(element,:)) * coefficients(problem.LM(element,:))) .*...
         inverseJacobianX_Xi .*  ...
-        problem.k(mapParametricToGlobal(x, problem), t, projectionOperator(:,problem.LM(element,:)) *...
+        problem.k(mapLocalToGlobal(x, X1, X2), t, projectionOperator(:,problem.LM(element,:)) *...
         coefficients(problem.LM(element,:)));
 end
 

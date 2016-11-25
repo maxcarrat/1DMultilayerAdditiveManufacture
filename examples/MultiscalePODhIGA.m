@@ -9,6 +9,8 @@ mkdir('XMultiscaleIGAProblem/Temperature');
 mkdir('XMultiscaleIGAProblem/Fluxes');
 mkdir('XMultiscaleIGAProblem/Time');
 mkdir('XMultiscaleIGAProblem/Dofs');
+mkdir('XMultiscaleIGAProblem/Files4Pics');
+
 
 %% Problem SetUp
 % Define the problem parameter, the boundary conditions
@@ -34,37 +36,37 @@ bodySource = 0.0e+00;
 %% Non-linear parameters
 tolerance = 1.0e-05;                                           % N-R convergence tolerance
 maxIteration = 50;                                             % max number of N-R iterations
-pMax = 1;                                                      % polynomial degree
+pMax = 2;                                                      % polynomial degree
 modesMax = 3;                                                  % max number of POD-modes
-depth = 8;                                                     % max refinement depth
+depth = 3;                                                     % max refinement depth
 DOFs = zeros(depth, 1);                                        % DOFs vector to print
 
-modes = 0;
+modes = 6;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %for loop to generate the convergence study for either different number of
 %modes or differents refinement depths
 
-for modes = 3:modesMax
+for modes = 2:modesMax
 % for refinementDepth = 1:depth
     
     %% Bar specifics
     numberOfLayers = 20;
-    trainingTimeSteps = 8;
+    trainingTimeSteps = 5;
 %     trainingTimeSteps = 20;
-    numberOfTimeStepsPerLayer = 4;                             % total time per layer 0.225 sec
-    numberOfHeatingTimeSteps = 2;                               % heating laser time per layer 0.090 sec
+    numberOfTimeStepsPerLayer = 1;                             % total time per layer 0.225 sec
+    numberOfHeatingTimeSteps = 1;                               % heating laser time per layer 0.090 sec
     
     numberOfElementsInX = numberOfLayers;                       % one element per layer
     timeSteps = numberOfLayers;
     
     p = pMax;
-    numberOfEnrichedRefinementDepth = 0;
-    numberOfPODModes = 0; %modes;
+    numberOfEnrichedRefinementDepth = 1;
+    numberOfPODModes = modes;
     
     refinementDepth = depth;
     integrationOrder = p + 1;                                     % integration order
-    integrationModesOrder = modes + 50;                           %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 100;                           %(modes - 1) ^ 2  + 1 + modes;
     
 
     numberOfRefinedElementsToBeKept = 1;
@@ -111,7 +113,8 @@ for modes = 3:modesMax
     
     
     %% Analysis
-    [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(depth)] = ...
+    [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(depth),...
+        localRefinedTemperatureSolutions, solutionReductionOperator] = ...
         multiscalePODhIGASolver(p, x_PostProcess, bodyLoad, T0,...
         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance,...
         maxIteration, totalNumberOfControlPoints, refinementDepth, numberOfEnrichedRefinementDepth,...
@@ -189,8 +192,8 @@ for modes = 3:modesMax
     % Write results to a file
    
     
-    formatSpec = 'XMultiscaleIGAProblem/Temperature/myXMultiscaleResultsFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XMultiscaleIGAProblem/Temperature/myMultiscaleResultsFileComparison_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -202,8 +205,8 @@ for modes = 3:modesMax
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XMultiscaleIGAProblem/Fluxes/myXMultiscaleFluxesFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XMultiscaleIGAProblem/Fluxes/myXMultiscaleFluxesFileComparison_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
         fprintf(resultFile, '%d, %\t', x_PostProcess(i));
@@ -215,8 +218,8 @@ for modes = 3:modesMax
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XMultiscaleIGAProblem/Time/myXMultiscaleTime_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XMultiscaleIGAProblem/Time/myXMultiscaleTimeComparison_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
         fprintf(resultFile, '%d, %\t', i);
@@ -226,11 +229,49 @@ for modes = 3:modesMax
     fclose(resultFile);
     
     % Write DOFs to a file
-    formatSpec = 'XMultiscaleIGAProblem/Dofs/myXMultiscaleDOFsFile_%d.txt';
-    filename = sprintf(formatSpec,modes);
+    formatSpec = 'XMultiscaleIGAProblem/Dofs/myXMultiscaleDOFsFileComparison_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(DOFs)
         fprintf(resultFile, '%d, %\t', DOFs(i));
+    end
+    
+    %% Write files for presentation
+    %Temperature Overlay mesh training phase
+    formatSpec = 'XMultiscaleIGAProblem/Files4Pics/TrainingPhaseOverlayTemperature_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(localRefinedTemperatureSolutions, 1)
+                fprintf(resultFile, '%d, %\t', i);
+        for k = 1:trainingTimeSteps*numberOfTimeStepsPerLayer+1
+            fprintf(resultFile, '%d, %\t', localRefinedTemperatureSolutions(i,k));
+        end
+        fprintf(resultFile, '\n');
+    end
+
+    %Temperature training phase
+    formatSpec = 'XMultiscaleIGAProblem/Files4Pics/TrainingPhaseTemperature_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(heatFlux, 1)
+        fprintf(resultFile, '%d, %\t', x_PostProcess(i));
+        for k = 1:trainingTimeSteps*numberOfTimeStepsPerLayer
+            fprintf(resultFile, '%d, %\t', temperatureSolution(i,k));
+        end
+        fprintf(resultFile, '\n');
+    end
+
+
+    %POD modes
+    formatSpec = 'XMultiscaleIGAProblem/Files4Pics/PODModes_%d.txt';
+    filename = sprintf(formatSpec,refinementDepth);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(solutionReductionOperator, 1)
+        fprintf(resultFile, '%d, %\t', i);
+        for k = 1:modes
+            fprintf(resultFile, '%d, %\t', solutionReductionOperator(i,k));
+        end
+        fprintf(resultFile, '\n');
     end
     
     fclose(resultFile);

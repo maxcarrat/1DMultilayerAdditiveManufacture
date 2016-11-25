@@ -168,6 +168,8 @@ elementEnrichedIndex = element - (overlayProblem.N - overlayProblem.XN);
 
 if elementEnrichedIndex == 1
     indexLocalEnrichedNodes = 2;
+elseif elementEnrichedIndex == overlayProblem.N
+    indexLocalEnrichedNodes = 1;
 else
     indexLocalEnrichedNodes = [1, 2];
 end

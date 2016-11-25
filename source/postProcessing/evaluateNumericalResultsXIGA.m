@@ -19,20 +19,23 @@ numericalSolutions=zeros(size(x));
 Xi1 = problem.knotVector( 1 + problem.p );
 Xi2 = problem.knotVector( 2 + problem.p );
 
-%local coordinates in post-processing
-localCoordinates = linspace(0, 1, length(x) / numberOfLayers * layer );
+X1 = mapParametricToGlobal(Xi1, problem);
+X2 = mapParametricToGlobal(Xi2, problem);
 
 %evaluate numerical solution at the points in the 1st element
-numericalSolutions(localCoordinates>=Xi1 & localCoordinates<=Xi2) = element_num_sol...
-    ( localCoordinates(localCoordinates>=Xi1 & localCoordinates<=Xi2), t, modes, problem, 1, coefficients, derivative);
+numericalSolutions(x>=X1 & x<=X2) = element_num_sol...
+    ( x(x>=X1 & x<=X2), t, modes, problem, 1, coefficients, derivative);
 
 %loop over remaining elements
 for e=2:size(problem.LM, 1)
     Xi1 = problem.knotVector( e + problem.p );
     Xi2 = problem.knotVector( e + 1 + problem.p );
     
-    numericalSolutions(localCoordinates>Xi1 & localCoordinates<=Xi2) = element_num_sol...
-        ( localCoordinates(localCoordinates>Xi1 & localCoordinates<=Xi2), t, modes, problem, e, coefficients, derivative);
+    X1 = mapParametricToGlobal(Xi1, problem);
+    X2 = mapParametricToGlobal(Xi2, problem);
+    
+    numericalSolutions(x>X1 & x<=X2) = element_num_sol...
+        ( x(x>X1 & x<=X2), t, modes, problem, e, coefficients, derivative);
     
 end
 
@@ -54,6 +57,7 @@ function r = element_num_sol(x, t, modes, problem, e, coefficients, derivative)
 numberOfProjectionPoints = length(x);
 m = length(problem.knotVector);
 
+
 %% Initialize variables
 
 projectionOperator = zeros(numberOfProjectionPoints, size(problem.LM, 2));
@@ -61,8 +65,8 @@ projectionOperator_der = zeros(numberOfProjectionPoints, size(problem.LM, 2));
 
 N = zeros(length(x), m - 1 - problem.p);
 B = zeros(length(x), m - 1 - problem.p);
-JacobianX_Xi = zeros(length(x), 1);
-inverseJacobianX_Xi = zeros(length(x), 1);
+
+parametricCoords = mapGlobalToParametric(x, problem.coords(1), problem.coords(end));
 
 %check if element is enriched
 if e > problem.N - problem.XN  % element is enriched
@@ -91,7 +95,7 @@ if e > problem.N - problem.XN  % element is enriched
     xLocal1 = mapParentToLocal(Xi1, Xp1, Xp2);
     xLocal2 = mapParentToLocal(Xi2, Xp1, Xp2);
     
-    localCoordinates = x;
+    localCoordinates = parametricCoords;
     projectedCoefficients=zeros(size(localCoordinates));
     
     %post-process on 1st sub-domain
@@ -111,7 +115,8 @@ if e > problem.N - problem.XN  % element is enriched
         xLocal1 = mapParentToLocal(Xi1, Xp1, Xp2);
         xLocal2 = mapParentToLocal(Xi2, Xp1, Xp2);
         
-        projectedCoefficients(localCoordinates>xLocal1 & localCoordinates<=xLocal2) = postProcessingProjectionSubElements(integrationSubDomainIndex, elementEnrichedIndex,...
+        projectedCoefficients(localCoordinates>xLocal1 & localCoordinates<=xLocal2) =...
+            postProcessingProjectionSubElements(integrationSubDomainIndex, elementEnrichedIndex,...
             localCoordinates(localCoordinates>xLocal1 & localCoordinates<=xLocal2), t, problem, e,...
             coefficients, modes, derivative, integrationDomain, indexLocalEnrichedNodes);
     end
@@ -124,7 +129,7 @@ else % element is not enriched
     if derivative == 0
         %loop over post-processing points in the eth element
         for i=1:length(x)
-            [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
+            [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(parametricCoords(i), problem.p, problem.knotVector);
             projectionOperator(i,1:size(N,2)) = N(i,:);
         end
         r = projectionOperator(:,problem.LM(e,:)) * coefficients(problem.LM(e,:)) ;
@@ -134,17 +139,23 @@ else % element is not enriched
         
         %loop over post-processing points in the eth element
         for i=1:length(x)
-            [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(x(i), problem.p, problem.knotVector);
+            [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(parametricCoords(i), problem.p, problem.knotVector);
+            
+            JacobianX_Xi = B(i,problem.LM(e, :)) *...
+                problem.coords(problem.LM(e, :))';
+            
+%             detJacobianX_Xi = norm(JacobianX_Xi);
+            detJacobianX_Xi = problem.coords(end) - problem.coords(1);
+            
+            inverseJacobianX_Xi = 1 / detJacobianX_Xi;
+            B = B * inverseJacobianX_Xi;
+            
             projectionOperator(i,1:size(N,2)) = N(i,:);
             projectionOperator_der(i,1:size(B,2)) = B(i,:);
-            
-            JacobianX_Xi(i) = B(i,problem.LM(e, :)) *...
-                problem.coords(problem.LM(e, :))';
-            inverseJacobianX_Xi(i) = 1 / JacobianX_Xi(i);
         end
         
-        r = (projectionOperator_der(:,problem.LM(e,:)) * coefficients(problem.LM(e,:))) .* inverseJacobianX_Xi .*  ...
-            problem.k(mapParametricToGlobal(x, problem), t, projectionOperator(:,problem.LM(e,:)) * coefficients(problem.LM(e,:))) ;
+        r = (projectionOperator_der(:,problem.LM(e,:)) * coefficients(problem.LM(e,:))) .*  ...
+            problem.k(mapParametricToGlobal(parametricCoords, problem), t, projectionOperator(:,problem.LM(e,:)) * coefficients(problem.LM(e,:))) ;
     end
 end
 
@@ -184,9 +195,6 @@ refinedNodes = length(problem.reductionOperator)-1;
 N = zeros(length(x), length(problem.knotVector)-problem.p-1);
 B = zeros(length(x), length(problem.knotVector)-problem.p-1);
 
-JacobianX_Xi = zeros(length(x), 1);
-inverseJacobianX_Xi = zeros(length(x), 1);
-
 F = zeros(length(x), modes * length(indexLocalEnrichedNodes));
 G = zeros(length(x), modes * length(indexLocalEnrichedNodes));
 
@@ -194,12 +202,6 @@ PODCoefficients = problem.reductionOperator(...
     (elementEnrichedIndex-1)*(floor(refinedNodes/problem.XN))+1:(elementEnrichedIndex-1)*(floor(refinedNodes/problem.XN)) +...
     ceil(refinedNodes/problem.XN),:);
 
-%loop over post-processing points in the sub-domain
-for k=1:length(x)
-    [N(k,:), B(k,:)] = BsplinesShapeFunctionsAndDerivatives(localCoords(k), problem.p, problem.knotVector);
-    [F(k,:), G(k,:)] = PODModesAndDerivativesIGA( problem, localCoords(k), modes, PODCoefficients,...
-        integrationDomain, subDomainIndex, indexLocalEnrichedNodes, element, problem.knotVector );
-end
 
 if length(indexLocalEnrichedNodes) == 1 %lhs
     coefficients = [solutionCoefficients((problem.N - problem.XN) + elementEnrichedIndex : (problem.N - problem.XN) + elementEnrichedIndex + 1); ...
@@ -211,9 +213,14 @@ else
         + (elementEnrichedIndex - 2) * modes + length(indexLocalEnrichedNodes)  * modes + problem.p )];
 end
 
-%evaluate temperature values in te sub-domain
-if derivative == 0   
+%evaluate temperature values in the sub-domain
+if derivative == 0
     for i=1:length(localCoords)
+        
+        [N(i,:), ~] = BsplinesShapeFunctionsAndDerivatives(localCoords(i), problem.p, problem.knotVector);
+        [F(i,:), ~] = PODModesAndDerivativesIGA( problem, localCoords(i), modes, PODCoefficients,...
+            integrationDomain, subDomainIndex, indexLocalEnrichedNodes, element, problem.knotVector );
+        
         projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
     end
     
@@ -222,23 +229,31 @@ if derivative == 0
 %evaluate heat fluxes in the sub-domain
 else    
     for i=1:length(localCoords)
+        
+        [N(i,:), B(i,:)] = BsplinesShapeFunctionsAndDerivatives(localCoords(i), problem.p, problem.knotVector);
+        [F(i,:), G(i,:)] = PODModesAndDerivativesIGA( problem, localCoords(i), modes, PODCoefficients,...
+            integrationDomain, subDomainIndex, indexLocalEnrichedNodes, element, problem.knotVector );
+        
+        JacobianX_Xi = B(i,problem.LM(element, :)) *...
+            problem.coords(problem.LM(element, :))';
+        
+        %         detJacobianX_Xi = norm(JacobianX_Xi);
+        detJacobianX_Xi = problem.coords(end) - problem.coords(1);
+        
+        inverseJacobianX_Xi = 1 / detJacobianX_Xi;
+        B = B .* inverseJacobianX_Xi;
+        
         projectionOperator(i,1:size(N,2)+size(F,2)) = [N(i,:), F(i,:)];
         projectionOperator_der(i,1:size(B,2)+size(G,2)) = [B(i,:), G(i,:)];
     end
-    
-    for i=1:length(localCoords)
-        JacobianX_Xi(i) = B(i,problem.LM(element, :)) *...
-            problem.coords(problem.LM(element, :))';
-        inverseJacobianX_Xi(i) = 1 / norm(JacobianX_Xi(i));
-    end
-    
+
     projectedCoefficients_der = projectionOperator_der(:, end-problem.p-modes:end) * coefficients ;
     projectedCoefficients = projectionOperator(:, end-problem.p-modes:end) * coefficients ;
     
     globalCoords = mapParametricToGlobal(localCoords, problem);
     
     for i=1:numel(projectedCoefficients_der)
-        projectedCoefficients_der(i) = projectedCoefficients_der(i) * inverseJacobianX_Xi(i) * ...
+        projectedCoefficients_der(i) = projectedCoefficients_der(i) * ...
             problem.k(globalCoords(i), t, projectedCoefficients(i));
     end
     

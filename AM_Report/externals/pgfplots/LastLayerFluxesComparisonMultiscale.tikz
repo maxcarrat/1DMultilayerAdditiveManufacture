@@ -1,0 +1,47 @@
+\documentclass{standalone}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepgfplotslibrary{colorbrewer}
+\usetikzlibrary{calc,fit,spy}
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=4, size=3.0cm, connect spies}]
+
+  \begin{axis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        axis lines = left,
+        xmin=0.0, xmax=12.0e-04,
+        ymin= 0.0e+0, ymax=1.0e+8,
+        xlabel={Bar length [$m$]},
+        ylabel={Heat Flux [$W/m^{2}$] },
+        legend pos=north west,
+        font=\small,
+        %mark size=0.05,
+        line width = 1.0,
+	    legend style={font=\small, mark size=3},
+        legend cell align=left,
+        cycle multi list={PuRd-3},
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot[red]  table [x index = 0, y index = 4, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/myXMultiscaleFluxesFile_3.txt};
+\addlegendentry{ROM}
+
+\addplot[dotted, black] table [x index = 0, y index = 4, col sep = comma]  {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/myMultiscaleFluxesComparison_6.txt};
+\addlegendentry{reference solution}
+
+\end{axis} 
+
+ \spy on (7.00,5.8) in node at (4,2);
+
+\end{tikzpicture}
+\end{document}
+
+
+
+

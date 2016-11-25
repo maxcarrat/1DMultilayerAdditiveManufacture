@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  21 SEP 2016 09:03
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  25 NOV 2016 15:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -521,6 +521,122 @@ Package: subfigure 2002/03/15 v2.1.5 subfigure package
 Package: tabto 2013/03/25  v 1.3  Another tabbing mechanism
 \CurrentLineWidth=\dimen178
 )
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2012/11/06 v6.83m Hypertext links for LaTeX
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
+
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
+Package hobsub Info: Skipping package `infwarerr' (already loaded).
+Package hobsub Info: Skipping package `ltxcmds' (already loaded).
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+Package: ifvtex 2010/03/01 v1.5 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+Package: intcalc 2007/09/27 v1.1 Expandable calculations with integers (HO)
+Package hobsub Info: Skipping package `ifpdf' (already loaded).
+Package: etexcmds 2011/02/16 v1.5 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+Package: kvsetkeys 2012/04/25 v1.16 Key value parser (HO)
+Package: kvdefinekeys 2011/04/07 v1.3 Define keys (HO)
+Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+Package: pdfescape 2011/11/25 v1.13 Implements pdfTeX's escape features (HO)
+Package: bigintcalc 2012/04/08 v1.3 Expandable calculations on big integers (HO
+)
+Package: bitset 2011/01/30 v1.1 Handle bit-vector datatype (HO)
+Package: uniquecounter 2011/01/30 v1.2 Provide unlimited unique counter (HO)
+)
+Package hobsub Info: Skipping package `hobsub' (already loaded).
+Package: letltxmacro 2010/09/02 v1.4 Let assignment for LaTeX macros (HO)
+Package: hopatch 2012/05/28 v1.2 Wrapper for package hooks (HO)
+Package: xcolor-patch 2011/01/30 xcolor patch
+Package: atveryend 2011/06/30 v1.8 Hooks at the very end of document (HO)
+Package atveryend Info: \enddocument detected (standard20110627).
+Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
+Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
+Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/auxhook.sty
+Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
+)
+\@linkdim=\dimen179
+\Hy@linkcounter=\count156
+\Hy@pagecounter=\count157
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2012/11/06 v6.83m Hyperref: PDFDocEncoding definition (HO)
+)
+\Hy@SavedSpaceFactor=\count158
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/hyperref.cfg
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+Package hyperref Info: Hyper figures OFF on input line 4443.
+Package hyperref Info: Link nesting OFF on input line 4448.
+Package hyperref Info: Hyper index ON on input line 4451.
+Package hyperref Info: Plain pages OFF on input line 4458.
+Package hyperref Info: Backreferencing OFF on input line 4463.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4688.
+\c@Hy@tempcnt=\count159
+
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip22
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 5041.
+\XeTeXLinkMargin=\dimen180
+\Fld@menulength=\count160
+\Field@Width=\dimen181
+\Fld@charsize=\dimen182
+Package hyperref Info: Hyper figures OFF on input line 6295.
+Package hyperref Info: Link nesting OFF on input line 6300.
+Package hyperref Info: Hyper index ON on input line 6303.
+Package hyperref Info: backreferencing OFF on input line 6310.
+Package hyperref Info: Link coloring OFF on input line 6315.
+Package hyperref Info: Link coloring with OCG OFF on input line 6320.
+Package hyperref Info: PDF/A mode OFF on input line 6325.
+LaTeX Info: Redefining \ref on input line 6365.
+LaTeX Info: Redefining \pageref on input line 6369.
+\Hy@abspage=\count161
+\c@Item=\count162
+\c@Hfootnote=\count163
+)
+
+Package hyperref Message: Driver (autodetected): hpdftex.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2012/11/06 v6.83m Hyperref driver for pdfTeX
+\Fld@listcount=\count164
+\c@bookmark@seq@number=\count165
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
+Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+82.
+)
+\Hy@SectionHShift=\skip74
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 22.
+
 
 LaTeX Warning: Unused global option(s):
     [3p].
@@ -528,66 +644,39 @@ LaTeX Warning: Unused global option(s):
 (./main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
  (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count156
-\scratchdimen=\dimen179
+\scratchcounter=\count166
+\scratchdimen=\dimen183
 \scratchbox=\box52
-\nofMPsegments=\count157
-\nofMParguments=\count158
+\nofMPsegments=\count167
+\nofMParguments=\count168
 \everyMPshowfont=\toks29
-\MPscratchCnt=\count159
-\MPscratchDim=\dimen180
-\MPnumerator=\count160
-\makeMPintoPDFobject=\count161
+\MPscratchCnt=\count169
+\MPscratchDim=\dimen184
+\MPnumerator=\count170
+\makeMPintoPDFobject=\count171
 \everyMPtoPDFconversion=\toks30
-) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
-Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
-)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifluatex.sty
-Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
-Package ifluatex Info: LuaTeX not detected.
-)
-Package pdftexcmds Info: LuaTeX not detected.
-Package pdftexcmds Info: \pdf@primitive is available.
-Package pdftexcmds Info: \pdf@ifprimitive is available.
-Package pdftexcmds Info: \pdfdraftmode found.
-)
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+) (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
 
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
 Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
-Package: kvdefinekeys 2011/04/07 v1.3 Define keys (HO)
-))
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
-Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
-Package: kvsetkeys 2012/04/25 v1.16 Key value parser (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/etexcmds.sty
-Package: etexcmds 2011/02/16 v1.5 Avoid name clashes with e-TeX commands (HO)
-Package etexcmds Info: Could not find \expanded.
-(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
-(etexcmds)             that some package has redefined \expanded.
-(etexcmds)             In the latter case, load this package earlier.
-)))
+)
 Package grfext Info: Graphics extension search list:
 (grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
 G,.JBIG2,.JB2,.eps]
@@ -597,52 +686,97 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Try loading font information for U+msa on input line 21.
+\AtBeginShipoutBox=\box53
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+LaTeX Info: Redefining \color on input line 76.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: pdftex.def on input line 130.
+)
+Package hyperref Info: Link coloring ON on input line 24.
+
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
+)
+\c@section@level=\count172
+)
+LaTeX Info: Redefining \ref on input line 24.
+LaTeX Info: Redefining \pageref on input line 24.
+LaTeX Info: Redefining \nameref on input line 24.
+
+(./main.out) (./main.out)
+\@outlinefile=\write3
+\openout3 = `main.out'.
+
+LaTeX Font Info:    Try loading font information for U+msa on input line 30.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 21.
+LaTeX Font Info:    Try loading font information for U+msb on input line 30.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 38.
 
-LaTeX Warning: No \author given.
-
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 40.
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 40.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 38.
 
-Underfull \hbox (badness 10000) in paragraph at lines 45--50
+Underfull \hbox (badness 10000) in paragraph at lines 43--48
 
  []
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (13.27733pt too wide) in paragraph at lines 54--55
+Overfull \hbox (13.27733pt too wide) in paragraph at lines 52--53
 []\OT1/cmr/m/n/10 V-GFEM: The \OT1/cmr/m/it/10 Vade-me-cum\OT1/cmr/m/n/10 -GFEM
  [[]] uses a dif-fer-ent de-com-po-si-tion method:
  []
 
-[2] [3] <Pictures/AMBar1D.pdf, id=29, 326.96455pt x 348.86736pt>
+[2]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 97.
+ [3] [4]
+Underfull \hbox (badness 10000) in paragraph at lines 158--163
+
+ []
+
+[5] <Pictures/IntegrationXPOD.pdf, id=83, 199.13498pt x 242.8242pt>
+File: Pictures/IntegrationXPOD.pdf Graphic file (type pdf)
+
+<use Pictures/IntegrationXPOD.pdf>
+Package pdftex.def Info: Pictures/IntegrationXPOD.pdf used on input line 168.
+(pdftex.def)             Requested size: 345.0pt x 420.70998pt.
+
+<Pictures/AMBar1D.pdf, id=89, 326.96455pt x 348.86736pt>
 File: Pictures/AMBar1D.pdf Graphic file (type pdf)
 
 <use Pictures/AMBar1D.pdf>
-Package pdftex.def Info: Pictures/AMBar1D.pdf used on input line 138.
+Package pdftex.def Info: Pictures/AMBar1D.pdf used on input line 188.
 (pdftex.def)             Requested size: 276.00105pt x 294.51048pt.
- [4]
-<Pictures/OneDimensionalModelProcess.pdf, id=34, 217.79869pt x 120.72pt>
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<Pictures/OneDimensionalModelProcess.pdf, id=90, 154.71802pt x 120.72pt>
 File: Pictures/OneDimensionalModelProcess.pdf Graphic file (type pdf)
 
 <use Pictures/OneDimensionalModelProcess.pdf>
 Package pdftex.def Info: Pictures/OneDimensionalModelProcess.pdf used on input 
-line 146.
-(pdftex.def)             Requested size: 345.0pt x 191.23837pt.
+line 196.
+(pdftex.def)             Requested size: 345.0pt x 269.24124pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -650,95 +784,111 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[5 <./Pictures/AMBar1D.pdf>] [6 <./Pictures/OneDimensionalModelProcess.pdf>]
-<Pictures/OneDimensionalPhysicalModelProcess.pdf, id=83, 180.66296pt x 80.55093
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+<Pictures/OneDimensionalPhysicalModelProcess.pdf, id=91, 180.66296pt x 99.01593
 pt>
 File: Pictures/OneDimensionalPhysicalModelProcess.pdf Graphic file (type pdf)
  <use Pictures/OneDimensionalPhysicalModelProcess.pdf>
 Package pdftex.def Info: Pictures/OneDimensionalPhysicalModelProcess.pdf used o
-n input line 197.
-(pdftex.def)             Requested size: 276.00105pt x 123.06184pt.
+n input line 241.
+(pdftex.def)             Requested size: 276.00105pt x 151.27177pt.
 
-<Pictures/AMBar1DInProgress_mod.pdf, id=84, 61.41545pt x 104.96715pt>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<Pictures/AMBar1DInProgress_mod.pdf, id=92, 61.41545pt x 104.96715pt>
 File: Pictures/AMBar1DInProgress_mod.pdf Graphic file (type pdf)
 
 <use Pictures/AMBar1DInProgress_mod.pdf>
 Package pdftex.def Info: Pictures/AMBar1DInProgress_mod.pdf used on input line 
-204.
+248.
 (pdftex.def)             Requested size: 137.9979pt x 235.8904pt.
- [7 <./Pictures/OneDimensionalPhysicalModelProcess.pdf> <./Pictures/AMBar1DInPr
-ogress_mod.pdf>]
-<pgfplots/XFEMLinearConvergenceStudy.pdf, id=119, 368.68741pt x 235.41551pt>
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[6] [7 <./Pictures/IntegrationXPOD.pdf>] [8 <./Pictures/AMBar1D.pdf>]
+
+LaTeX Warning: Text page 9 contains only floats.
+
+[9 <./Pictures/OneDimensionalModelProcess.pdf> <./Pictures/OneDimensionalPhysic
+alModelProcess.pdf>]
+<pgfplots/XFEMLinearConvergenceStudy.pdf, id=199, 283.08258pt x 235.41551pt>
 File: pgfplots/XFEMLinearConvergenceStudy.pdf Graphic file (type pdf)
 
 <use pgfplots/XFEMLinearConvergenceStudy.pdf>
 Package pdftex.def Info: pgfplots/XFEMLinearConvergenceStudy.pdf used on input 
-line 227.
-(pdftex.def)             Requested size: 258.75pt x 165.22797pt.
+line 271.
+(pdftex.def)             Requested size: 258.75pt x 215.19473pt.
 
-<pgfplots/XFEMLinearTimeResults.pdf, id=120, 283.08461pt x 237.06567pt>
+<pgfplots/XFEMLinearTimeResults.pdf, id=200, 283.08461pt x 237.06567pt>
 File: pgfplots/XFEMLinearTimeResults.pdf Graphic file (type pdf)
 
 <use pgfplots/XFEMLinearTimeResults.pdf>
 Package pdftex.def Info: pgfplots/XFEMLinearTimeResults.pdf used on input line 
-228.
+272.
 (pdftex.def)             Requested size: 172.5pt x 144.4579pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
-<pgfplots/XFEMNonLinearConvergenceStudy.pdf, id=121, 283.08258pt x 235.41551pt>
+<pgfplots/XFEMNonLinearConvergenceStudy.pdf, id=202, 283.08258pt x 235.41551pt>
 File: pgfplots/XFEMNonLinearConvergenceStudy.pdf Graphic file (type pdf)
 <use pgfplots/XFEMNonLinearConvergenceStudy.pdf>
 Package pdftex.def Info: pgfplots/XFEMNonLinearConvergenceStudy.pdf used on inp
-ut line 240.
+ut line 286.
 (pdftex.def)             Requested size: 155.24895pt x 129.10893pt.
 
-<pgfplots/XFEMNonLinearTimeResults.pdf, id=122, 283.08461pt x 237.06567pt>
+<pgfplots/XFEMNonLinearTimeResults.pdf, id=203, 283.08461pt x 237.06567pt>
 File: pgfplots/XFEMNonLinearTimeResults.pdf Graphic file (type pdf)
 
 <use pgfplots/XFEMNonLinearTimeResults.pdf>
 Package pdftex.def Info: pgfplots/XFEMNonLinearTimeResults.pdf used on input li
-ne 241.
+ne 287.
 (pdftex.def)             Requested size: 155.24895pt x 130.01393pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 241--241
+Underfull \hbox (badness 10000) in paragraph at lines 287--287
 []\OT1/cmr/m/n/8 (b) Time com-par-i-son FEM vs X-
  []
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Pictures/ConductivityDistribution.pdf, id=123, 284.82913pt x 241.66084pt>
+[10 <./Pictures/AMBar1DInProgress_mod.pdf>]
+<Pictures/ConductivityDistribution.pdf, id=233, 284.82913pt x 241.66084pt>
 File: Pictures/ConductivityDistribution.pdf Graphic file (type pdf)
 
 <use Pictures/ConductivityDistribution.pdf>
 Package pdftex.def Info: Pictures/ConductivityDistribution.pdf used on input li
-ne 252.
+ne 298.
 (pdftex.def)             Requested size: 172.5pt x 146.3546pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-
-<pgfplots/MultiPhaseXFEMConvergenceStudy.pdf, id=124, 283.08258pt x 235.41551pt
+[11 <./pgfplots/XFEMLinearConvergenceStudy.pdf> <./pgfplots/XFEMLinearTimeResul
+ts.pdf>]
+<pgfplots/MultiPhaseXFEMConvergenceStudy.pdf, id=271, 283.08258pt x 235.41551pt
 >
 File: pgfplots/MultiPhaseXFEMConvergenceStudy.pdf Graphic file (type pdf)
  <use pgfplots/MultiPhaseXFEMConvergenceStudy.pdf>
 Package pdftex.def Info: pgfplots/MultiPhaseXFEMConvergenceStudy.pdf used on in
-put line 265.
+put line 311.
 (pdftex.def)             Requested size: 155.24895pt x 129.10893pt.
 
-<pgfplots/MultiPhaseTimeResults.pdf, id=125, 290.7904pt x 243.99356pt>
+<pgfplots/MultiPhaseTimeResults.pdf, id=272, 290.7904pt x 243.99356pt>
 File: pgfplots/MultiPhaseTimeResults.pdf Graphic file (type pdf)
 
 <use pgfplots/MultiPhaseTimeResults.pdf>
 Package pdftex.def Info: pgfplots/MultiPhaseTimeResults.pdf used on input line 
-266.
+312.
 (pdftex.def)             Requested size: 155.24895pt x 130.26534pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 266--266
+Underfull \hbox (badness 10000) in paragraph at lines 312--312
 []\OT1/cmr/m/n/8 (b) Time com-par-i-son FEM vs X-
  []
 
@@ -746,64 +896,75 @@ Underfull \hbox (badness 10000) in paragraph at lines 266--266
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
-LaTeX Warning: Command \c invalid in math mode on input line 274.
+LaTeX Warning: Command \c invalid in math mode on input line 320.
 
-[8]
 
-LaTeX Warning: Command \c invalid in math mode on input line 278.
+LaTeX Warning: Command \c invalid in math mode on input line 324.
 
-<Pictures/heatCapacity.pdf, id=129, 301.04771pt x 249.25421pt>
+[12 <./pgfplots/XFEMNonLinearConvergenceStudy.pdf> <./pgfplots/XFEMNonLinearTim
+eResults.pdf> <./Pictures/ConductivityDistribution.pdf>]
+<Pictures/heatCapacity.pdf, id=326, 301.04771pt x 249.25421pt>
 File: Pictures/heatCapacity.pdf Graphic file (type pdf)
 
 <use Pictures/heatCapacity.pdf>
-Package pdftex.def Info: Pictures/heatCapacity.pdf used on input line 287.
+Package pdftex.def Info: Pictures/heatCapacity.pdf used on input line 333.
 (pdftex.def)             Requested size: 172.5pt x 142.82181pt.
+ [13 <./pgfplots/MultiPhaseXFEMConvergenceStudy.pdf> <./pgfplots/MultiPhaseTime
+Results.pdf> <./Pictures/heatCapacity.pdf>]
+(./main.bbl [14])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 356.
+ [15]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 356.
+ (./main.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 356.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 356.
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-[9 <./pgfplots/XFEMLinearConvergenceStudy.pdf> <./pgfplots/XFEMLinearTimeResult
-s.pdf>] [10 <./pgfplots/XFEMNonLinearConvergenceStudy.pdf> <./pgfplots/XFEMNonL
-inearTimeResults.pdf> <./Pictures/ConductivityDistribution.pdf>] (./main.bbl
-[11 <./pgfplots/MultiPhaseXFEMConvergenceStudy.pdf> <./pgfplots/MultiPhaseTimeR
-esults.pdf> <./Pictures/heatCapacity.pdf>]) [12] (./main.aux) ) 
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 356.
+ ) 
 Here is how much of TeX's memory you used:
- 9495 strings out of 493304
- 165162 string characters out of 6139871
- 208662 words of memory out of 5000000
- 12769 multiletter control sequences out of 15000+600000
- 13531 words of font info for 51 fonts, out of 8000000 for 9000
+ 13138 strings out of 493304
+ 220456 string characters out of 6139871
+ 293071 words of memory out of 5000000
+ 16312 multiletter control sequences out of 15000+600000
+ 13890 words of font info for 52 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,9n,35p,10405b,290s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
-Output written on main.pdf (12 pages, 370761 bytes).
+ 38i,10n,35p,10405b,445s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib
+10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
+Output written on main.pdf (15 pages, 415169 bytes).
 PDF statistics:
- 316 PDF objects out of 1000 (max. 8388607)
- 261 compressed objects within 3 object streams
- 0 named destinations out of 1000 (max. 500000)
- 61 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 469 PDF objects out of 1000 (max. 8388607)
+ 405 compressed objects within 5 object streams
+ 66 named destinations out of 1000 (max. 500000)
+ 66 words of extra memory for PDF output out of 10000 (max. 10000000)
 

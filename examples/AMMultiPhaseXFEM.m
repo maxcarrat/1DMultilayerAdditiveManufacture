@@ -4,10 +4,11 @@
 clear all;
 clc;
 
-mkdir('XFEMResults/Temperature');
-mkdir('XFEMResults/Fluxes');
-mkdir('XFEMResults/Time');
-mkdir('XFEMResults/Dofs');
+mkdir('XFEMTest/Temperature');
+mkdir('XFEMTest/Fluxes');
+mkdir('XFEMTest/Time');
+mkdir('XFEMTest/Dofs');
+mkdir('XFEMTest/Files4Pics');
 
 
 %% Problem SetUp
@@ -19,7 +20,7 @@ c = 600.0;                                                  % specific heat [J/(
 T0 = 20.0;                                                  % Initial temperature [°C]
 entalphyJump = 261e+03;                                     % entalphy [J/Kg]
 Tsource = 1500.0;                                           % source temperature [°C]
-Tmelt = 1475.0;                                             % melting temperature [°C]
+Tmelt = 1450.0;                                             % melting temperature [°C]
 
 tEnd = 4.5;                                                 % total time [sec]
 xEnd = 0.001;                                               % length of the bar [m]
@@ -32,29 +33,29 @@ bodySource = 0.0e+13;
 tolerance = 1.0e-05;
 maxIteration = 50;
 
-initialNumberOfModes = 1;
-maxNumberOfModes = 1;
+initialNumberOfModes = 3;
+maxNumberOfModes = 3;
 DOFs = zeros(maxNumberOfModes, 1);
 % modes = 1;
 
 for modes = initialNumberOfModes:maxNumberOfModes
-% for refinementDepth = 1:8
+    % for refinementDepth = 1:8
     
     numberOfLayers = 20;
-%     trainingTimeSteps = 5;
-    trainingTimeSteps = 20;
-
+    trainingTimeSteps = 5;
+%     trainingTimeSteps = 20;
+    
     numberOfTimeStepsPerLayer = 10;     % total time per layer 0.225 sec
     numberOfHeatingTimeSteps = 4;       % heating laser time per layer 0.090 sec
     
     refinementDepth = 8;
     PODRefinementDepth = 0;
-
+    
     integrationOrder = 2;
-    integrationModesOrder = modes + 10;  %(modes - 1) ^ 2  + 1 + modes;
+    integrationModesOrder = modes + 30;  %(modes - 1) ^ 2  + 1 + modes;
     
     numberOfRefinedElementsToBeKept = 1;
-
+    
     numberOfElementsInX = numberOfLayers;
     timeSteps = 4;
     numberOfPODModes = modes;
@@ -65,24 +66,25 @@ for modes = initialNumberOfModes:maxNumberOfModes
     bodyLoad = @(x, t) externalSource(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, refinementDepth, bodySource);
     
-%     k = @(x, t, T) 27.0;
-  k = @(x, t, T)  steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
+    %     k = @(x, t, T) 27.0;
+    k = @(x, t, T)  steelThermalConductivity(x, t, xEnd, numberOfLayers, tEnd,...
         numberOfTimeStepsPerLayer, T);                                                          % thermal conductivity [W/(m K)]
     
-    heatCapacity= @(x, t, T) 7500 * 600;
-%   heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
-%       entalphyJump, Tsource, Tmelt);                              % heat capacity [kJ / kg °C]
-
+    %     heatCapacity= @(x, t, T) 7500 * 600;
+    heatCapacity= @(x, T, T_last)  capacityPhaseTransition(x, T, T_last, c, rho,...
+        entalphyJump, Tsource, Tmelt);                              % heat capacity [kJ / kg °C]
+    
     t = linspace(0, tEnd, numberOfTimeStepsPerLayer*numberOfLayers + 1);                        % time discretization
     x = linspace(0.0, xEnd, numberOfElementsInX + 1);                                           % spatial discretization X
     layerCoords = linspace(0.0, xEnd, numberOfElementsInX + 1);                                 % layer spatial discretization X
     
-%     x_PostProcess = linspace(0.0, xEnd, ( numberOfElementsInX + 1 ) * 2.^8);                    % post-processing coordinates
+    %     x_PostProcess = linspace(0.0, xEnd, ( numberOfElementsInX + 1 ) * 2.^8);                    % post-processing coordinates
     x_PostProcess = linspace(0.0, xEnd, 6000);                    % post-processing coordinates
     [X, T] = meshgrid(x_PostProcess, t);
     
     %% Analysis
-    [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(modes)] = multiPhaseBackwardEulerSolver(x, x_PostProcess, bodyLoad, T0,...
+    [temperatureSolution, heatFlux, internalEnergy, CPUTime, DOFs(modes), ...
+        localRefinedTemperatureSolutions, solutionReductionOperator] = multiPhaseBackwardEulerSolver(x, x_PostProcess, bodyLoad, T0,...
         dirichletLeftBC, dirichletRightBC, nuemannRightBC, k, heatCapacity, t, tolerance, maxIteration, numberOfRefinedElementsToBeKept,...
         refinementDepth, PODRefinementDepth, trainingTimeSteps, numberOfTimeStepsPerLayer,...
         numberOfLayers, numberOfPODModes, integrationOrder, integrationModesOrder);
@@ -119,7 +121,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     
     hold off
     
-   figure(modes+9999)
+    figure(modes+9999)
     % Create axes
     axes2 = axes;
     
@@ -138,7 +140,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
         % Axis limit
         xlim(axes2,[0 xEnd]);
         ylim(axes2,[0.0e+01 4.0e+08]);
-
+        
         box(axes2,'on');
         % Set the remaining axes properties
         set(axes2,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
@@ -153,9 +155,9 @@ for modes = initialNumberOfModes:maxNumberOfModes
     hold off
     
     % Write results to a file
-   
     
-    formatSpec = 'XFEMResults/Temperature/myFEMNonLinearResultsFile_%d.txt';
+    
+    formatSpec = 'XFEMTest/Temperature/myXFEMMultiphaseResultsFile_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(temperatureSolution, 1)
@@ -168,7 +170,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write fluxes to a file
-    formatSpec = 'XFEMResults/Fluxes/myFEMNonLinearFluxesFile_%d.txt';
+    formatSpec = 'XFEMTest/Fluxes/myXFEMMultiphaseFluxesFile_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:size(heatFlux, 1)
@@ -181,7 +183,7 @@ for modes = initialNumberOfModes:maxNumberOfModes
     fclose(resultFile);
     
     % Write CPU time to a file
-    formatSpec = 'XFEMResults/Time/myFEMNonLinearTimeFile_%d.txt';
+    formatSpec = 'XFEMTest/Time/myXFEMMultiphaseTimeFile_%d.txt';
     filename = sprintf(formatSpec,refinementDepth);
     resultFile = fopen(filename, 'wt'); % Open for writing
     for i=1:numel(CPUTime)
@@ -189,59 +191,49 @@ for modes = initialNumberOfModes:maxNumberOfModes
         fprintf(resultFile, '%d, %\n', CPUTime(i));
         fprintf(resultFile, '\n');
     end
-    
     fclose(resultFile);
     
-    % Write DOFs to a file
-    formatSpec = 'XFEMResults/Dofs/myFEMNonLinearDOFsFile_%d.txt';
-    filename = sprintf(formatSpec,refinementDepth);
+    %% Write files for presentation
+    %Temperature Overlay mesh training phase
+    formatSpec = 'XFEMTest/Files4Pics/TrainingPhaseOverlayTemperature_%d.txt';
+    filename = sprintf(formatSpec,modes);
     resultFile = fopen(filename, 'wt'); % Open for writing
-    for i=1:numel(DOFs)
-        fprintf(resultFile, '%d, %\t', DOFs(i));
+    for i=1:size(localRefinedTemperatureSolutions, 1)
+        fprintf(resultFile, '%d, %\t', i);
+        for k = 1:trainingTimeSteps*numberOfTimeStepsPerLayer+1
+            fprintf(resultFile, '%d, %\t', localRefinedTemperatureSolutions(i,k));
+        end
+        fprintf(resultFile, '\n');
+    end
+    fclose(resultFile);
+    
+    %Temperature training phase
+    formatSpec = 'XFEMTest/Files4Pics/TrainingPhaseTemperature_%d.txt';
+    filename = sprintf(formatSpec,modes);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(heatFlux, 1)
+        fprintf(resultFile, '%d, %\t', x_PostProcess(i));
+        for k = 1:trainingTimeSteps*numberOfTimeStepsPerLayer
+            fprintf(resultFile, '%d, %\t', temperatureSolution(i,k));
+        end
+        fprintf(resultFile, '\n');
+    end
+    fclose(resultFile);
+    
+    
+    %POD modes
+    formatSpec = 'XFEMTest/Files4Pics/PODModes_%d.txt';
+    filename = sprintf(formatSpec,modes);
+    resultFile = fopen(filename, 'wt'); % Open for writing
+    for i=1:size(solutionReductionOperator, 1)
+        fprintf(resultFile, '%d, %\t', i);
+        for k = 1:modes
+            fprintf(resultFile, '%d, %\t', solutionReductionOperator(i,k));
+        end
+        fprintf(resultFile, '\n');
     end
     
     fclose(resultFile);
-%     
-%     myVideoSpec = 'AdditiveManufacturingNonLinearPODBasis_%d.avi';
-%     myVideo = sprintf(myVideoSpec,modes);
-%     writerObj = VideoWriter(myVideo);
-%     writerObj.Quality = 100;
-%     writerObj.FrameRate = 10;
-%     open(writerObj);
-%     
-%     figure(modes + 11111111)
-%     % Create axes
-%     axes1 = axes;
-%     
-%     F(size(t,2)) = struct('cdata',[],'colormap',[]);
-%     
-%     for i=1:size(t,2)
-%         plot(x_PostProcess,temperatureSolution(:,i)')
-%         
-%         % Title
-%         myTitleSpec = 'Temperature evolution of the bar using %d. modes';
-%         myTitle = sprintf(myTitleSpec,modes);
-%         title( myTitle, 'Interpreter','latex');
-%         
-%         % Create ylabel
-%         ylabel('\fontname{Latin Modern Math} Temperature [°C]');
-%         xlabel('\fontname{Latin Modern Math} length [m]');
-%         
-%         % Axis limit
-%         xlim(axes1,[0 xEnd]);
-%         ylim(axes1,[-100 2500]);
-%         
-%         box(axes1,'on');
-%         % Set the remaining axes properties
-%         set(axes1,'FontSize',15,'FontWeight','normal', 'TickLabelInterpreter','latex');
-%         
-%         grid on
-%         drawnow
-%         F(i) = getframe;
-%         writeVideo(writerObj, getframe(gcf, [ 0 0 500 400 ]));
-%     end
-%     
-%     close(writerObj);
     
     
     

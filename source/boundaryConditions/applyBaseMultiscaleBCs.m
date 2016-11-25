@@ -6,7 +6,7 @@ function [ K, Kprime, KCoupling, MCoupling, f ] = applyBaseMultiscaleBCs( basePr
 for i=1:size(baseProblem.dirichlet_bc,1)
     K(baseProblem.dirichlet_bc(i, 1), baseProblem.dirichlet_bc(i, 1)) = K(baseProblem.dirichlet_bc(i, 1), baseProblem.dirichlet_bc(i, 1)) + baseProblem.penalty;
     Kprime(baseProblem.dirichlet_bc(i, 1), baseProblem.dirichlet_bc(i, 1)) = Kprime(baseProblem.dirichlet_bc(i, 1), baseProblem.dirichlet_bc(i, 1)) + baseProblem.penalty;
-    KCoupling(baseProblem.dirichlet_bc(i, 1), :) = zeros( 1, size(KCoupling, 2));
+%     KCoupling(baseProblem.dirichlet_bc(i, 1), :) = zeros( 1, size(KCoupling, 2));
 
 %     MCoupling(baseProblem.dirichlet_bc(i, 1), :) = zeros( 1, size(MCoupling, 2));
     

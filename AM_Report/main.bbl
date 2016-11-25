@@ -9,7 +9,7 @@ W.~Aquino, J.~C. Brigham, C.~J. Earls, and N.~Sukumar.
 \bibitem{Babuska1997}
 I.~Babu{\v s}ka and J.~M. Melenk.
 \newblock The {{Partition}} of {{Unity Method}}.
-\newblock {\em Int. J. Numer. Meth. Engng.}, 40(4), 1997.
+\newblock {\em Int. J. Numer. Meth. Engng.}, 40(4):727--758, 1997.
 
 \bibitem{Canales2016a}
 D.~Canales, A.~Leygue, F.~Chinesta, D.~Gonz{\'a}lez, E.~Cueto, E.~Feulvarch,
@@ -23,6 +23,12 @@ D.~Celentano, E.~O{\~ n}ate, and S.~Oller.
 \newblock A temperature-based formulation for finite eleemnt analysis of
   generalized phase-change problems.
 \newblock {\em Int. J. Numer. Meth. Engng}, (37):3441--3465, 1994.
+
+\bibitem{cottrell_isogeometric_2009}
+J.~Cottrell, T.~J. Hughes, and Y.~Bazilevs.
+\newblock {\em Isogeometric Analysis: Toward Integration of {CAD} and {FEA}}.
+\newblock Wiley and Sons.
+\newblock bibtex: Cottrell2009.
 
 \bibitem{EN1993}
 En 1993-1-2 (2005) (english): Eurocode 3: Design of steel structures - part
@@ -42,6 +48,7 @@ G.~Rozza, D.~B.~P. Huynh, and A.~T. Patera.
 \newblock Reduced {{Basis Approximation}} and a {{Posteriori Error Estimation}}
   for {{Affinely Parametrized Elliptic Coercive Partial Differential
   Equations}}: {{Application}} to {{Transport}} and {{Continuum Mechanics}}.
-\newblock 15(3), 2009.
+\newblock {\em Archives of Computational Methods in Engineering},
+  15(3):229--275, 2009.
 
 \end{thebibliography}

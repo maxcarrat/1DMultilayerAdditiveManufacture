@@ -13,7 +13,12 @@ function [ Phi, PhiDerivative ] = PODModesAndDerivativesMultiscale( localCoordin
 
 % Define Phi
 Phi =  [];
-for nodalIndex = 1:length(indexLocalEnrichedNodes)
+% Define PhiDerivative
+PhiDerivative = [];
+
+numberOfLocalEnrichedNodes = length(indexLocalEnrichedNodes);
+
+for nodalIndex = 1:numberOfLocalEnrichedNodes
     
     for iMode=1:numberOfModes
         
@@ -22,50 +27,6 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
         Xi1 = coefficients(integrationSubDomainIndex);
         Xi2 = coefficients(integrationSubDomainIndex + 1);
         localSubElementCoords = mapGlobalToLocal( localCoordinates, Xi1, Xi2);
-        
-        mapIntegrationDomainForward = 1;        
-        N_subElement =  0.5 * [(1 - localSubElementCoords)', (1 + localSubElementCoords)'];
-        
-        %element shape function
-        [N, ~] = shapeFunctionsAndDerivatives(localCoordinates);
-        
-        %POD coefficients vector
-        if indexLocalEnrichedNodes(nodalIndex) == 2
-            Phi_Nodal = PODCoefficients(end, iMode);
-        else
-            Phi_Nodal = PODCoefficients(1, iMode);
-        end
-        
-        Phi1 = PODCoefficients(integrationSubDomainIndex, iMode) - Phi_Nodal;
-        Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode) - Phi_Nodal;
-        Phi_coeff = [Phi1, Phi2];
-        
-        Phi_iMode = N_subElement * Phi_coeff';
-        
-        %         Phi_LocalSupport = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode;
-        Phi_LocalSupport =  Phi_iMode;
-
-        %Phi modal basis
-        Phi = [Phi, Phi_LocalSupport ];
-    end
-    
-end
-%% Matrix of modes derivatives
-% Evaluate the enriched basis function derivatives PhiDerivative(x)
-
-% Define PhiDerivative
-PhiDerivative = [];
-
-for nodalIndex = 1:length(indexLocalEnrichedNodes)
-    
-    for iMode=1:numberOfModes
-        
-        % Evaluate the ithMode basis function Phi(x)
-        % linear interpolation function on the integration subdomain
-        Xi1 = coefficients(integrationSubDomainIndex);
-        Xi2 = coefficients(integrationSubDomainIndex + 1);
-        
-        localSubElementCoords = mapGlobalToLocal( localCoordinates, Xi1, Xi2);
         mapIntegrationSubDomainBackward = 2/(Xi2 - Xi1);
         mapIntegrationDomainBackward= 2/(elementGlobalCoords(2) - elementGlobalCoords(1));
 
@@ -73,39 +34,53 @@ for nodalIndex = 1:length(indexLocalEnrichedNodes)
             * [(1 - localSubElementCoords)', (1 + localSubElementCoords)'];
         B_subElement =  0.5 * [-1, 1];
         
+        
         % element shape function and derivatives
         [N, B] = shapeFunctionsAndDerivatives(localCoordinates);
         
         %POD coefficients vector
         if indexLocalEnrichedNodes(nodalIndex) == 2
             Phi_Nodal = PODCoefficients(end, iMode);
+            
+            Phi1 = PODCoefficients(integrationSubDomainIndex, iMode) - Phi_Nodal;
+            Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode) - Phi_Nodal;
+            Phi_coeff = [Phi1, Phi2];
+            
+            Phi_iMode = N_subElement * Phi_coeff';
+            Phi_iModeContinuousDer = mapIntegrationSubDomainBackward ...
+                * B_subElement * Phi_coeff' * mapIntegrationDomainBackward;
+            
+%             Phi_LocalSupport =  Phi_iMode;
+            Phi_LocalSupport = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode;
+            
+            derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;
+            derivative_2 = B(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode *...
+                mapIntegrationDomainBackward;            
+            
         else
             Phi_Nodal = PODCoefficients(1, iMode);
+            
+            Phi1 = PODCoefficients(integrationSubDomainIndex, iMode) - Phi_Nodal;
+            Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode) - Phi_Nodal;
+            Phi_coeff = [Phi1, Phi2];
+            
+            Phi_iMode = N_subElement * Phi_coeff';
+            Phi_iModeContinuousDer = mapIntegrationSubDomainBackward ...
+                * B_subElement * Phi_coeff' * mapIntegrationDomainBackward;
+            
+            Phi_LocalSupport = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode;
+            
+            derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;
+            derivative_2 = B(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode *...
+                mapIntegrationDomainBackward;
+            
         end
         
-        Phi1 = PODCoefficients(integrationSubDomainIndex, iMode)  - Phi_Nodal;
-        Phi2 = PODCoefficients(integrationSubDomainIndex+1, iMode)  - Phi_Nodal;
-        Phi_coeff = [Phi1, Phi2];
+        %Phi modal basis
+        Phi = [Phi, Phi_LocalSupport ];
         
-        Phi1Der = PODCoefficients(integrationSubDomainIndex, iMode);
-        Phi2Der = PODCoefficients(integrationSubDomainIndex+1, iMode);
-        Phi_coeff_der = [Phi1Der, Phi2Der];    
-        
-        Phi_iMode = N_subElement * Phi_coeff';
-        Phi_iModeContinuousDer = mapIntegrationSubDomainBackward ...
-            * B_subElement * Phi_coeff_der' * mapIntegrationDomainBackward;
-
-%         derivative_1 = N(indexLocalEnrichedNodes(nodalIndex)) * Phi_iModeContinuousDer;
-%         derivative_2 = B(indexLocalEnrichedNodes(nodalIndex)) * Phi_iMode *...
-%             mapIntegrationDomainBackward;
-        
-        derivative_1 = Phi_iModeContinuousDer;
-        derivative_2 = Phi_iMode;
-
         %PhiDerivative modal basis derivative
         PhiDerivative = [PhiDerivative, derivative_1 + derivative_2];
     end
+    
 end
-end
-
-

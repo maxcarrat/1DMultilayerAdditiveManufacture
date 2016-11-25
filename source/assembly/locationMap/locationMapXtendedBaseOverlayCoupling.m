@@ -28,7 +28,7 @@ for i=1:numberOfOverlayElements
         end
     else
         for j=1:2*modes
-            LM(i,2 + j) = (numberOfOverlayElements + 1) + (i-2)*2*modes + j + 1;
+            LM(i,2 + j) = (numberOfOverlayElements + 1) + (i-2)*2*modes + j + modes;
         end
     end
 end

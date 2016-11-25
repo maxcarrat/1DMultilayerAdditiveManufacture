@@ -186,12 +186,13 @@ for e=1:overlayProblem.N
         
         if elementEnrichedIndex == 1
             indexLocalEnrichedNodes = 2;
+        elseif elementEnrichedIndex == overlayProblem.N
+            indexLocalEnrichedNodes = 1;
         else
             indexLocalEnrichedNodes = [1, 2];
         end
         
         modalDofs = length(indexLocalEnrichedNodes)*modes;
-        incrementModes = (length(indexLocalEnrichedNodes) - 1) * modes;
         
         %loop over sub-domains
         for integrationSubDomainIndex =...

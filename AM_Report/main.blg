@@ -3,66 +3,55 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: main.aux
 The style file: abbrv.bst
 Database file #1: bibliography.bib.bib
-I was expecting a `,' or a `}'---line 45 of file bibliography.bib.bib
- :   
- :   keywords = {generalized finite element method,proper generalized decomposition,transient problem,vademecum-based generalized finite element method,welding simulation},
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
-I was expecting a `,' or a `}'---line 101 of file bibliography.bib.bib
- :   
- :   pages = {229--275},
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
-I was expecting a `,' or a `}'---line 157 of file bibliography.bib.bib
- :   
- :   pages = {727--758},
-(Error may have been on previous line)
+Illegal end of database file---line 24624 of file bibliography.bib.bib
+ : }
+ :  
 I'm skipping whatever remains of this entry
 Warning--there's a number but no volume in Aquino2008
 Warning--there's a number but no volume in Celentano1994
+Warning--empty year in cottrell_isogeometric_2009
 Warning--empty author in EN1993
 Warning--empty journal in EN1993
 Warning--empty year in EN1993
-Warning--empty journal in Rozza2009
-You've used 7 entries,
+You've used 8 entries,
             2118 wiz_defined-function locations,
-            540 strings with 5398 characters,
-and the built_in function-call counts, 2223 in all, are:
-= -- 201
-> -- 144
+            548 strings with 5639 characters,
+and the built_in function-call counts, 2684 in all, are:
+= -- 249
+> -- 162
 < -- 0
-+ -- 59
-- -- 50
-* -- 181
-:= -- 396
-add.period$ -- 19
-call.type$ -- 7
-change.case$ -- 47
++ -- 66
+- -- 56
+* -- 220
+:= -- 466
+add.period$ -- 23
+call.type$ -- 8
+change.case$ -- 52
 chr.to.int$ -- 0
-cite$ -- 13
-duplicate$ -- 72
-empty$ -- 142
-format.name$ -- 50
-if$ -- 428
+cite$ -- 14
+duplicate$ -- 86
+empty$ -- 182
+format.name$ -- 56
+if$ -- 524
 int.to.chr$ -- 0
-int.to.str$ -- 7
-missing$ -- 7
-newline$ -- 36
-num.names$ -- 12
-pop$ -- 47
+int.to.str$ -- 8
+missing$ -- 9
+newline$ -- 42
+num.names$ -- 14
+pop$ -- 56
 preamble$ -- 1
-purify$ -- 40
+purify$ -- 45
 quote$ -- 0
-skip$ -- 47
+skip$ -- 50
 stack$ -- 0
-substring$ -- 84
-swap$ -- 5
+substring$ -- 139
+swap$ -- 7
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 28
+type$ -- 30
 warning$ -- 6
-while$ -- 16
-width$ -- 8
-write$ -- 70
-(There were 3 error messages)
+while$ -- 22
+width$ -- 9
+write$ -- 82
+(There was 1 error message)

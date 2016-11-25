@@ -67,12 +67,14 @@ for e=1:overlayProblem.N
 
     X1 = overlayProblem.coords(e);
     X2 = overlayProblem.coords(e+1);
-    elementGloabalCoords = [X1, X2];
+    elementGlobalCoords = [X1, X2];
     
     elementEnrichedIndex = e - (overlayProblem.N - overlayProblem.XN);
     
-    if elementEnrichedIndex == 1
+    if elementEnrichedIndex == 1 
         indexLocalEnrichedNodes = 2;
+    elseif elementEnrichedIndex == overlayProblem.N
+        indexLocalEnrichedNodes = 1;
     else
         indexLocalEnrichedNodes = [1, 2];
     end
@@ -124,7 +126,7 @@ for e=1:overlayProblem.N
                 [ N, B ] = shapeFunctionsAndDerivatives(rGP(iGP));
                 B = B * inverseJacobianLocalToGlobal;
                 
-                [ F, G ] = PODModesAndDerivativesMultiscale( rGP(iGP), elementGloabalCoords, modes,...
+                [ F, G ] = PODModesAndDerivativesMultiscale( rGP(iGP), elementGlobalCoords, modes,...
                     PODCoefficients, integrationDomain,...
                     integrationSubDomainIndex, indexLocalEnrichedNodes );
                 
@@ -281,6 +283,8 @@ elementEnrichedIndex = element - (overlayXProblem.N - overlayXProblem.XN);
 
 if elementEnrichedIndex == 1
     indexLocalEnrichedNodes = 2;
+elseif elementEnrichedIndex == overlayXProblem.N
+    indexLocalEnrichedNodes = 1;
 else
     indexLocalEnrichedNodes = [1, 2];
 end

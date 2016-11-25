@@ -26,39 +26,40 @@ for e=1:problem.N
     ldof = problem.p + 1;
     
     %knot span left and right end
-    Xp1 = problem.knotVector(e + problem.p);
-    Xp2 = problem.knotVector(e + problem.p + 1);
+    Xi1 = problem.knotVector(e + problem.p);
+    Xi2 = problem.knotVector(e + problem.p + 1);
     
   
         % Gauss integration
         for iGP = 1:numberOfIntegrationPoints
             
             %map GPs onto parametric space
-            localCoords = mapParentToLocal(rGP(iGP), Xp1, Xp2);
+            localCoords = mapParentToLocal(rGP(iGP), Xi1, Xi2);
             
             %map GPs onto global coordinates system
-            globalCoords = mapParentToGlobal(rGP(iGP), Xp1, Xp2, problem, e);
+            globalCoords = mapParametricToGlobal(localCoords, problem);
             
             %evaluate element basis functions and derivatives
             [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords, problem.p, problem.knotVector);
             
             %Jacobian from parametric to global space
             JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
+            
             %determinant of the Jacobian
             detJacobianX_Xi = norm(JacobianX_Xi);
             
             %Evaluate temperature@GP
             temperatureAtGaussPoint = evaluateTemperature(e, globalCoords, localCoords, problem,...
-                solutionCoefficients, layerLength,initialTemperature);
+                solutionCoefficients, layerLength, initialTemperature);
             
             %% Integrate IGA block
             %external heat source
             f_IGA(problem.LM(e,1:ldof)) = f_IGA(problem.LM(e,1:ldof)) + N(problem.LM(e, 1:ldof))' * temperatureAtGaussPoint...
-                * wGP(iGP) * detJacobianX_Xi * problem.F_map(Xp1, Xp2);
+                * wGP(iGP) * detJacobianX_Xi * problem.F_map(Xi1, Xi2);
             
             %Capacity matrix
             M_IGA(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) = M_IGA(problem.LM(e, 1:ldof), problem.LM(e, 1:ldof)) +...
-                (N(problem.LM(e, 1:ldof))' * N(problem.LM(e, 1:ldof))) * wGP(iGP) * detJacobianX_Xi * problem.F_map(Xp1, Xp2);
+                (N(problem.LM(e, 1:ldof))' * N(problem.LM(e, 1:ldof))) * wGP(iGP) * detJacobianX_Xi * problem.F_map(Xi1, Xi2);
             
         end
 end
@@ -90,16 +91,12 @@ localCoords = xLocal;
 %loop over points and evaluate the BSplines at that point
 for k=1:length(xLocal)
     [N, ~] = BsplinesShapeFunctionsAndDerivatives(localCoords(k),problem.p, problem.knotVector);
-end
-
-%assembly projection operator
-for i=1:length(xLocal)
-    projectionOperator(i,1:size(N,2)) = N(i,:);
+    projectionOperator(k,1:size(N,2)) = N(k,:);
 end
 
 %if in the new layer set to powder temperature, project the results of the
 %previous mesh otherwise
-if xGlobal < problem.coords(end) && xGlobal > ( problem.coords(end) - layerLength)
+if xGlobal < problem.coords(end) && xGlobal >= ( problem.coords(end) - layerLength)
     projectedCoefficients = initialTemperature;
 else
     projectedCoefficients = projectionOperator(:, problem.LM(e,:)) * solutionCoefficients(problem.LM(e,:));

@@ -11,7 +11,14 @@ boundaryConditionPoint = deltaX * timeStep_layer;
 k = zeros(numel(T), 1);
 
 for i=1:numel(T)
-     k(i) = 54.0 - 26.7 * tanh( ( T(i) - 800.0 ) / 800.0 + 1.0 ); % [W/(m K)]
+    if T(i) < 800
+       k(i) =  54.0 - T(i)/800 * 26.7;
+    else
+       k(i) = 26.7; 
+    end
+        
+        
+%      k(i) = 54.0 - 26.7 * tanh( ( T(i) - 800.0 ) / 800.0 + 1.0 ); % [W/(m K)]        
 end
 
 end

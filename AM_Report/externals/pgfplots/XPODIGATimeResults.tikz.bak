@@ -1,0 +1,125 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+                 
+
+\begin{filecontents*}{IGA8_time.csv}
+layer, time
+1, 1.700891e+01,
+2, 2.019712e+01,
+3, 2.346122e+01,
+4, 2.571403e+01,
+5, 2.674183e+01,
+6, 2.782949e+01,
+7, 2.979594e+01,
+8, 3.051251e+01,
+9, 3.080451e+01,
+10, 3.603962e+01,
+11, 3.329955e+01,
+12, 3.320057e+01,
+13, 3.378730e+01,
+14, 3.667353e+01,
+15, 3.637648e+01,
+16, 3.699146e+01,
+17, 3.709049e+01,
+18, 3.724063e+01,
+19, 4.089347e+01,
+20, 3.896170e+01, 
+\end{filecontents*}
+
+\begin{filecontents*}{IGA5_time.csv}
+layer, time
+1, 1.004918e+00,
+2, 1.191130e+00,
+3, 1.467990e+00,
+4, 1.669064e+00,
+5, 1.795266e+00,
+6, 1.930598e+00,
+7, 2.044763e+00,
+8, 2.174718e+00,
+9, 2.396899e+00,
+10, 2.507682e+00,
+11, 2.585131e+00,
+12, 2.795713e+00,
+13, 2.797739e+00,
+14, 2.978952e+00,
+15, 3.120564e+00,
+16, 3.424361e+00,
+17, 3.384404e+00,
+18, 3.483550e+00,
+19, 3.491927e+00,
+20, 3.636528e+00, 
+\end{filecontents*}
+
+\begin{filecontents*}{XPODIGA3_time.csv}
+layer, time
+1, 1.691046e+01,
+2, 2.012027e+01,
+3, 2.289920e+01,
+4, 2.419921e+01,
+5, 2.506726e+01,
+6, 2.689931e+01,
+7, 2.799642e+01, 
+8, 2.918986e+01,
+9, 2.938042e+01,
+10, 3.412192e+01,
+11, 1.718676e+00,
+12, 1.745605e+00,
+13, 1.823266e+00,
+14, 2.072940e+00,
+15, 1.972102e+00,
+16, 2.094559e+00,
+17, 2.193626e+00,
+18, 2.442927e+00,
+19, 2.505066e+00,
+20, 2.469723e+00, 
+
+\end{filecontents*}
+
+
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
+
+  \begin{semilogyaxis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        xmin=0, xmax=20,
+        ymin=1e-1, ymax=1.0e+2,
+        xlabel={Layer},
+        ylabel={CPU time [$sec$] },
+        legend pos= south east,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3},
+        legend cell align=left,
+        %cycle list name=myCycleListColor,
+    	grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot table [ x = layer, y = time, col sep = comma] {IGA8_time.csv};
+   \addlegendentry{Reference solution};
+
+\addplot table [x = layer, y = time, col sep = comma] {XPODIGA3_time.csv};
+   \addlegendentry{X-PODIGA $m=3$};
+   	
+\addplot table [x = layer, y = time, col sep = comma] {IGA5_time.csv};
+   \addlegendentry{IGA $depth=5$};
+
+ \end{semilogyaxis} 
+
+% \spy on (0.9,1.25) in node at (-3,3);
+
+
+\end{tikzpicture}
+\end{document}
+
+
+

@@ -1,0 +1,74 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,spy}
+
+\begin{filecontents*}{IGA_data.csv}
+dofs,relError
+11, 0.026085859877198
+21, 0.057430234981306
+41, 0.014406961878365
+81, 0.006047768854501
+161, 0.001251857395371
+
+\end{filecontents*}
+
+\begin{filecontents*}{PODXIGA_data.csv}
+dofs,relError
+12, 0.009016421398460
+13, 0.004558697837980
+14, 0.005699426454238
+
+\end{filecontents*}
+
+\begin{filecontents*}{PODXIGAOverIntegrated_data.csv}
+dofs,relError
+12, 0.005209558020781
+13, 0.003292142321507
+14, 0.003277395988251
+
+\end{filecontents*}
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=2, size=3.0cm, connect spies}]
+
+  \begin{loglogaxis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+%        ymin=1.0, ymax=1.0e-04,
+%        xmin=1e+0, xmax=1.0e+2,
+        xlabel={CPU time last time step $[sec]$},
+        ylabel={Average relative L2-error $[\%]$ },
+        legend pos=north east,
+        font=\small,
+        mark size=2,
+        line width = 0.5,
+	    legend style={font=\small, mark size=3},
+        legend cell align=left,
+        %cycle list name=myCycleListColor,
+    		grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+\addplot table [x=dofs, y=relError, col sep=comma] {IGA_data.csv};
+   \addlegendentry{IGA};
+   
+\addplot[dashed, red!80!black, mark=diamond, every mark/.append style={solid,fill=red!80!black}] table [x=dofs, y=relError, col sep=comma] {PODXIGAOverIntegrated_data.csv};
+   \addlegendentry{POD X-IGA $Overintegrated$};
+
+	
+\addplot[green!50!black, mark=star, every mark/.append style={solid,fill=green!50!black}] table [x=dofs, y=relError, col sep=comma] {PODXIGA_data.csv};
+   \addlegendentry{POD X-IGA};
+
+
+%\spy on (0.9,3.25) in node at (-3,0);
+
+\end{loglogaxis}
+
+\end{tikzpicture}
+\end{document}
+
+

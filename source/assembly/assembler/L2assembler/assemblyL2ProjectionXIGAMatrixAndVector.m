@@ -70,7 +70,7 @@ for e=1:problem.N
             localCoords = mapParentToLocal(rGPXIGA(iGP), Xp1, Xp2);
             
             %map GP onto the global space
-            globalCoords = mapParentToGlobal(rGPXIGA(iGP), Xp1, Xp2, problem, e);
+            globalCoords = mapParametricToGlobal(localCoords, problem);
             
             %evaluate BSplines at integration points
             [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords,problem.p, problem.knotVector);
@@ -80,7 +80,7 @@ for e=1:problem.N
             %Jacobian from parametric to global and from parent to
             %parametric
             JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
-            detJacobianX_Xi = norm(JacobianX_Xi);
+            detJacobianX_Xi = problem.coords(end) - problem.coords(1);
             detJacobianParameterToGlobal = problem.F_map(Xp1, Xp2);
             
             %% Integrate IGA block
@@ -119,13 +119,11 @@ for e=1:problem.N
                     localCoords = mapParentToLocal(rGPXIGA(iGP), Xp1, Xp2);
                     
                     %map GP onto global space
-                    globalCoords = mapParentToGlobal(rGPXIGA(iGP), Xp1, Xp2, problem, e);
+                    globalCoords = mapParametricToGlobal(localCoords, problem);
                     
                     %evaluate BSplines and POD-modal enrichment functions
                     %@GP
-                    [N, ~] = shapeFunctionsAndDerivativesIGASubElements( rGPXIGA(iGP), integrationSubDomainIndex,...
-                        subDomainShapeFunctionCoefficients,  Xp1, Xp2,...
-                        integrationDomain(integrationSubDomainIndex), integrationDomain(integrationSubDomainIndex+1), problem );
+                    [N, ~] = BsplinesShapeFunctionsAndDerivatives( localCoords, problem.p, problem.knotVector );
                     [F, ~] = PODModesAndDerivativesIGA( problem, localCoords, modes, PODCoefficients,...
                         integrationDomain, integrationSubDomainIndex, indexLocalEnrichedNodes, e, problem.knotVector );
                     
@@ -136,10 +134,8 @@ for e=1:problem.N
                     
                     %% Integrate Coupling block
                     % matrix
-                    M_Coupling(((elementEnrichedIndex-2)*incrementModes + 1):...
-                        ((elementEnrichedIndex-2)*incrementModes) + modalDofs, problem.LMC(elementEnrichedIndex, :)) =...
-                        M_Coupling(((elementEnrichedIndex-2)*incrementModes + 1):...
-                        ((elementEnrichedIndex-2)*incrementModes) + modalDofs, problem.LMC(elementEnrichedIndex, :)) +...
+                    M_Coupling(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LMC(elementEnrichedIndex, :)) =...
+                        M_Coupling(problem.LME(elementEnrichedIndex, 1:modalDofs), problem.LMC(elementEnrichedIndex, :)) +...
                         F' * N(end-problem.p:end) * wGPXIGA(iGP) *  detJacobianX_Xi * detJacobianParameterToGlobal;
                     
                     %% Integrate XIGA block
@@ -157,7 +153,6 @@ for e=1:problem.N
             end
             
         end
-        incrementModes = (length(indexLocalEnrichedNodes) - 1) * modes;
         
         %% Previously enriched element
     elseif e >= (problem.N - problem.XN) && e <= (problem.N - problem.XN)
@@ -186,17 +181,16 @@ for e=1:problem.N
                 
                 if rGPXIGA(iGP) <= integrationDomain(integrationSubDomainIndex + 1) &&...
                         rGPXIGA(iGP) > integrationDomain(integrationSubDomainIndex)
-                    
-                    %map GP onto the global space
-                    globalCoords = mapParentToGlobal(rGPXIGA(iGP), Xp1, Xp2, problem, e);
-                    
                     %map GP onto the parametric space
                     localCoords = mapParentToLocal(rGPXIGA(iGP), Xp1, Xp2);
                     
+                    %map GP onto the global space
+                    globalCoords = mapParametricToGlobal(localCoords, problem);
+
                     %evaluate shape function at GP and Jacobian
                     [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords, problem.p, problem.knotVector);
                     JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
-                    detJacobianX_Xi = norm(JacobianX_Xi);
+                    detJacobianX_Xi = problem.coords(end) - problem.coords(1);
                     
                     %Evaluate temperature@GP
                     temperatureAtGaussPoint = evaluateTemperatureSubElements(integrationSubDomainIndex,...
@@ -218,20 +212,18 @@ for e=1:problem.N
                 end
             end
             
-        end
-        incrementModes = (length(indexLocalEnrichedNodes) - 1) * modes;
-        
+        end        
         %% Non-enriched element
     else
         % Gauss integration
         for iGP = 1:numberOfIntegrationPoints
             
             localCoords = mapParentToLocal(rGP(iGP), Xp1, Xp2);
-            globalCoords = mapParentToGlobal(rGP(iGP), Xp1, Xp2, problem, e);
+            globalCoords = mapParametricToGlobal(localCoords, problem);
             [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords, problem.p, problem.knotVector);
             
             JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
-            detJacobianX_Xi = norm(JacobianX_Xi);
+            detJacobianX_Xi = problem.coords(end) - problem.coords(1);
             
             %Evaluate temperature@GP:
             temperatureAtGaussPoint = evaluateTemperature(e, globalCoords, localCoords, problem,...

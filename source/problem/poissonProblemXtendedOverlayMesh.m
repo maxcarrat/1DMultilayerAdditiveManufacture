@@ -41,11 +41,13 @@ neumann_bc = [LM(N,end) rhs(coords(end), time)];
 
 
 overlayDofs = N + 1;
-Xdof = (2*numberOfEnrichedDofs-1) * modes;
+% -2 because the first and te last dof of the linear overlay mesh are set
+% to zero
+Xdof = (2*numberOfEnrichedDofs-2) * modes;
 gdof = overlayDofs + Xdof;
 
-penaltyL2 = 1.0e+15;
-penalty = 1.0e+12;
+penaltyL2 = 1.0e+20;
+penalty = 1.0e+15;
 
 problemXOverlay = struct('LM', LM, 'LMC', LMCoupling, 'LME', LMEnriched, 'B_map', B_map,...
     'F_map', F_map, 'dirichlet_bc', dirichlet_bc, 'neumann_bc', neumann_bc,...

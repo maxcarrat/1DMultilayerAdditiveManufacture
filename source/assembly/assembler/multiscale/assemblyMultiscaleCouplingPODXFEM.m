@@ -41,14 +41,16 @@ for e=1:overlayProblem.N
     X1 = overlayProblem.coords(e);
     X2 = overlayProblem.coords(e+1);
     elementGlobalCoords = [X1, X2];
-
+    
     detJacobianLocalToGlobal = overlayProblem.F_map(X1, X2);
     inverseJacobianLocalToGlobal = overlayProblem.B_map(X1,X2);
     
     elementEnrichedIndex = e - (overlayProblem.N - overlayProblem.XN);
     
-    if elementEnrichedIndex == 1
+    if elementEnrichedIndex == 1 
         indexLocalEnrichedNodes = 2;
+    elseif elementEnrichedIndex == overlayProblem.N
+        indexLocalEnrichedNodes = 1;
     else
         indexLocalEnrichedNodes = [1, 2];
     end
@@ -94,8 +96,10 @@ for e=1:overlayProblem.N
                 N = [N, F];
                 B = [B, G];
                 
-                temperature = evaluateTemperature(integrationSubDomainIndex, e, rGP(iGP), overlayProblem, baseProblem, overlaySolutionCoefficients, baseSolutionCoefficients);
-                lastTemperature = evaluateTemperature(integrationSubDomainIndex, e, rGP(iGP), overlayProblem, baseProblem, lastConvergentOverlaySolution, lastConvergentBaseSolution);
+                temperature = evaluateTemperature(integrationSubDomainIndex, e, rGP(iGP),...
+                    overlayProblem, baseProblem, overlaySolutionCoefficients, baseSolutionCoefficients);
+                lastTemperature = evaluateTemperature(integrationSubDomainIndex, e, rGP(iGP),...
+                    overlayProblem, baseProblem, lastConvergentOverlaySolution, lastConvergentBaseSolution);
                 
                 globalCoords = mapLocalToGlobal(rGP(iGP), X1, X2);
                 
@@ -104,18 +108,20 @@ for e=1:overlayProblem.N
                     M_ob(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2), baseProblem.LM(end,:)) +...
                     overlayProblem.heatCapacity( globalCoords, temperature, lastTemperature)...
                     * (N' * Nspline(baseProblem.LM(end,1:ldof_b))) * wGP(iGP) * detJacobianLocalToGlobal;
-
+                
                 %Conductivity matrix
                 K_ob(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2), baseProblem.LM(end,:)) =...
                     K_ob(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2), baseProblem.LM(end,:)) +...
                     overlayProblem.k(globalCoords, time, temperature)...
                     * (B' * Bspline(baseProblem.LM(end,1:ldof_b))) * wGP(iGP) * detJacobianLocalToGlobal;
                 break;
+                
             end
-        end
-    end
+            
+        end % end loop over sub-domains
+    end% end loop over GPs
     
-end
+end % end loop over elements
 
 end
 
@@ -148,6 +154,8 @@ elementEnrichedIndex = element - (overlayProblem.N - overlayProblem.XN);
 
 if elementEnrichedIndex == 1
     indexLocalEnrichedNodes = 2;
+elseif elementEnrichedIndex == overlayProblem.N
+    indexLocalEnrichedNodes = 1;
 else
     indexLocalEnrichedNodes = [1, 2];
 end

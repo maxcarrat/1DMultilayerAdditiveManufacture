@@ -29,11 +29,14 @@ for e=1:problem.N
     for iGP = 1:numberOfIntegrationPoints
         
         localCoords = mapParentToLocal(rGP(iGP), Xi1, Xi2);
-        globalCoords = mapParentToGlobal(rGP(iGP), Xi1, Xi2, problem, e);
+        globalCoords = mapParametricToGlobal(localCoords, problem);
         [N, B] = BsplinesShapeFunctionsAndDerivatives(localCoords,problem.p, problem.knotVector);
         
         JacobianX_Xi = B(problem.LM(e, 1:ldof)) * problem.coords(problem.LM(e, 1:ldof))';
-        detJacobianX_Xi = norm(JacobianX_Xi);
+
+%         detJacobianX_Xi = norm(JacobianX_Xi);
+        detJacobianX_Xi = problem.coords(end) - problem.coords(1);
+
         inverseJacobianX_Xi = 1 / detJacobianX_Xi;
         
         %% Integrate FEM block

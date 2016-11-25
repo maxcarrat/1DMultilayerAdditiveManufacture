@@ -44,6 +44,9 @@ f_b = zeros(baseProblem.gdof, 1);
 [rGP, wGP] = gaussPoints( integrationOrder );
 [rGPXFEM, wGPXFEM] = gaussPoints( integrationModalOrder );
 
+[W] = evaluateOptimalWeigthPODModes( integrationModalOrder, ...
+    overlayProblem);
+
 numberOfIntegrationPoints = length(rGP);
 numberOfModalIntegrationPoints = length(rGPXFEM);
 
@@ -52,6 +55,8 @@ modes = overlayProblem.modes;
 %On active elements use the refined domain as integration domain
 refinedDofs = previousOverlayProblem.N + 1;
 integrationDomain = linspace(-1, 1, ceil(refinedDofs/overlayProblem.XN));
+
+detJacobianX_Xi = previousBaseProblem.coords(end) - previousBaseProblem.coords(1);
 
 %loop over non-overlapped base elements of previous mesh
 for e=1:previousBaseProblem.N-1
@@ -66,8 +71,6 @@ for e=1:previousBaseProblem.N-1
         parametricGPCoord = mapParentToLocal(rGP(iGP),Xi1, Xi2);
         
         [Nspline, ~] = BsplinesShapeFunctionsAndDerivatives(parametricGPCoord, baseProblem.p, baseProblem.knotVector);
-        
-        detJacobianX_Xi = previousBaseProblem.coords(end) - previousBaseProblem.coords(1);
         
         %% Integrate IGA block
         %Base vector
@@ -95,7 +98,6 @@ for e=1:previousOverlayProblem.N
     X1 = previousOverlayProblem.coords(e);
     X2 = previousOverlayProblem.coords(e+1);
     
-
     % Gauss integration
     for iGP = 1:numberOfIntegrationPoints
         
@@ -171,7 +173,7 @@ for e=1:overlayProblem.N
         %Base matrix
         M_bb(baseProblem.LM(end, 1:ldof_b), baseProblem.LM(end, 1:ldof_b)) = M_bb(baseProblem.LM(end, 1:ldof_b), baseProblem.LM(end, 1:ldof_b)) +...
             (Nspline(layer:end)' * Nspline(layer:end)) * wGPComposed(iGP) * detJacobianLocalToGlobal;
-
+        
         
         %% Integrate FEM block
         
@@ -187,11 +189,12 @@ for e=1:overlayProblem.N
         
         if elementEnrichedIndex == 1
             indexLocalEnrichedNodes = 2;
+        elseif elementEnrichedIndex == overlayProblem.N
+            indexLocalEnrichedNodes = 1;
         else
             indexLocalEnrichedNodes = [1, 2];
         end
         
-        incrementModes = (length(indexLocalEnrichedNodes) - 1) * modes;
         modalDofs = length(indexLocalEnrichedNodes)*modes;
         
         %loop over sub-domains
@@ -208,13 +211,13 @@ for e=1:overlayProblem.N
                 
                 %evaluate BSplines and POD-modal enrichment functions
                 %@GP
-%                 [ N, ~] = shapeFunctionsAndDerivativesSubElements( rGPXFEM(iGP), ...
-%                     integrationSubDomainIndex, subDomainShapeFunctionCoefficients, integrationDomain );
-                [ N, ~] = shapeFunctionsAndDerivatives( rGPXFEM(iGP));                
+                %                 [ N, ~] = shapeFunctionsAndDerivativesSubElements( rGPXFEM(iGP), ...
+                %                     integrationSubDomainIndex, subDomainShapeFunctionCoefficients, integrationDomain );
+                [ N, ~] = shapeFunctionsAndDerivatives( rGPXFEM(iGP));
                 [ F, ~ ] = PODModesAndDerivativesMultiscale( rGPXFEM(iGP), elementGloabalCoords, modes,...
                     PODCoefficients, integrationDomain,...
                     integrationSubDomainIndex, indexLocalEnrichedNodes );
-                                
+                
                 %% Integrate Coupling POD/FEM block
                 % matrix
                 M_Coupling(overlayProblem.LME(elementEnrichedIndex,1:modalDofs), overlayProblem.LMC(elementEnrichedIndex, :)) =...
@@ -233,10 +236,10 @@ for e=1:overlayProblem.N
                 
                 %% Base/Overlay Coupling block
                 N = [N, F];
-
+                
                 %Coupling matrix
-                M_ob(overlayProblem.LMBC(e,1:modalDofs+2), baseProblem.LM(end,:)) = M_ob(overlayProblem.LMBC(e,1:modalDofs+2), baseProblem.LM(end,:)) +...
-                    (N' * Nspline(baseProblem.LM(end,1:ldof_b))) * wGPComposed(iGP) * detJacobianLocalToGlobal;    
+                M_ob(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2), baseProblem.LM(end,:)) = M_ob(overlayProblem.LMBC(elementEnrichedIndex,1:modalDofs+2), baseProblem.LM(end,:)) +...
+                    (N' * Nspline(baseProblem.LM(end,1:ldof_b))) * wGPComposed(iGP) * detJacobianLocalToGlobal;
                 
                 break;
             end
@@ -316,7 +319,7 @@ localCoords = x;
 globalCoord = mapLocalToGlobal(x,overlayProblem.coords(e), overlayProblem.coords(e+1));
 
 for k=1:length(x)
-    [projectionOperator(k,1:size(N,2)), ~] = shapeFunctionsAndDerivatives(localCoords(k));    
+    [projectionOperator(k,1:size(N,2)), ~] = shapeFunctionsAndDerivatives(localCoords(k));
     [NIga, ~] =  BsplinesShapeFunctionsAndDerivatives(mapGlobalToParametric...
         (globalCoord, baseProblem.coords(1), baseProblem.coords(end)), baseProblem.p, baseProblem.knotVector);
     projectionOperatorSpline(k,1:size(Nspline,2)) = NIga(baseProblem.LM(end,:));

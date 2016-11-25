@@ -32,7 +32,10 @@ for i=1:numberOfModes
     for k=1:N
         u(:,i)=  D(k,i)*T(:,k) + u(:,i);
     end
+    
     uNormalized(:,i) = 1/sqrt(N)*u(:,i);
+
+%     uNormalized(:,i) = u(:,i);
 end
 
 
@@ -93,7 +96,7 @@ end
 
 
 function [ S, D, numberOfModes ] = sortEigenvalues(S, D)
-    k = extractK(S, 1.0e-05);
+    k = extractK(S, 1.0e-10);
     numberOfModes = numel(k);
     
     S = diag(S);
@@ -148,7 +151,7 @@ end
 function checkOrtogonality(A)
 
 OrthogonalIdentity = A*A';
-tol=1.0e-08;
+tol=1.0e-10;
 
 identityNorm = norm(OrthogonalIdentity);
 

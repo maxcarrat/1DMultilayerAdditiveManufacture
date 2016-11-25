@@ -1,0 +1,93 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usepgfplotslibrary{colorbrewer}
+\usetikzlibrary{calc,fit,spy}
+
+
+\begin{document}
+\begin{tikzpicture} [spy using outlines= {circle, magnification=3, size=3.0cm, connect spies}]
+
+  \begin{axis}[
+        scale only axis, % The height and width argument only apply to the actual axis
+        xmin = 0,
+        xmax = 60,
+        legend pos=north west,
+        font=\small,
+        line width = 0.5,
+	      legend style={font=\small, mark size=3},
+        legend cell align=left,
+        cycle multi list={RdYlBu-11},
+        grid = both,
+   	    grid style={ dash pattern = on 0.05 off 1,
+    		line cap = round, draw=gray!60 }
+      ]
+		%2 levels of refinement		
+
+
+
+\addplot table [x index = 0, y index = 1, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/PODModes_3.txt};
+
+
+\end{axis} 
+
+
+%  \begin{axis}[
+%        scale only axis, % The height and width argument only apply to the actual axis
+%        xmin=0.0, xmax=4.0e-04,
+%        ymin= 0.0e+0, ymax=2.0e+3,
+%        xlabel={Bar length [$m$]},
+%        ylabel={Temperature [$^{\circ}C$] },
+%        legend pos=north west,
+%        font=\small,
+%        %mark size=0.05,
+%        line width = 0.5,
+%	      legend style={font=\small, mark size=3},
+%        legend cell align=left,
+%		cycle list name=color list,
+%    	grid = both,
+%   	    grid style={ dash pattern = on 0.05 off 1,
+%    		line cap = round, draw=gray!60 }
+%      ]
+%		%2 levels of refinement		
+%
+%
+%
+%\addplot table [y index = 1, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/PODModes_3.txt};
+%
+%
+%\end{axis} 
+
+%
+%  \begin{axis}[
+%        scale only axis, % The height and width argument only apply to the actual axis
+%        xmin=0.0, xmax=4.0e-04,
+%        ymin= 0.0e+0, ymax=2.0e+3,
+%        xlabel={Bar length [$m$]},
+%        ylabel={Temperature [$^{\circ}C$] },
+%        legend pos=north west,
+%        font=\small,
+%        %mark size=0.05,
+%        line width = 0.5,
+%	      legend style={font=\small, mark size=3},
+%        legend cell align=left,
+%		cycle list name=color list,
+%    	grid = both,
+%   	    grid style={ dash pattern = on 0.05 off 1,
+%    		line cap = round, draw=gray!60 }
+%      ]
+%		%2 levels of refinement		
+%
+%
+%
+%\addplot table [y index = 2, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/PODModes_3.txt};
+%
+%
+%\end{axis} 
+
+\end{tikzpicture}
+\end{document}
+
+
+
