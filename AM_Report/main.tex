@@ -165,7 +165,7 @@ The use of XIgA enriched by means of POD-modes requires additional mapping for t
 \end{equation} 
 The interpolation functions $\phi(x)$ are defined on a sub-domain $\bar{\Omega}$ of the integration space $\tilde{\Omega}$, therefore an additional affine mapping $\bar{\sigma}:\bar{\Omega}^{el}\rightarrow\tilde{\Omega}^{sel}$ as shown in Figure \ref{fig:IntegrationMappingPODXIgA}.
 \begin{figure}
-\includegraphics[width=1\linewidth]{Pictures/IntegrationXPOD.pdf}
+\includegraphics[width=1\linewidth]{externals/Pictures/IntegrationXPOD.pdf}
 \caption{Integration is performed by Gaussian quadrature on the parent space. The value of the POD-modes at each Gauss point is obtained by linear approximation of POD-mode coefficients. The set of POD-mode coefficients define a grid called sub-domain enrichment space and the interpolation linear basis are defined on such a space.}
 \label{fig:IntegrationMappingPODXIgA}
 \end{figure}
@@ -185,7 +185,7 @@ As benchmark to test the method presented so far, we use an AM process where a b
 
 \begin{figure}[!h]
 \centering
-  \includegraphics[width=0.8\linewidth]{Pictures/AMBar1D.pdf}
+  \includegraphics[width=0.8\linewidth]{externals/Pictures/AMBar1D.pdf}
   \caption{AM process of a bar}
   \label{fig:AMBar1D}
   
@@ -193,7 +193,7 @@ As benchmark to test the method presented so far, we use an AM process where a b
 
 \begin{figure}[!h]
 
-  \includegraphics[width=\linewidth]{Pictures/OneDimensionalModelProcess.pdf}
+  \includegraphics[width=\linewidth]{externals/Pictures/OneDimensionalModelProcess.pdf}
   
  \caption{X-PODFEM learning process: The solution snapshots are generated in the training-phase, which corresponds to the $k$ first layers. In the ROM-phase the last node of the original (coarse) mesh is enriched using POD modes via PU expansion. $\Delta T_{layer}$ is time required to build a single layer of the bar.}
   
@@ -238,14 +238,14 @@ As benchmark to test the method presented so far, we use an AM process where a b
 \subsection*{Linear transient heat problem}
 \begin{figure}[!h]
 \centering
-  \includegraphics[width=0.8\linewidth]{Pictures/OneDimensionalPhysicalModelProcess.pdf}
+  \includegraphics[width=0.8\linewidth]{externals/Pictures/OneDimensionalPhysicalModelProcess.pdf}
   \caption{Single layer time evolution process}
   \label{fig:1DProcessLayer}
   
 \end{figure}
 \begin{figure}[!h]
 \centering
-  \includegraphics[width=0.4\linewidth]{Pictures/AMBar1DInProgress_mod.pdf}
+  \includegraphics[width=0.4\linewidth]{externals/Pictures/AMBar1DInProgress_mod.pdf}
   \caption{Bar problem}
   \label{fig:1DProblem}
   
@@ -268,8 +268,8 @@ Figure \ref{fig:LinearConvergenceStudy} shows the relative error in the energy n
 
 \begin{figure}[!h]
 \centering
-  \subfigure[Convergence study of the linear problem.]  {\label{fig:LinearConvergenceStudy} \includegraphics[width=0.75\linewidth]{pgfplots/XFEMLinearConvergenceStudy.pdf}}
-  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeLinearComparison} \includegraphics[width=0.5\linewidth]{pgfplots/XFEMLinearTimeResults.pdf}}
+  \subfigure[Convergence study of the linear problem.]  {\label{fig:LinearConvergenceStudy} \includegraphics[width=0.75\linewidth]{externals/pgfplots/XFEMLinearConvergenceStudy.pdf}}
+  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeLinearComparison} \includegraphics[width=0.5\linewidth]{externals/pgfplots/XFEMLinearTimeResults.pdf}}
   \caption{Linear problem results}
   \label{Linear}
 \end{figure}
@@ -283,8 +283,8 @@ Isogemetric analysis (IgA)\cite{cottrell_isogeometric_2009}
 
 \begin{figure}[!h]
 \centering
-  \subfigure[Convergence study of the non-linear problem.]  {\label{fig:NonLinearConvergenceStudy} \includegraphics[width=0.45\linewidth]{pgfplots/XFEMNonLinearConvergenceStudy.pdf}}
-  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeNonLinearComparison} \includegraphics[width=0.45\linewidth]{pgfplots/XFEMNonLinearTimeResults.pdf}}
+  \subfigure[Convergence study of the non-linear problem.]  {\label{fig:NonLinearConvergenceStudy} \includegraphics[width=0.45\linewidth]{externals/pgfplots/XFEMNonLinearConvergenceStudy.pdf}}
+  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeNonLinearComparison} \includegraphics[width=0.45\linewidth]{externals/pgfplots/XFEMNonLinearTimeResults.pdf}}
     \caption{Non-linear problem results}
     \label{NonLinear}
 \end{figure}
@@ -295,7 +295,7 @@ The PDE of the previous case is modified such that the thermal conductivity $\ka
 \end{equation}
 \begin{figure}[!h]
 \centering
-  \includegraphics[width=0.5\linewidth]{Pictures/ConductivityDistribution.pdf}
+  \includegraphics[width=0.5\linewidth]{externals/Pictures/ConductivityDistribution.pdf}
   \caption{Steel conductivity distribution}
   \label{fig:Conductivity}
   
@@ -308,8 +308,8 @@ Figure \ref{fig:NonLinearConvergenceStudy} shows that the same level of accuracy
 \subsection*{Non-linear transient heat problem with phase change}
 \begin{figure}[!h]
 \centering
-  \subfigure[Convergence study of the non-linear problem with phase-change.]  {\label{fig:MultiPhaseConvergenceStudy} \includegraphics[width=0.45\linewidth]{pgfplots/MultiPhaseXFEMConvergenceStudy.pdf}}
-  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeMultiPhaseComparison} \includegraphics[width=0.45\linewidth]{pgfplots/MultiPhaseTimeResults.pdf}}
+  \subfigure[Convergence study of the non-linear problem with phase-change.]  {\label{fig:MultiPhaseConvergenceStudy} \includegraphics[width=0.45\linewidth]{externals/pgfplots/MultiPhaseXFEMConvergenceStudy.pdf}}
+  \subfigure[Time comparison FEM vs X-PODFEM.]  {\label{fig:TimeMultiPhaseComparison} \includegraphics[width=0.45\linewidth]{externals/pgfplots/MultiPhaseTimeResults.pdf}}
     \caption{Multi-phase problem results}
     \label{MultiPhase}
 \end{figure}
@@ -330,7 +330,7 @@ where
 
 \begin{figure}[!h]
 \centering
-  \includegraphics[width=0.5\linewidth]{Pictures/heatCapacity.pdf}
+  \includegraphics[width=0.5\linewidth]{externals/Pictures/heatCapacity.pdf}
   \caption{Steel heat capacity distribution}
   \label{fig:heatCapacity}
 \end{figure}
