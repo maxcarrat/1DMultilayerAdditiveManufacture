@@ -54,7 +54,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %draw enriched layer discretization
 	  % initial coarse element 
-\node at(0,-0.5) {\tiny $t=\left[k\Delta T_{layer}, (k+1)\Delta T_{layer}\right)$};
+\node at(0,-0.5) {\tiny $t=\left[k\Delta t_{layer}, (k+1)\Delta t_{layer}\right)$};
 
  % draw BSpline base mesh 
 	  \begin{axis}[

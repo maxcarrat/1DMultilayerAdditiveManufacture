@@ -1,18 +1,18 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  16 NOV 2016 15:59
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  28 NOV 2016 15:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**LastLayerTemperatureComparisonMultiscale.tex
+**LastLayerFluxesComparisonMultiscale.tex
 
 ! Emergency stop.
-<*> LastLayerTemperatureComparisonMultiscale.tex
-                                                
+<*> LastLayerFluxesComparisonMultiscale.tex
+                                           
 *** (job aborted, file error in nonstop mode)
 
  
 Here is how much of TeX's memory you used:
  3 strings out of 493304
- 141 string characters out of 6139871
+ 136 string characters out of 6139871
  51880 words of memory out of 5000000
  3564 multiletter control sequences out of 15000+600000
  3640 words of font info for 14 fonts, out of 8000000 for 9000

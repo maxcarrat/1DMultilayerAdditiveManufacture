@@ -83,18 +83,26 @@
 %   \end{scope}
 %
 
-      \foreach \z in {0.0,0.05,...,2} 
+      \foreach \z in {0.0,0.5,...,2} 
       {
         \draw[grid] (0.0,0.0,\z) -- ++(0.5,0.0,0.0);
       }
 
-      \foreach \z in {0.0,0.05,...,2} 
+      \foreach \z in {0.0,0.5,...,2} 
       {
         \draw[grid] (0.5,0.0,\z) -- ++(0.0,0.5,0.0);
       }
       
 
+      \foreach \z in {0.0,0.5,...,2} 
+      {
+        \draw[barDash] (0.0,0.5,\z) -- ++(0.5,0.0,0.0);
+      }
 
+      \foreach \z in {0.0,0.5,...,2} 
+      {
+        \draw[barDash] (0.0,0.0,\z) -- ++(0.0,0.5,0.0);
+      }
 
 %  % draw the load surface
 %  \coordinate (a) at (0.5,0.47,0.1875);
@@ -136,14 +144,14 @@
 %  \draw (2,+1,0.25) -- ++(0,0,0.4);
 %  \draw[dim] (2.0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
 %  
-  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,2.5) -- ++(0,0,-0.5)node[black, right, midway] {\small $\Gamma_{d1}$} node[black] at (0.25, 0.25, 2.75) {\small $\theta_{max}$};
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,2.5) -- ++(0,0,-0.5)node[black, right, midway] {\small $\Gamma_{d1}(t)$} node[black] at (0.25, 0.25, 2.75) {\small $\theta_{d1}(t_{l})$};
 %   \begin{cases}
 %      2020^{\circ}C, & \text{if}\quad t_{layer}=0.0\div 0.09 sec \\
 %      0^{\circ}C, & \text{if}\quad t_{layer}=0.09\div 0.225 sec
 %    \end{cases}$ } ;
-  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,-0.8) -- ++(0,0,0.5)node[black, right, midway] {\small $\Gamma_{d2}$} node[black] at (0.25, 0.25, -1.0) {\small $\theta_{min}$};
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,-0.8) -- ++(0,0,0.5)node[black, right, midway] {\small $\Gamma_{d2}$} node[black] at (0.25, 0.25, -1.0) {\small $\theta_{d2}$};
 
-  \draw[ very thin, opacity=1.0] (0.7,0.6,1) -- ++(0,0.0,0.0)node[black] {\small $\Omega$} ;
+  \draw[ very thin, opacity=1.0] (0.7,0.6,1) -- ++(0,0.0,0.0)node[black, right] {\small $\Omega(t)$} ;
   
 \end{tikzpicture}
 \end{document}

@@ -45,7 +45,7 @@
  \addplot [black, dashed, no markers] coordinates {( 1400, 7500 * 600 ) ( 1400, 7500 * 600 + 7500 * 261000 / 50.0 )};
 
  \addplot [black, dashed, no markers] coordinates {(1400, 7500 * 600 +  7500.0 * 261000.0 / 50.0 ) (1500, 7500 * 600 +  7500.0 * 261000.0 / 50.0 )};
-    \addlegendentry{Standard Distribution};
+    \addlegendentry{Isothermal Distribution};
     
 \end{semilogyaxis}
 

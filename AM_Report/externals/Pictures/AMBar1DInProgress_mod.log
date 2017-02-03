@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  16 SEP 2016 11:59
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  30 NOV 2016 10:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -619,10 +619,10 @@ our preamble.
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 (./AMBar1DInProgress_mod.aux) ) 
 Here is how much of TeX's memory you used:
- 18779 strings out of 493304
- 449233 string characters out of 6139871
- 587205 words of memory out of 5000000
- 21860 multiletter control sequences out of 15000+600000
+ 18741 strings out of 493304
+ 448443 string characters out of 6139871
+ 584205 words of memory out of 5000000
+ 21822 multiletter control sequences out of 15000+600000
  6369 words of font info for 24 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  56i,7n,74p,741b,737s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -631,7 +631,7 @@ c/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
 nts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on AMBar1DInProgress_mod.pdf (1 page, 41017 bytes).
+Output written on AMBar1DInProgress_mod.pdf (1 page, 39995 bytes).
 PDF statistics:
  31 PDF objects out of 1000 (max. 8388607)
  22 compressed objects within 1 object stream

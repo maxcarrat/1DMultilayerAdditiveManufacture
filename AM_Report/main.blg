@@ -3,55 +3,51 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: main.aux
 The style file: abbrv.bst
 Database file #1: bibliography.bib.bib
-Illegal end of database file---line 24624 of file bibliography.bib.bib
+Illegal end of database file---line 24631 of file bibliography.bib.bib
  : }
  :  
 I'm skipping whatever remains of this entry
-Warning--there's a number but no volume in Aquino2008
 Warning--there's a number but no volume in Celentano1994
-Warning--empty year in cottrell_isogeometric_2009
-Warning--empty author in EN1993
-Warning--empty journal in EN1993
-Warning--empty year in EN1993
-You've used 8 entries,
+Warning--empty publisher in Hesthaven_2016
+You've used 14 entries,
             2118 wiz_defined-function locations,
-            548 strings with 5639 characters,
-and the built_in function-call counts, 2684 in all, are:
-= -- 249
-> -- 162
-< -- 0
-+ -- 66
-- -- 56
-* -- 220
-:= -- 466
-add.period$ -- 23
-call.type$ -- 8
-change.case$ -- 52
+            595 strings with 7015 characters,
+and the built_in function-call counts, 5078 in all, are:
+= -- 495
+> -- 287
+< -- 1
++ -- 115
+- -- 98
+* -- 394
+:= -- 872
+add.period$ -- 47
+call.type$ -- 14
+change.case$ -- 89
 chr.to.int$ -- 0
-cite$ -- 14
-duplicate$ -- 86
-empty$ -- 182
-format.name$ -- 56
-if$ -- 524
+cite$ -- 16
+duplicate$ -- 165
+empty$ -- 354
+format.name$ -- 98
+if$ -- 1020
 int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 9
-newline$ -- 42
-num.names$ -- 14
-pop$ -- 56
+int.to.str$ -- 14
+missing$ -- 16
+newline$ -- 77
+num.names$ -- 28
+pop$ -- 83
 preamble$ -- 1
-purify$ -- 45
+purify$ -- 77
 quote$ -- 0
-skip$ -- 50
+skip$ -- 108
 stack$ -- 0
-substring$ -- 139
-swap$ -- 7
-text.length$ -- 0
+substring$ -- 308
+swap$ -- 24
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 30
-warning$ -- 6
-while$ -- 22
-width$ -- 9
-write$ -- 82
+type$ -- 52
+warning$ -- 2
+while$ -- 47
+width$ -- 16
+write$ -- 159
 (There was 1 error message)

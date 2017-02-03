@@ -12,32 +12,45 @@
   \begin{axis}[
         scale only axis, % The height and width argument only apply to the actual axis
         axis lines = left,
-        xmin=0.0, xmax=12.0e-04,
-        ymin= 0.0e+0, ymax=1.0e+8,
+        xmin=0.0, xmax=10.5e-04,
+        ymin= 0.0e+0, ymax=1.2e+8,
         xlabel={Bar length [$m$]},
         ylabel={Heat Flux [$W/m^{2}$] },
         legend pos=north west,
         font=\small,
         %mark size=0.05,
-        line width = 1.0,
+        line width = 1.5,
 	    legend style={font=\small, mark size=3},
         legend cell align=left,
-        cycle multi list={PuRd-3},
+        cycle multi list={PuOr-4},
     	grid = both,
    	    grid style={ dash pattern = on 0.05 off 1,
     		line cap = round, draw=gray!60 }
       ]
 		%2 levels of refinement		
 
-\addplot[red]  table [x index = 0, y index = 4, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/myXMultiscaleFluxesFile_3.txt};
-\addlegendentry{ROM}
+\addplot  table [x index = 0, y index = 10, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myeXtendedPODXIGAFluxesFileComparison_2.txt};
+\addlegendentry{POD-XIgA $1^{st}$ time step}
 
-\addplot[dotted, black] table [x index = 0, y index = 4, col sep = comma]  {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/pgfplots/XMultiscaleIGAProblem/Files4Pics/myMultiscaleFluxesComparison_6.txt};
-\addlegendentry{reference solution}
+\addplot  table [x index = 0, y index = 9, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myeXtendedPODXIGAFluxesFileComparison_2.txt};
+\addlegendentry{POD-XIgA $4^{th}$ time step}
+
+\addplot  table [x index = 0, y index = 1, col sep = comma] {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myeXtendedPODXIGAFluxesFileComparison_2.txt};
+\addlegendentry{POD-XIgA $10^{th}$ time step}
+
+\addplot[dotted, black] table [x index = 0, y index = 10, col sep = comma]  {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myPODXIGAFluxesFileComparison_6.txt};
+\addlegendentry{reference solution $1^{st}$ time step}
+
+
+\addplot[dashed, black] table [x index = 0, y index = 9, col sep = comma]  {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myPODXIGAFluxesFileComparison_6.txt};
+\addlegendentry{reference solution $4^{th}$ time step}
+
+\addplot[dotted, gray!95] table [x index = 0, y index = 1, col sep = comma]  {/home/ferdinando/workspace/gitRepository/1DMultilayerAdditiveManufacture/AM_Report/externals/pgfplots/PODXIGA/Fluxes/myPODXIGAFluxesFileComparison_6.txt};
+\addlegendentry{reference solution $10^{th}$ time step}
 
 \end{axis} 
 
- \spy on (7.00,5.8) in node at (4,2);
+% \spy on (7.00,5.8) in node at (4,2);
 
 \end{tikzpicture}
 \end{document}

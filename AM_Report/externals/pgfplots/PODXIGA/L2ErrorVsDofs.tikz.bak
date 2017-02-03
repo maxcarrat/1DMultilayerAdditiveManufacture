@@ -38,7 +38,7 @@ dofs,relError
         scale only axis, % The height and width argument only apply to the actual axis
 %        ymin=1.0, ymax=1.0e-04,
 %        xmin=1e+0, xmax=1.0e+2,
-        xlabel={CPU time last time step $[sec]$},
+        xlabel={Degrees of freedom},
         ylabel={Average relative L2-error $[\%]$ },
         legend pos=north east,
         font=\small,
@@ -54,14 +54,14 @@ dofs,relError
 		%2 levels of refinement		
 
 \addplot table [x=dofs, y=relError, col sep=comma] {IGA_data.csv};
-   \addlegendentry{IGA};
+   \addlegendentry{IgA};
    
 \addplot[dashed, red!80!black, mark=diamond, every mark/.append style={solid,fill=red!80!black}] table [x=dofs, y=relError, col sep=comma] {PODXIGAOverIntegrated_data.csv};
-   \addlegendentry{POD X-IGA $Overintegrated$};
+   \addlegendentry{POD-XIgA $Overintegrated$};
 
 	
 \addplot[green!50!black, mark=star, every mark/.append style={solid,fill=green!50!black}] table [x=dofs, y=relError, col sep=comma] {PODXIGA_data.csv};
-   \addlegendentry{POD X-IGA};
+   \addlegendentry{POD-XIgA};
 
 
 %\spy on (0.9,3.25) in node at (-3,0);

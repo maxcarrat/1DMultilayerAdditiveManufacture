@@ -55,14 +55,14 @@ time,relError
 		%2 levels of refinement		
 
 \addplot table [x=time, y=relError, col sep=comma] {IGA_data.csv};
-   \addlegendentry{IGA};
+   \addlegendentry{IgA};
    
 %\addplot[dashed, red!50!white, mark=diamond, every mark/.append style={solid,fill=red!25!white}] table [x=time, y=relError, col sep=comma] {PODXIGAOverIntegrated_data.csv};
 %   \addlegendentry{POD X-IGA $Overintegrated$};
 
 	
 \addplot table [x=time, y=relError, col sep=comma] {PODXIGA_data.csv};
-   \addlegendentry{POD X-IGA};
+   \addlegendentry{POD-XIgA};
 
 
 %\spy on (0.9,3.25) in node at (-3,0);

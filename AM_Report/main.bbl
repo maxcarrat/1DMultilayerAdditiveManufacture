@@ -1,22 +1,31 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{Aquino2008}
 W.~Aquino, J.~C. Brigham, C.~J. Earls, and N.~Sukumar.
 \newblock Generalized finite element method using proper orthogonal
   decomposition.
-\newblock {\em Int. J. Numer. Meth. Engng}, (00):1--31, 2008.
+\newblock {\em Int. J. Numer. Meth. Engng}, 00(00):1--31, 2008.
 
 \bibitem{Babuska1997}
 I.~Babu{\v s}ka and J.~M. Melenk.
 \newblock The {{Partition}} of {{Unity Method}}.
-\newblock {\em Int. J. Numer. Meth. Engng.}, 40(4):727--758, 1997.
+\newblock {\em International Journal for Numerical Methods in Engineering},
+  40(4):727--758, 1997.
+
+\bibitem{brands_2016}
+B.~Brands, J.~Mergheim, and P.~Steinmann.
+\newblock Reduced-order modelling for linear heat conduction with parametrised
+  moving heat sources: Reduced-order modelling for linear heat conduction with
+  parametrised moving heat sources.
+\newblock {\em {GAMM}-Mitteilungen}, 39(2):170--188, 2016-11.
 
 \bibitem{Canales2016a}
 D.~Canales, A.~Leygue, F.~Chinesta, D.~Gonz{\'a}lez, E.~Cueto, E.~Feulvarch,
   J.-M. Bergheau, and A.~Huerta.
 \newblock Vademecum-based {{GFEM}} ({{V-GFEM}}): optimal enrichment for
   transient problems.
-\newblock {\em Int. J. Numer. Meth. Engng}, 2016.
+\newblock {\em International Journal for Numerical Methods in Engineering},
+  2016.
 
 \bibitem{Celentano1994}
 D.~Celentano, E.~O{\~ n}ate, and S.~Oller.
@@ -27,13 +36,20 @@ D.~Celentano, E.~O{\~ n}ate, and S.~Oller.
 \bibitem{cottrell_isogeometric_2009}
 J.~Cottrell, T.~J. Hughes, and Y.~Bazilevs.
 \newblock {\em Isogeometric Analysis: Toward Integration of {CAD} and {FEA}}.
-\newblock Wiley and Sons.
+\newblock Wiley and Sons, 2009.
 \newblock bibtex: Cottrell2009.
 
-\bibitem{EN1993}
-En 1993-1-2 (2005) (english): Eurocode 3: Design of steel structures - part
-  1-2: General rules - structural fire design [authority: The european union
-  per regulation 305/2011, directive 98/34/ec, directive 2004/18/ec].
+\bibitem{fish_s-version_1996}
+J.~Fish and R.~Guttal.
+\newblock The s-version of finite element method for laminated composites.
+\newblock {\em Int. J. Numer. Meth. Engng.}, 39(21):3641--3662, 1996-11-15.
+\newblock bibtex: Fish1996.
+
+\bibitem{Hesthaven_2016}
+J.~S. Hesthaven, B.~Stamm, and G.~Rozza.
+\newblock {\em Cerified Reduced Basis Methods for Parametrized Partial
+  Differential Equations}.
+\newblock 2016.
 
 \bibitem{Michopoulos2014a}
 J.~G. Michopoulos, B.~Dennis, F.~Komninelli, A.~Iliopoulos, and A.~Akbariyeh.
@@ -43,6 +59,25 @@ J.~G. Michopoulos, B.~Dennis, F.~Komninelli, A.~Iliopoulos, and A.~Akbariyeh.
   Technical Conferences and Computers and Information in Engineering Conference
   IDETC/CIE}, 2014.
 
+\bibitem{Moes2002}
+N.~Moës and T.~Belytschko.
+\newblock Extended finite element method for cohesive crack growth.
+\newblock {\em Engineering Fracture Mechanics}, 69(7):813--833, 2002-05.
+\newblock 00713 bibtex: Moes2002.
+
+\bibitem{nguyen_isogeometric_2013}
+V.~P. Nguyen, S.~P.~A. Bordas, and T.~Rabczuk.
+\newblock Isogeometric analysis: an overview and computer implementation
+  aspects.
+\newblock {\em {arXiv}:1205.2129}, 2013.
+\newblock bibtex: Nguyen2013.
+
+\bibitem{Ohara2013}
+P.~O'Hara, C.~A. Duarte, T.~Eason, and J.~Garzon.
+\newblock Efficient analysis of transient heat transfer problems exhibiting
+  sharp thermal gradients.
+\newblock {\em Computational Mechanics}, 51(5):743--764, 2013.
+
 \bibitem{Rozza2009}
 G.~Rozza, D.~B.~P. Huynh, and A.~T. Patera.
 \newblock Reduced {{Basis Approximation}} and a {{Posteriori Error Estimation}}
@@ -50,5 +85,13 @@ G.~Rozza, D.~B.~P. Huynh, and A.~T. Patera.
   Equations}}: {{Application}} to {{Transport}} and {{Continuum Mechanics}}.
 \newblock {\em Archives of Computational Methods in Engineering},
   15(3):229--275, 2009.
+
+\bibitem{Rozza2_2009}
+G.~Rozza, C.~N. Nguyen, A.~T. Patera, and S.~Deparis.
+\newblock Reduced basis methods and a posteriori error estimators for heat
+  transfer problems.
+\newblock In {\em {{ASME}} 2009 {{Heat Transfer Summer Conference}} collocated
+  with the {{InterPACK09}} and 3rd {{Energy Sustainability Conferences}}},
+  pages 753--762. {American Society of Mechanical Engineers}, 2009.
 
 \end{thebibliography}

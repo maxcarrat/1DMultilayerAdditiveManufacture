@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  25 NOV 2016 09:55
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.6.21)  28 NOV 2016 12:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -554,18 +554,18 @@ our preamble.
  on input line 34.
 
 PGFPlots: reading {PODModes.dat}
-<TrainingPhaseScheme.pdf, id=4, 214.76938pt x 79.98885pt>
+<TrainingPhaseScheme.pdf, id=4, 214.09787pt x 79.98885pt>
 File: TrainingPhaseScheme.pdf Graphic file (type pdf)
 
 <use TrainingPhaseScheme.pdf>
 Package pdftex.def Info: TrainingPhaseScheme.pdf used on input line 52.
-(pdftex.def)             Requested size: 362.25105pt x 134.92833pt.
+(pdftex.def)             Requested size: 362.25105pt x 135.34209pt.
 
-<ROMPhaseScheme.pdf, id=5, 187.41418pt x 104.91597pt>
+<ROMPhaseScheme.pdf, id=5, 186.07117pt x 104.91597pt>
 File: ROMPhaseScheme.pdf Graphic file (type pdf)
  <use ROMPhaseScheme.pdf>
 Package pdftex.def Info: ROMPhaseScheme.pdf used on input line 58.
-(pdftex.def)             Requested size: 345.0pt x 193.14053pt.
+(pdftex.def)             Requested size: 345.0pt x 194.53491pt.
 
 [1
 
@@ -584,7 +584,7 @@ fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
 sfonts/cm/cmr7.pfb>
-Output written on PODXIGAScheme.pdf (1 page, 56717 bytes).
+Output written on PODXIGAScheme.pdf (1 page, 56424 bytes).
 PDF statistics:
  48 PDF objects out of 1000 (max. 8388607)
  38 compressed objects within 1 object stream

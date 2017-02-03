@@ -148,14 +148,14 @@
 %  \draw (2,+1,0.25) -- ++(0,0,0.4);
 %  \draw[dim] (2.0,+1,+0.6) -- ++(0.5,0,0) node[midway,above] {\small $0.5$};
 %  
-  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,2.5) -- ++(0,0,-0.5)node[black, right, midway] {\small $\Gamma_{d1}= 
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,2.5) -- ++(0,0,-0.5)node[black, right, midway] {\small $\Gamma_{d1}(t)$} node[black] at(1.75, 1.5, 2.5) {\small $\theta_{d1}(t_{l})= 
    \begin{cases}
-      1520^{\circ}C, & \text{if}\quad t_{layer}\in\left[0.0, 0.09\right) sec \\
-      none, & \text{if}\quad t_{layer}\in\left[0.09, 0.225\right] sec
+      \theta_{d1} & \text{if}\quad t_{l}\in\Delta t_{heat}\\
+      none & \text{if}\quad t_{l}\in\Delta t_{cool}
     \end{cases}$ } ;
-  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,-0.8) -- ++(0,0,0.5)node[black, right, midway] {\small $\Gamma_{d2}=20^{\circ}C$} ;
+  \draw[ very thin, opacity=1.0, ->, >= latex] (0.25,0.25,-0.8) -- ++(0,0,0.5)node[black, right, midway] {\small $\Gamma_{d2}$} node[black] at(0.25, 0.25, -1.0) {\small $\theta_{d2}$};
 
-  \draw[ very thin, opacity=1.0] (1.2,0.6,1) -- ++(0,0.0,0.0)node[black] {\small $\Omega^{layer}$} ;
+  \draw[ very thin, opacity=1.0] (1.2,0.6,1) -- ++(0,0.0,0.0)node[black] {\small $\Omega(t)$} ;
   
 \end{tikzpicture}
 \end{document}
