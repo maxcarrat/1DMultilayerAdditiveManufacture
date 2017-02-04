@@ -78,6 +78,12 @@ P.~O'Hara, C.~A. Duarte, T.~Eason, and J.~Garzon.
   sharp thermal gradients.
 \newblock {\em Computational Mechanics}, 51(5):743--764, 2013.
 
+\bibitem{Piegl1997}
+L.~Piegl and W.~Tiller.
+\newblock {\em The {NURBS} Book}.
+\newblock Monographs in Visual Communication. Springer Berlin Heidelberg, 1997.
+\newblock bibtex: Piegl1997.
+
 \bibitem{Rozza2009}
 G.~Rozza, D.~B.~P. Huynh, and A.~T. Patera.
 \newblock Reduced {{Basis Approximation}} and a {{Posteriori Error Estimation}}

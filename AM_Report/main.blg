@@ -1,53 +1,53 @@
-This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2015/dev/Debian)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: main.aux
 The style file: abbrv.bst
 Database file #1: bibliography.bib.bib
-Illegal end of database file---line 24631 of file bibliography.bib.bib
+Illegal end of database file---line 24636 of file bibliography.bib.bib
  : }
  :  
 I'm skipping whatever remains of this entry
 Warning--there's a number but no volume in Celentano1994
 Warning--empty publisher in Hesthaven_2016
-You've used 14 entries,
+You've used 15 entries,
             2118 wiz_defined-function locations,
-            595 strings with 7015 characters,
-and the built_in function-call counts, 5078 in all, are:
-= -- 495
-> -- 287
+            602 strings with 7154 characters,
+and the built_in function-call counts, 5352 in all, are:
+= -- 523
+> -- 300
 < -- 1
-+ -- 115
-- -- 98
-* -- 394
-:= -- 872
-add.period$ -- 47
-call.type$ -- 14
-change.case$ -- 89
++ -- 121
+- -- 102
+* -- 407
+:= -- 921
+add.period$ -- 52
+call.type$ -- 15
+change.case$ -- 93
 chr.to.int$ -- 0
-cite$ -- 16
-duplicate$ -- 165
-empty$ -- 354
-format.name$ -- 98
-if$ -- 1020
+cite$ -- 17
+duplicate$ -- 177
+empty$ -- 376
+format.name$ -- 102
+if$ -- 1079
 int.to.chr$ -- 0
-int.to.str$ -- 14
-missing$ -- 16
-newline$ -- 77
-num.names$ -- 28
-pop$ -- 83
+int.to.str$ -- 15
+missing$ -- 18
+newline$ -- 83
+num.names$ -- 30
+pop$ -- 89
 preamble$ -- 1
-purify$ -- 77
+purify$ -- 81
 quote$ -- 0
-skip$ -- 108
+skip$ -- 115
 stack$ -- 0
-substring$ -- 308
-swap$ -- 24
+substring$ -- 314
+swap$ -- 25
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 52
+type$ -- 54
 warning$ -- 2
-while$ -- 47
-width$ -- 16
-write$ -- 159
+while$ -- 49
+width$ -- 17
+write$ -- 172
 (There was 1 error message)
